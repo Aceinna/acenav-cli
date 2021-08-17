@@ -1,4 +1,4 @@
-# Copyright (C) 2018 Aceinna Navigation System Open Source Project
+# Copyright (C) 2021 Aceinna Navigation System Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ def load_json_file_path_under_setting_folder():
 
     return json_file_paths
 
-PACKAGE_DESCRIPTION = "Aceinna Navigation System Open Devices Library"
+PACKAGE_DESCRIPTION = "Aceinna Navigation Studio GNSS/INS Device Driver"
 
 INSTALL_REQUIRES = [
     "pyserial",

@@ -9,6 +9,7 @@ import struct
 import json
 import math
 import traceback
+from ctypes import *
 from ..framework.utils import resource
 from ..framework.utils.print import (print_green, print_red)
 
@@ -767,20 +768,32 @@ def prepare_setting_folder(setting_file):
 
 def do_parse(folder_path, kml_rate, setting_file):
     setting_path = prepare_setting_folder(setting_file)
+    if os.name == 'nt':  # windows
+        lib_path = os.path.join(os.getcwd(), "UserDecoderLib.dll")
+    else:  # Linux
+        lib_path = os.path.join(os.getcwd(), "UserDecoderLib.so")
+        pass
+    lib = CDLL(lib_path)
     for root, _, file_name in os.walk(folder_path):
         for fname in file_name:
             if fname.startswith('user') and fname.endswith('.bin'):
-                file_path = os.path.join(root, fname)
-                print_green(
-                    'Parse is started. File path: {0}'.format(file_path))
-                path = mkdir(file_path)
-                try:
-                    with open(file_path, 'rb') as fp_rawdata:
-                        parse = INS401Parse(
-                            fp_rawdata, path + '/' + fname[:-4] + '_', kml_rate, setting_path)
+                # file_path = os.path.join(root, fname)
+                # print_green(
+                #     'Parse is started. File path: {0}'.format(file_path))
+                # path = mkdir(file_path)
+                # try:
+                #     with open(file_path, 'rb') as fp_rawdata:
+                #         parse = INS401Parse(
+                #             fp_rawdata, path + '/' + fname[:-4] + '_', kml_rate, setting_path)
 
-                        parse.start_pasre()
-                        print_green('Parse done.')
-                except Exception as e:
-                    print_red(e)
-                    traceback.print_exc()
+                #         parse.start_pasre()
+                #         print_green('Parse done.')
+                # except Exception as e:
+                #     print_red(e)
+                #     traceback.print_exc()
+                if os.name == 'nt':
+                    file_path = folder_path + "\\" + fname
+                else:
+                    file_path = folder_path + "/" + fname
+                lib.decode_ins401(bytes(file_path, encoding='utf8'))
+                pass

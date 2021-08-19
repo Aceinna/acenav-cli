@@ -66,10 +66,9 @@ class DeviceManager:
             uart: communicator, device_type
             lan: communicator
         '''
-
         if communicator.type == INTERFACES.ETH_100BASE_T1:
             device_access = args[0]
-
+            
             ping_result = ping_tool.do_ping(communicator.type, device_access,
                                             None)
             if ping_result is not None:

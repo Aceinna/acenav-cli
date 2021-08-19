@@ -24,8 +24,10 @@ a = Analysis([os.path.join(root_path,'aceinna','executor.py'),
          ],
          pathex=[root_path],
          binaries=[],
+		 
          datas=[
-            (os.path.join(root_path,'aceinna','setting'), os.path.join('setting'))
+            (os.path.join(root_path,'aceinna','setting'), os.path.join('setting')),
+            (os.path.join(root_path,'aceinna','libs'), os.path.join('libs'))
          ],
          hiddenimports=[],
          hookspath=[],

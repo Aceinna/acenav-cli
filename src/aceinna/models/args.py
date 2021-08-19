@@ -44,6 +44,17 @@ class WebserverArgs(KeyValuesArgumentBase):
     }
 
 
+class DetectorArgs(KeyValuesArgumentBase):
+    '''
+    Argument define for detect device
+    '''
+    default_values = {
+        'device_type': 'auto',
+        'baudrate': 'auto',
+        'com_port': 'auto'
+    }
+
+
 class LogParserArgs(KeyValuesArgumentBase):
     '''
     Argument define for log parser

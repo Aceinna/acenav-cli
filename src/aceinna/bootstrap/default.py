@@ -43,7 +43,6 @@ class Default:
         device_context = DeviceContext(device_provider)
         APP_CONTEXT.device_context = device_context
 
-
     def handle_lost(self):
         self._tunnel.notify('lost')
 

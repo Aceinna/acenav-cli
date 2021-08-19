@@ -138,10 +138,8 @@ class DeviceMessageCenter(EventBase):
             self._has_running_checker = True
 
         # setup receiver, parser
-        if self._communicator.type == INTERFACES.ETH_100BASE_T1:
-            funcs = [self.thread_ethernet_receiver, self.thread_parser]
-        else:
-            funcs = [self.thread_receiver, self.thread_parser]
+
+        funcs = [self.thread_receiver, self.thread_parser]
 
         for func in funcs:
             thread = threading.Thread(target=func)
@@ -207,7 +205,7 @@ class DeviceMessageCenter(EventBase):
             self.timeout_check()
 
             try:
-                time.sleep(0.001)
+                time.sleep(0.1)
             except KeyboardInterrupt:  # response for KeyboardInterrupt such as Ctrl+C
                 return True
 

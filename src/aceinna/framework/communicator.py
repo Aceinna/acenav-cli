@@ -8,8 +8,6 @@ import socket
 import threading
 import collections
 from abc import ABCMeta, abstractmethod
-import serial
-import serial.tools.list_ports
 from scapy.all import sendp, sniff, conf, AsyncSniffer
 from scapy.layers.l2 import Ether
 from ..devices import DeviceManager

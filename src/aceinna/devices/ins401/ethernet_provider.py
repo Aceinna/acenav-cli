@@ -625,7 +625,7 @@ class Provider(OpenDeviceBase):
 
         if self.is_in_bootloader:
             return
-
+        
         result = self.get_params()
 
         device_configuration = None
@@ -666,8 +666,6 @@ class Provider(OpenDeviceBase):
         ) and not self.ntrip_client and not self.is_in_bootloader:
             thead = threading.Thread(target=self.ntrip_client_thread)
             thead.start()
-
-        self.save_device_info()
 
     # command list
     def server_status(self, *args):  # pylint: disable=invalid-name
@@ -822,7 +820,7 @@ class Provider(OpenDeviceBase):
         command_line = helper.build_ethernet_packet(
             self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
             uP, message_bytes)
-        result = yield self._message_center.build(command=command_line)
+        result = yield self._message_center.build(command=command_line.actual_command)
 
         error = result['error']
         data = result['data']

@@ -27,6 +27,10 @@ def _build_args():
 
     parser.add_argument("-i", "--interface", dest="interface",  metavar='',
                         help="Interface. Allowed one of values: {0}".format(INTERFACE_LIST), default=INTERFACES.ETH_100BASE_T1, choices=INTERFACE_LIST)
+    parser.add_argument("--device-type", dest="device_type", type=str,
+                        help="Open Device Type. Allowed one of values: {0}".format(DEVICE_TYPES), choices=DEVICE_TYPES, metavar='')
+    parser.add_argument("-s", "--set-user-para", dest='set_user_para', action='store_true',
+                        help="Set user parameters", default=False)
     parser.add_argument("--cli", dest='use_cli', action='store_true',
                         help="start as cli mode", default=False)
 
@@ -40,6 +44,9 @@ def _build_args():
                                   default='ins401',  dest="log_type", choices=TYPES_OF_LOG)
     parse_log_action.add_argument(
         "-p", type=str, help="The folder path of logs", default='./data', metavar='', dest="path")
+    parse_log_action.add_argument(
+        "-i", type=int, help="Ins kml rate(hz). Allowed one of values: {0}".format(KML_RATES), default=5, metavar='', dest="kml_rate", choices=KML_RATES)
+
     return parser.parse_args()
 
 

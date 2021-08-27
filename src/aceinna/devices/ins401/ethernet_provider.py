@@ -218,16 +218,17 @@ class Provider(OpenDeviceBase):
     def handle_rtcm_data_parsed(self, data):
         # print('rtcm',data)
 
-        if self.rtcm_logf is not None and data is not None:
-            self.rtcm_logf.write(bytes(data))
-            self.rtcm_logf.flush()
+        if not self.is_upgrading and not self.with_upgrade_error:
+            if self.rtcm_logf is not None and data is not None:
+                self.rtcm_logf.write(bytes(data))
+                self.rtcm_logf.flush()
 
-        if self.communicator.can_write() and not self.is_upgrading and not self.with_upgrade_error:
-            command = helper.build_ethernet_packet(
-                self.communicator.get_dst_mac(),
-                self.communicator.get_src_mac(), b'\x02\x0b', data)
+            if self.communicator.can_write():
+                command = helper.build_ethernet_packet(
+                    self.communicator.get_dst_mac(),
+                    self.communicator.get_src_mac(), b'\x02\x0b', data)
 
-            self.communicator.write(command.actual_command)
+                self.communicator.write(command.actual_command)
 
     def after_setup(self):
         set_user_para = self.cli_options and self.cli_options.set_user_para
@@ -308,9 +309,7 @@ class Provider(OpenDeviceBase):
                     self.nmea_buffer = []
                     self.nmea_sync = 0
 
-        # if self.user_logf is not None and data is not None:
-        #     self.user_logf.write(data)
-        #     self.user_logf.flush()
+
 
     def thread_data_log(self, *args, **kwargs):
         self.ethernet_data_logger = EthernetDataLogger(self.properties,
@@ -343,7 +342,7 @@ class Provider(OpenDeviceBase):
     def after_jump_bootloader(self):
         self.communicator.reshake_hand()
 
-    def after_jump_application(self):
+    def do_reshake(self):
         '''
             check if in application mode
         '''
@@ -355,30 +354,27 @@ class Provider(OpenDeviceBase):
             except:
                 continue
 
-
     def before_write_content(self, core, content_len):
         command_CS = [0x04, 0xaa]
 
         message_bytes = [ord('C'), ord(core)]
         message_bytes.extend(struct.pack('>I', content_len))
-
-        command = helper.build_ethernet_packet(
-            self.communicator.get_dst_mac(),
-            self.communicator.get_src_mac(),
-            command_CS, message_bytes,
-            use_length_as_protocol=self.communicator.use_length_as_protocol)
-
+        
         self.communicator.reset_buffer()
+        for i in range(3):
+            command = helper.build_ethernet_packet(
+                self.communicator.get_dst_mac(),
+                self.communicator.get_src_mac(),
+                command_CS, message_bytes,
+                use_length_as_protocol=self.communicator.use_length_as_protocol)
+            time.sleep(1)
+            self.communicator.write(command.actual_command)
+            time.sleep(1)
+            result = helper.read_untils_have_data(
+                self.communicator, command_CS, 100, 200)
 
-        time.sleep(2)
-        self.communicator.write(command.actual_command)
-        time.sleep(1)
-
-        result = helper.read_untils_have_data(
-            self.communicator, command_CS, 1000, 50)
-
-        if not result == []:
-            raise Exception('Cannot run set core command')
+            if result:
+                break
 
     def ins_firmware_write_command_generator(self, data_len, current, data):
         command_WA = [0x03, 0xaa]
@@ -398,10 +394,12 @@ class Provider(OpenDeviceBase):
         message_bytes.extend(struct.pack('>I', current))
         message_bytes.extend(struct.pack('B', data_len))
         message_bytes.extend(data)
-        return helper.build_ethernet_packet(
+        command = helper.build_ethernet_packet(
             self.communicator.get_dst_mac(),
             self.communicator.get_src_mac(),
-            command_WA, message_bytes, 'B')
+            command_WA, message_bytes)
+        command.packet_type = [0x57, 0x41]
+        return command
 
     def ins_jump_bootloader_command_generator(self):
         return helper.build_ethernet_packet(
@@ -417,6 +415,18 @@ class Provider(OpenDeviceBase):
             bytes([0x02, 0xaa]),
             use_length_as_protocol=self.communicator.use_length_as_protocol)
 
+    def imu_jump_bootloader_command_generator(self):
+        return helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(),
+            self.communicator.get_src_mac(),
+            bytes([0x49, 0x4a]))
+
+    def imu_jump_application_command_generator(self):
+        return helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(),
+            self.communicator.get_src_mac(),
+            bytes([0x41, 0x4a]))
+
     def build_worker(self, rule, content):
         ''' Build upgarde worker by rule and content
         '''
@@ -430,7 +440,7 @@ class Provider(OpenDeviceBase):
             rtk_upgrade_worker.on(
                 UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(15))
             rtk_upgrade_worker.on(UPGRADE_EVENT.BEFORE_WRITE,
-                                  lambda: self.before_write_content('0', len(content)))
+                                lambda: self.before_write_content('0', len(content)))
             return rtk_upgrade_worker
 
         if rule == 'ins':
@@ -447,24 +457,24 @@ class Provider(OpenDeviceBase):
                                   lambda: self.before_write_content('1', len(content)))
             return ins_upgrade_worker
 
-        # if rule == 'sdk':
-        #     sdk_upgrade_worker = EthernetSDK9100UpgradeWorker(
-        #         self.communicator,
-        #         lambda: helper.format_firmware_content(content))
-        #     sdk_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
-        #     return sdk_upgrade_worker
+        if rule == 'sdk':
+            sdk_upgrade_worker = EthernetSDK9100UpgradeWorker(
+                self.communicator,
+                lambda: helper.format_firmware_content(content))
+            sdk_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
+            return sdk_upgrade_worker
 
-        # if rule == 'imu':
-        #     imu_upgrade_worker = FirmwareUpgradeWorker(
-        #         self.communicator,
-        #         lambda: helper.format_firmware_content(content),
-        #         self.imu_firmware_write_command_generator,
-        #         192)
-        #     imu_upgrade_worker.name = 'SUB_IMU'
-        #     imu_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
-        #     imu_upgrade_worker.on(
-        #         UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(5))
-        #     return imu_upgrade_worker
+        if rule == 'imu':
+            imu_upgrade_worker = FirmwareUpgradeWorker(
+                self.communicator,
+                lambda: helper.format_firmware_content(content),
+                self.imu_firmware_write_command_generator,
+                192)
+            imu_upgrade_worker.name = 'SUB_IMU'
+            imu_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
+            imu_upgrade_worker.on(
+                UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(8))
+            return imu_upgrade_worker
 
     def get_upgrade_workers(self, firmware_content):
         workers = []
@@ -496,8 +506,6 @@ class Provider(OpenDeviceBase):
             if isinstance(worker, FirmwareUpgradeWorker) and worker.name == 'MAIN_RTK':
                 start_index = i if start_index == -1 else start_index
                 end_index = i
-        dst_mac = self.communicator.get_dst_mac()
-        src_mac = self.communicator.get_src_mac()
 
         ins_jump_bootloader_worker = JumpBootloaderWorker(
             self.communicator,
@@ -515,7 +523,7 @@ class Provider(OpenDeviceBase):
             wait_timeout_after_command=4)
         ins_jump_application_worker.group = UPGRADE_GROUP.FIRMWARE
         ins_jump_application_worker.on(
-            UPGRADE_EVENT.AFTER_COMMAND, self.after_jump_application)
+            UPGRADE_EVENT.AFTER_COMMAND, self.do_reshake)
 
         if start_index > -1 and end_index > -1:
             workers.insert(
@@ -531,18 +539,19 @@ class Provider(OpenDeviceBase):
                 start_index = i if start_index == -1 else start_index
                 end_index = i
 
-        imu_jump_bootloader_command = helper.build_ethernet_packet(
-            dst_mac, src_mac, bytes([0x49, 0x4a]), payload_length_format='B')
         imu_jump_bootloader_worker = JumpBootloaderWorker(
             self.communicator,
-            command=imu_jump_bootloader_command,
-            wait_timeout_after_command=3,)
+            command=self.imu_jump_bootloader_command_generator,
+            listen_packet=[0x4a, 0x49],
+            wait_timeout_after_command=8)
+        imu_jump_bootloader_worker.on(
+            UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
         imu_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE
 
-        imu_jump_application_command = helper.build_ethernet_packet(
-            dst_mac, src_mac, bytes([0x41, 0x4a]), payload_length_format='B')
         imu_jump_application_worker = JumpApplicationWorker(
-            self.communicator, command=imu_jump_application_command)
+            self.communicator,
+            command=self.imu_jump_application_command_generator,
+            listen_packet=[0x4a, 0x41])
         imu_jump_application_worker.group = UPGRADE_GROUP.FIRMWARE
 
         if start_index > -1 and end_index > -1:
@@ -613,15 +622,6 @@ class Provider(OpenDeviceBase):
         '''
         if not self.rtk_log_file_name or not self._device_info_string:
             return
-
-        # local_time = time.localtime()
-        # formatted_file_time = time.strftime("%Y_%m_%d_%H_%M_%S", local_time)
-        # file_path = os.path.join(
-        #     self.rtk_log_file_name,
-        #     'device_info_{0}.txt'.format(formatted_file_time)
-        # )
-        # with open(file_path, 'w') as outfile:
-        #     outfile.write(self._device_info_string)
 
         if self.is_in_bootloader:
             return
@@ -741,14 +741,13 @@ class Provider(OpenDeviceBase):
         for parameter in self.properties['userConfiguration']:
             if parameter['paramId'] == 0:
                 continue
-
             result = self.get_param(parameter)
             if result['packetType'] == 'error':
                 has_error = True
                 break
 
             parameter_values.append(result['data'])
-            time.sleep(0.1)
+            time.sleep(0.2)
 
         if not has_error:
             self.parameters = parameter_values
@@ -880,9 +879,7 @@ class Provider(OpenDeviceBase):
             if self._logger is not None:
                 self._logger.stop_user_log()
 
-            thread = threading.Thread(target=self.thread_do_upgrade_framework,
-                                      args=(file, ))
-            thread.start()
+            self.thread_do_upgrade_framework(file)
             print("Upgrade INS401 firmware started at:[{0}].".format(
                 datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 

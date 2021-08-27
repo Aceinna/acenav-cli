@@ -220,7 +220,6 @@ class OpenDeviceBase(EventBase):
         '''
         Remove specified client
         '''
-        self._reset_client()
         self.clients.remove(client)
 
     def _reset_client(self):

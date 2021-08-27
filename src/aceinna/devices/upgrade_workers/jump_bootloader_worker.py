@@ -60,12 +60,16 @@ class JumpBootloaderWorker(UpgradeWorkerBase):
             self.emit(UPGRADE_EVENT.BEFORE_COMMAND)
 
             self._communicator.reset_buffer()
-            self._communicator.write(actual_command)
 
-            time.sleep(self._wait_timeout_after_command)
+            for i in range(3):
+                self._communicator.write(actual_command)
 
-            helper.read_untils_have_data(
-                self._communicator, self._listen_packet, 1000, 50, payload_length_format)
+                time.sleep(self._wait_timeout_after_command)
+
+                response = helper.read_untils_have_data(
+                           self._communicator, self._listen_packet, 100, 200, payload_length_format)
+                if response:
+                    break
 
             self.emit(UPGRADE_EVENT.AFTER_COMMAND)
 

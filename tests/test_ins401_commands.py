@@ -9,7 +9,7 @@ try:
     from aceinna.models.args import WebserverArgs
     from aceinna.framework.utils import (helper)
     from aceinna.framework.decorator import handle_application_exception
-    from aceinna.devices.openrtk.ethernet_provider import Provider as EhternetProvider
+    from aceinna.devices.ins401.ethernet_provider import Provider as EhternetProvider
     from aceinna.framework.constants import INTERFACES
 except:  # pylint: disable=bare-except
     print('load package from local')
@@ -18,7 +18,7 @@ except:  # pylint: disable=bare-except
     from aceinna.models.args import WebserverArgs
     from aceinna.framework.utils import (helper)
     from aceinna.framework.decorator import handle_application_exception
-    from aceinna.devices.openrtk.ethernet_provider import Provider as EhternetProvider
+    from aceinna.devices.ins401.ethernet_provider import Provider as EhternetProvider
     from aceinna.framework.constants import INTERFACES
 
 INPUT_PACKETS = [b'\x01\xcc', b'\x02\xcc', b'\x03\xcc', b'\x04\xcc', b'\x01\x0b', b'\x02\x0b']
@@ -28,7 +28,7 @@ user_parameters = [0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 def get_production_info(dest, src, command):
     message_bytes = []
 
-    command_line = helper.build_ethernet_packet(dest, src, command, message_bytes)
+    command_line = helper._ethernet_packet(dest, src, command, message_bytes)
     return command_line
 
 def get_user_configuration_parameters(dest, src, command, field_id):

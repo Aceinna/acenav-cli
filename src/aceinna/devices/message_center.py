@@ -209,38 +209,6 @@ class DeviceMessageCenter(EventBase):
             except KeyboardInterrupt:  # response for KeyboardInterrupt such as Ctrl+C
                 return True
 
-    def ethernet_callback(self, packet):
-        data = bytes(packet)
-        if data and len(data) > 0:
-            # print(data)
-            self.emit(EVENT_TYPE.READ_BLOCK, data)
-            self.data_lock.acquire()
-            for data_byte in data:
-                self.data_queue.put(data_byte)
-            self.data_lock.release()
-
-    def thread_ethernet_receiver(self, *args, **kwargs):
-        ''' receive data and push data into data_queue.
-            return when occur Exception or set as stop
-        '''
-        while True:
-            if self._has_exception or self._is_stop:
-                print('thread_receiver: exception')
-                return
-
-            if self._is_pause:
-                continue
-
-            data = None
-            try:
-                self._communicator.read(self.ethernet_callback)
-            except Exception as ex:  # pylint: disable=broad-except
-                print('Thread:receiver error:', ex)
-                self.exception_lock.acquire()
-                self._has_exception = True  # Notice thread paser to exit.
-                self.exception_lock.release()
-                return  # exit thread receiver
-
     def thread_receiver(self, *args, **kwargs):
         ''' receive data and push data into data_queue.
             return when occur Exception or set as stop
@@ -251,7 +219,7 @@ class DeviceMessageCenter(EventBase):
                 return
 
             if self._is_pause:
-                time.sleep(0.1)
+                time.sleep(0.01)
                 continue
 
             data = None
@@ -268,8 +236,7 @@ class DeviceMessageCenter(EventBase):
             if data and len(data) > 0:
                 self.emit(EVENT_TYPE.READ_BLOCK, data)
                 self.data_lock.acquire()
-                for data_byte in data:
-                    self.data_queue.put(data_byte)
+                self.data_queue.put(data)
                 self.data_lock.release()
             else:
                 time.sleep(0.01)
@@ -293,7 +260,7 @@ class DeviceMessageCenter(EventBase):
             self.exception_lock.release()
 
             if self._is_pause:
-                time.sleep(0.1)
+                time.sleep(0.01)
                 continue
 
             self.data_lock.acquire()
@@ -306,9 +273,10 @@ class DeviceMessageCenter(EventBase):
                 self.data_lock.release()
 
             if self._parser:
-                if sys.version_info[0] < 3:
-                    data = ord(data)
-                self._parser.analyse(data)
+                for data_block in data:
+                    if sys.version_info[0] < 3:
+                        data_block = ord(data_block)
+                    self._parser.analyse(data_block)
 
     def on_command_receive(self, *args, **kwargs):
         # TODO: should do timeout command check

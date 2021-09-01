@@ -514,7 +514,7 @@ class Provider(OpenDeviceBase):
         if self.is_in_bootloader:
             ins_wait_timeout = 1
         else:
-            ins_wait_timeout = 30
+            ins_wait_timeout = 10
 
         ins_jump_bootloader_worker = JumpBootloaderWorker(
             self.communicator,

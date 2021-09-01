@@ -405,6 +405,8 @@ class OpenDeviceBase(EventBase):
         self.emit('upgrade_failed', 'UPGRADE.FAILED.001', message)
         # self.add_output_packet('upgrade_complete', {
         #                        'success': False, 'message': message})
+        print("upgrade_failed")
+        os._exit(1)
 
     def handle_upgrade_process(self, step, current, total):
         if self._pbar:
@@ -417,7 +419,7 @@ class OpenDeviceBase(EventBase):
     def handle_upgrade_complete(self):
         if self._pbar:
             self._pbar.close()
-        time.sleep(8)
+        time.sleep(3)
         self.restart()
 
     def connect_log(self, params):

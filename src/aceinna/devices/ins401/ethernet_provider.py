@@ -205,7 +205,7 @@ class Provider(OpenDeviceBase):
                 '\nYou can choose to place your json file under execution path if it is an unknown application.'
             )
 
-    def ntrip_client_thread(self):
+    def ntrip_client_thread(self): 
         self.ntrip_client = NTRIPClient(self.properties)
         self.ntrip_client.on('parsed', self.handle_rtcm_data_parsed)
         if self.device_info.__contains__('sn') and self.device_info.__contains__('pn'):
@@ -264,9 +264,10 @@ class Provider(OpenDeviceBase):
             self.save_device_info()
 
             # start ntrip client
-            if self.properties["initial"].__contains__("ntrip") \
-                    and not self.ntrip_client and not self.is_in_bootloader:
-                threading.Thread(target=self.ntrip_client_thread).start()
+            if not self.is_upgrading and not self.with_upgrade_error:
+                if self.properties["initial"].__contains__("ntrip") \
+                        and not self.ntrip_client and not self.is_in_bootloader:
+                    threading.Thread(target=self.ntrip_client_thread).start()
 
         except Exception as e:
             print('Exception in after setup', e)
@@ -484,6 +485,10 @@ class Provider(OpenDeviceBase):
             InternalCombineAppParseRule('sdk', 'sdk_start:', 4),
             InternalCombineAppParseRule('imu', 'imu_start:', 4),
         ]
+        if self.communicator:
+            self.communicator.reset_buffer()
+            self.communicator.upgrade()
+            print('upgrading flag:{0}'.format(self.communicator.upgrading_flag))
 
         parsed_content = firmware_content_parser(firmware_content, rules)
 
@@ -506,15 +511,19 @@ class Provider(OpenDeviceBase):
             if isinstance(worker, FirmwareUpgradeWorker) and worker.name == 'MAIN_RTK':
                 start_index = i if start_index == -1 else start_index
                 end_index = i
+        if self.is_in_bootloader:
+            ins_wait_timeout = 1
+        else:
+            ins_wait_timeout = 30
 
         ins_jump_bootloader_worker = JumpBootloaderWorker(
             self.communicator,
             command=self.ins_jump_bootloader_command_generator,
             listen_packet=[0x01, 0xaa],
-            wait_timeout_after_command=8)
+            wait_timeout_after_command=ins_wait_timeout)
         ins_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE
         ins_jump_bootloader_worker.on(
-            UPGRADE_EVENT.AFTER_COMMAND, self.after_jump_bootloader)
+            UPGRADE_EVENT.AFTER_COMMAND, self.do_reshake)
 
         ins_jump_application_worker = JumpApplicationWorker(
             self.communicator,
@@ -543,7 +552,7 @@ class Provider(OpenDeviceBase):
             self.communicator,
             command=self.imu_jump_bootloader_command_generator,
             listen_packet=[0x4a, 0x49],
-            wait_timeout_after_command=8)
+            wait_timeout_after_command=30)
         imu_jump_bootloader_worker.on(
             UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
         imu_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE
@@ -660,12 +669,7 @@ class Provider(OpenDeviceBase):
                           ensure_ascii=False)
 
     def after_upgrade_completed(self):
-        # start ntrip client
-        if self.properties["initial"].__contains__(
-                "ntrip"
-        ) and not self.ntrip_client and not self.is_in_bootloader:
-            thead = threading.Thread(target=self.ntrip_client_thread)
-            thead.start()
+        pass
 
     # command list
     def server_status(self, *args):  # pylint: disable=invalid-name

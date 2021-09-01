@@ -1331,9 +1331,13 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
                 self._communicator, pG)
             if response:
                 break
-
-        if not self.send_sync():
-            return self._raise_error('Sync failed')
+        
+        for i in range(3):
+            result = self.send_sync()
+            if not result and i == 2:
+                return self._raise_error('Sync failed')
+            else:
+                break
 
         self.flash_write_pre(self._file_content)
         time.sleep(0.1)
@@ -1369,8 +1373,13 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         #     return self._raise_error('Wait nvm failed')
 
         time.sleep(2)
-        if not self.flash_write(fs_len, self._file_content):
-            return self._raise_error('Write flash failed')
+        for i in range(3):
+            time.sleep(1)
+            result = self.flash_write(fs_len, self._file_content)
+            if not result and i == 2:
+                return self._raise_error('Write flash failed')
+            else:
+                break   
 
         if not self.flash_crc():
             return self._raise_error('CRC check fail')
@@ -1380,3 +1389,5 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         else:
             # self._uart.close()
             self.emit(UPGRADE_EVENT.FINISH, self._key)
+        
+

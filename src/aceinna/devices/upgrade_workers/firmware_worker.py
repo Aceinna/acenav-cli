@@ -1,3 +1,4 @@
+import os
 import time
 from ..base.upgrade_worker_base import UpgradeWorkerBase
 from ...framework.utils import helper
@@ -67,10 +68,13 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
             except Exception as ex:
                 self.emit(UPGRADE_EVENT.ERROR, self._key,
                           'Fail in first packet: {0}'.format(ex))
+                print('Fail in first packet: {0}'.format(ex))
+                os._exit(1)
                 return False
+            time.sleep(5)
 
         response = helper.read_untils_have_data(
-            self._communicator, listen_packet, 12, 200, payload_length_format)
+            self._communicator, listen_packet, 12, 1000, payload_length_format)
 
         if response is None:
             return False
@@ -83,6 +87,8 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
             return
         if self.current == 0 and self.total == 0:
             self.emit(UPGRADE_EVENT.ERROR, self._key, 'Invalid file content')
+            print('Invalid file content')
+            os._exit(1)
             return
 
         try:
@@ -90,7 +96,12 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
         except Exception as ex:
             self.emit(UPGRADE_EVENT.ERROR, self._key,
                       'Fail in before write: {0}'.format(ex))
+            print('Fail in before write: {0}'.format(ex))
+            os._exit(1)
             return
+            
+        self._communicator.reset_buffer()
+
         while self.current < self.total:
             if self._is_stopped:
                 return
@@ -99,17 +110,22 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
                 self.total - self.current) > self.max_data_len else (self.total - self.current)
             data = self._file_content[self.current: (
                 self.current + packet_data_len)]
+            
             if self.current == 0:
-                for i in range(5):
+                for i in range(10):
                     write_result = self.write_block(packet_data_len, self.current, data)
                     if write_result:
                         break
             else:
-                write_result = self.write_block(packet_data_len, self.current, data)
-
+                for i in range(3):
+                    write_result = self.write_block(packet_data_len, self.current, data)
+                    if write_result:
+                        break
             if not write_result:
                 self.emit(UPGRADE_EVENT.ERROR, self._key,
-                          'Write firmware operation failed')
+                          'Write firmware operation failed,  offset length: {0}'.format(self.current))
+                print('Write firmware operation failed, offset length: {0}'.format(self.current))
+                os._exit(1)
                 return
 
             self.current += packet_data_len
@@ -121,6 +137,8 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
         except Exception as ex:
             self.emit(UPGRADE_EVENT.ERROR, self._key,
                       'Fail in after write: {0}'.format(ex))
+            print('Fail in after write: {0}'.format(ex))
+            os._exit(1)
             return
 
         if self.total > 0 and self.current >= self.total:

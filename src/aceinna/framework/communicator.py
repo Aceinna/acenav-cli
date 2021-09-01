@@ -18,6 +18,8 @@ from .utils.print import (print_red, print_yellow)
 from .utils import helper
 from .wrapper import SocketConnWrapper
 
+UPGRADE_PACKETS = [b'\x01\xcc', b'\x01\xaa', b'\x02\xaa', b'\x03\xaa', b'\x04\xaa',
+                   b'\x05\xaa', b'\x06\xaa', b'\x07\xaa', b'\x08\xaa', b'\x4a\x49', b'\x4a\x41', b'\x57\x41']
 
 class CommunicatorFactory:
     '''
@@ -121,9 +123,10 @@ class Ethernet(Communicator):
         self.filter_device_type_assigned = False
 
         self.iface_confirmed = False
-        self.receive_cache = collections.deque(maxlen=1000)
+        self.receive_cache = collections.deque(maxlen=10000)
         self.use_length_as_protocol = True
         self.async_sniffer = None
+        self.upgrading_flag = False
 
         if options and options.device_type != 'auto':
             self.filter_device_type = options.device_type
@@ -167,6 +170,7 @@ class Ethernet(Communicator):
 
     def find_device(self, callback, retries=0, not_found_handler=None):
         self.device = None
+        self.reset_buffer()
 
         # find network connection
         if not self.iface_confirmed:
@@ -240,7 +244,7 @@ class Ethernet(Communicator):
             self.start_listen_data()
             return True
         else:
-            # raise Exception('Cannot finish shake hand.')
+            raise Exception('Cannot finish shake hand.')
             return False
 
     def start_listen_data(self):
@@ -264,10 +268,14 @@ class Ethernet(Communicator):
         if packet_type == b'\x01\xcc':
             self.dst_mac = packet.src
 
-        if packet_raw_length == b'\x00\x00':
-            self.use_length_as_protocol = False
-
-        self.receive_cache.append(packet_raw[2:])
+            if packet_raw_length == b'\x00\x00':
+                self.use_length_as_protocol = False
+        
+        if self.upgrading_flag:
+            if UPGRADE_PACKETS.__contains__(packet_type):
+                self.receive_cache.append(packet_raw[2:])
+        else:
+            self.receive_cache.append(packet_raw[2:])
 
     def open(self):
         '''
@@ -298,6 +306,9 @@ class Ethernet(Communicator):
         '''
         read
         '''
+        if len(self.receive_cache) == self.receive_cache.maxlen:
+            print('receive cache full.')
+        
         if len(self.receive_cache) > 0:
             return self.receive_cache.popleft()
         return []
@@ -322,3 +333,5 @@ class Ethernet(Communicator):
             network_card_info.append(
                 (conf.ifaces[item].name, conf.ifaces[item].mac))
         return network_card_info
+    def upgrade(self):
+        self.upgrading_flag = True

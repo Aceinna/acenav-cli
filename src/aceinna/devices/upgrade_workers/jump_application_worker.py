@@ -1,3 +1,4 @@
+import os
 import time
 from ..base.upgrade_worker_base import UpgradeWorkerBase
 from ...framework.utils import helper
@@ -66,14 +67,11 @@ class JumpApplicationWorker(UpgradeWorkerBase):
             self.emit(UPGRADE_EVENT.BEFORE_COMMAND)
 
             self._communicator.reset_buffer()
-
-            for i in range(3):
+            for i in range(self._wait_timeout_after_command):
                 self._communicator.write(actual_command)
-
-                time.sleep(self._wait_timeout_after_command)
-
+                time.sleep(1)
                 response = helper.read_untils_have_data(
-                    self._communicator, self._listen_packet, 100, 200, payload_length_format)
+                    self._communicator, self._listen_packet, 100, 1000, payload_length_format)
                 if response:
                     break
 

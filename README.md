@@ -34,6 +34,10 @@ Run the CLI software and connect with the INS401 system for the first time, ther
 
 ## Commands
 
+Run the following command to log all data output from Ethernet port to binary files, setting a JSON format of configuration file and streaming GNSS RTK correction data through Ethernet port to INS401, then compared with JSON format of configuration files  of  “setting” folder and ins401_log_{time}" subfolder under "data" folder (e.g. on Ubuntu)
+```shell
+./acenav -i 100base-t1 -s
+```
 Run the following command to log all data output from Ethernet port to binary files, and streaming GNSS RTK correction data through Ethernet port to INS401 (e.g. on Ubuntu)
 
 ```shell

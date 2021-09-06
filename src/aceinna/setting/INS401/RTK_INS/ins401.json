@@ -7,17 +7,17 @@
             {
                 "paramId": 1,
                 "name": "gnss lever arm x",
-                "value": 1.19
+                "value": 0.0
             },
             {
                 "paramId": 2,
                 "name": "gnss lever arm y",
-                "value": -0.24
+                "value": -0.0
             },
             {
                 "paramId": 3,
                 "name": "gnss lever arm z",
-                "value": -0.9
+                "value": -0.0
             },
             {
                 "paramId": 4,
@@ -37,17 +37,17 @@
             {
                 "paramId": 7,
                 "name": "user lever arm x",
-                "value": 1.19
+                "value": 0.0
             },
             {
                 "paramId": 8,
                 "name": "user lever arm y",
-                "value": -0.24
+                "value": -0.0
             },
             {
                 "paramId": 9,
                 "name": "user lever arm z",
-                "value": -0.9
+                "value": -0.0
             },
             {
                 "paramId": 10,

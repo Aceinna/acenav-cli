@@ -48,3 +48,9 @@ Run the following command to parse the logged data into text or csv files,
 ./acenav parse -t ins401 -p <path to data folder/session data subfolder>
 ```
 
+If user changed the GNSS/INS user settings in the "ins401.json" file, and wants to make it effective, run the data logging command with "-s" option like below, and the changed user settings will be saved into flash
+
+```shell
+./acenav -i 100base-t1 -s
+```
+

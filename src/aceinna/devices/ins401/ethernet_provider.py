@@ -149,7 +149,8 @@ class Provider(OpenDeviceBase):
             self.device_info = {
                 'name': split_text[0],
                 'pn': split_text[1],
-                'sn': split_text[2]
+                'sn': split_text[2],
+                'hardware':split_text[4]
             }
 
     def _build_app_info(self, text):
@@ -176,8 +177,8 @@ class Provider(OpenDeviceBase):
 
         self.app_info = {
             'app_name': app_name,
-            'version': split_text[1] + split_text[2],
-            'bootloader_version': split_text[3] + split_text[4],
+            'firmware':  split_text[2],
+            'bootloader': split_text[4],
         }
 
     def load_properties(self):

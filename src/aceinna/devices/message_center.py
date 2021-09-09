@@ -273,10 +273,7 @@ class DeviceMessageCenter(EventBase):
                 self.data_lock.release()
 
             if self._parser:
-                for data_block in data:
-                    if sys.version_info[0] < 3:
-                        data_block = ord(data_block)
-                    self._parser.analyse(data_block)
+                self._parser.analyse(data)
 
     def on_command_receive(self, *args, **kwargs):
         # TODO: should do timeout command check

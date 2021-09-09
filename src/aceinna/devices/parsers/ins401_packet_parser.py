@@ -192,8 +192,8 @@ def update_parameter_parser(payload, user_configuration):
     uP parser
     '''
     error = False
-    data = decode_value('uint32', payload[0:4])
-    if data:
+    data = decode_value('int32', payload[0:4])
+    if data != 0:
         error = True
     return data, error
 

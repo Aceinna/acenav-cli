@@ -851,10 +851,10 @@ class Provider(OpenDeviceBase):
 
         data = result['data']
         error = result['error']
-        if data:
-            yield {'packetType': 'success', 'data': error}
+        if error:
+            yield {'packetType': 'error', 'data': data}
 
-        yield {'packetType': 'success', 'data': error}
+        yield {'packetType': 'success', 'data': data}
 
     @with_device_message
     def reset_params(self, params, *args):  # pylint: disable=unused-argument

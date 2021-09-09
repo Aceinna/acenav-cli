@@ -10,6 +10,7 @@ from .ins401_packet_parser import (
 
 MSG_HEADER = [0x55, 0x55]
 PACKET_TYPE_INDEX = 2
+PAYLOAD_LEN_INDEX = 8
 # PRIVATE_PACKET_TYPE = ['RE', 'WE', 'UE', 'LE', 'SR']
 INPUT_PACKETS = [b'\x01\xcc', b'\x02\xcc',
                  b'\x03\xcc', b'\x04\xcc', b'\x01\x0b', b'\x02\x0b']
@@ -20,61 +21,52 @@ OTHER_OUTPUT_PACKETS = [b'\x01\n', b'\x02\n',
 class EthernetMessageParser(MessageParserBase):
     def __init__(self, configuration):
         super(EthernetMessageParser, self).__init__(configuration)
-        self.frame = []
-        self.payload_len_idx = 8
-        self.sync_pattern = collections.deque(2*[0], 2)
-        self.find_header = False
-        self.payload_len = 0
-        # command,continuous_message
 
     def set_run_command(self, command):
         pass
 
     def analyse(self, data_block):
-        if self.find_header:
-            self.frame.append(data_block)
+        sync_pattern = data_block[0:2]
+        if operator.eq(list(sync_pattern), MSG_HEADER) and len(data_block) >= PAYLOAD_LEN_INDEX:
+            payload_len_byte = bytes(data_block[4:PAYLOAD_LEN_INDEX])
+            payload_len = struct.unpack('<I', payload_len_byte)[0]
+   
+            packet_type_byte = bytes(data_block[PACKET_TYPE_INDEX:4])
+            packet_type = struct.unpack('>H', packet_type_byte)[0]
 
-            if self.payload_len_idx == len(self.frame):
-                payload_len_byte = bytes(self.frame[4:])
-                self.payload_len = struct.unpack('<I', payload_len_byte)[0]
+            if len(data_block) < PAYLOAD_LEN_INDEX + payload_len + 2:
+                APP_CONTEXT.get_logger().logger.info(
+                    "crc check error! packet_type:{0}".format(packet_type))
 
-            elif 8 + self.payload_len + 2 == len(self.frame):
-                packet_type_byte = bytes(self.frame[PACKET_TYPE_INDEX:4])
-                packet_type = struct.unpack('>H', packet_type_byte)[0]
-                self.find_header = False
-                result = helper.calc_crc(self.frame[2:-2])
-                if result[0] == self.frame[-2] and result[1] == self.frame[-1]:
-                    # find a whole frame
-                    # self._parse_frame(self.frame, self.payload_len)
-                    self._parse_message(
-                        struct.pack('>H', packet_type), self.payload_len, self.frame)
+                self.emit('crc_failure', packet_type=packet_type,
+                            event_time=time.time())
+                print('crc_failure', packet_type=packet_type,
+                            event_time=time.time())
+                return
 
-                    self.find_header = False
-                    self.payload_len = 0
-                    self.sync_pattern = collections.deque(2*[0], 2)
-                else:
-                    APP_CONTEXT.get_logger().logger.info(
-                        "crc check error! packet_type:{0}".format(packet_type))
+            result = helper.calc_crc(data_block[2:8+payload_len])
+                
+            if result[0] == data_block[PAYLOAD_LEN_INDEX + payload_len] and result[1] == data_block[PAYLOAD_LEN_INDEX + payload_len + 1]:
+                self._parse_message(
+                    struct.pack('>H', packet_type), payload_len, data_block)
+            else:
+                APP_CONTEXT.get_logger().logger.info(
+                    "crc check error! packet_type:{0}".format(packet_type))
 
-                    self.emit('crc_failure', packet_type=packet_type,
-                              event_time=time.time())
-                    input_packet_config = next(
-                        (x for x in self.properties['userMessages']['inputPackets']
-                         if x['name'] == packet_type), None)
-                    if input_packet_config:
-                        self.emit('command',
-                                  packet_type=packet_type,
-                                  data=[],
-                                  error=True,
-                                  raw=self.frame)
-        else:
-            self.sync_pattern.append(data_block)
-            if operator.eq(list(self.sync_pattern), MSG_HEADER):
-                self.frame = MSG_HEADER[:]  # header_tp.copy()
-                self.find_header = True
+                self.emit('crc_failure', packet_type=packet_type,
+                            event_time=time.time())
+                input_packet_config = next(
+                    (x for x in self.properties['userMessages']['inputPackets']
+                        if x['name'] == packet_type), None)
+                if input_packet_config:
+                    self.emit('command',
+                                packet_type=packet_type,
+                                data=[],
+                                error=True,
+                                raw=data_block)
 
     def _parse_message(self, packet_type, payload_len, frame):
-        payload = frame[self.payload_len_idx:payload_len+self.payload_len_idx]
+        payload = frame[PAYLOAD_LEN_INDEX:payload_len+PAYLOAD_LEN_INDEX]
         # parse interactive commands
         is_interactive_cmd = INPUT_PACKETS.__contains__(packet_type)
 

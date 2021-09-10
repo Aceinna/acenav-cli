@@ -375,8 +375,11 @@ class Provider(OpenDeviceBase):
             result = helper.read_untils_have_data(
                 self.communicator, command_CS, 100, 200)
 
-            if result:
+            if result:     
                 break
+        if result is None:
+            print('send cs command failed, core:{0}'.format(ord(core)))
+            os._exit(1)
 
     def ins_firmware_write_command_generator(self, data_len, current, data):
         command_WA = [0x03, 0xaa]

@@ -14,7 +14,7 @@ def _run_command(communicator, command):
 
     time.sleep(0.1)
     data_buffer = helper.read_untils_have_data(
-        communicator, command, retry_times=100)
+        communicator, command, retry_times=500)
     return data_buffer
 
 

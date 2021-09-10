@@ -10,7 +10,9 @@ from .ins401_packet_parser import (
 
 MSG_HEADER = [0x55, 0x55]
 PACKET_TYPE_INDEX = 2
-PAYLOAD_LEN_INDEX = 8
+PACKET_PAYLOAD_LEN_INDEX = 4
+PACKET_PAYLOAD_INDEX = 8
+
 # PRIVATE_PACKET_TYPE = ['RE', 'WE', 'UE', 'LE', 'SR']
 INPUT_PACKETS = [b'\x01\xcc', b'\x02\xcc',
                  b'\x03\xcc', b'\x04\xcc', b'\x01\x0b', b'\x02\x0b']
@@ -27,14 +29,14 @@ class EthernetMessageParser(MessageParserBase):
 
     def analyse(self, data_block):
         sync_pattern = data_block[0:2]
-        if operator.eq(list(sync_pattern), MSG_HEADER) and len(data_block) >= PAYLOAD_LEN_INDEX:
-            payload_len_byte = bytes(data_block[4:PAYLOAD_LEN_INDEX])
+        if operator.eq(list(sync_pattern), MSG_HEADER) and len(data_block) >= PACKET_PAYLOAD_INDEX:
+            payload_len_byte = bytes(data_block[PACKET_PAYLOAD_LEN_INDEX:PACKET_PAYLOAD_INDEX])
             payload_len = struct.unpack('<I', payload_len_byte)[0]
    
-            packet_type_byte = bytes(data_block[PACKET_TYPE_INDEX:4])
+            packet_type_byte = bytes(data_block[PACKET_TYPE_INDEX:PACKET_PAYLOAD_LEN_INDEX])
             packet_type = struct.unpack('>H', packet_type_byte)[0]
 
-            if len(data_block) < PAYLOAD_LEN_INDEX + payload_len + 2:
+            if len(data_block) < PACKET_PAYLOAD_INDEX + payload_len + 2:
                 APP_CONTEXT.get_logger().logger.info(
                     "crc check error! packet_type:{0}".format(packet_type))
 
@@ -44,9 +46,9 @@ class EthernetMessageParser(MessageParserBase):
                             event_time=time.time())
                 return
 
-            result = helper.calc_crc(data_block[2:8+payload_len])
+            result = helper.calc_crc(data_block[PACKET_TYPE_INDEX:PACKET_PAYLOAD_INDEX+payload_len])
                 
-            if result[0] == data_block[PAYLOAD_LEN_INDEX + payload_len] and result[1] == data_block[PAYLOAD_LEN_INDEX + payload_len + 1]:
+            if result[0] == data_block[PACKET_PAYLOAD_INDEX + payload_len] and result[1] == data_block[PACKET_PAYLOAD_INDEX + payload_len + 1]:
                 self._parse_message(
                     struct.pack('>H', packet_type), payload_len, data_block)
             else:
@@ -66,7 +68,7 @@ class EthernetMessageParser(MessageParserBase):
                                 raw=data_block)
 
     def _parse_message(self, packet_type, payload_len, frame):
-        payload = frame[PAYLOAD_LEN_INDEX:payload_len+PAYLOAD_LEN_INDEX]
+        payload = frame[PACKET_PAYLOAD_INDEX:payload_len+PACKET_PAYLOAD_INDEX]
         # parse interactive commands
         is_interactive_cmd = INPUT_PACKETS.__contains__(packet_type)
 

@@ -311,7 +311,7 @@ class Ethernet(Communicator):
         
         if len(self.receive_cache) > 0:
             return self.receive_cache.popleft()
-        return []
+        return None
 
     def reset_buffer(self):
         '''

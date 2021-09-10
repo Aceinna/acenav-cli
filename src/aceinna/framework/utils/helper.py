@@ -378,8 +378,7 @@ def _parse_buffer(data_buffer):
 
     return response
 
-
-def _parse_eth_100base_t1_buffer(data_buffer, payload_length_format='<I'):
+def _parse_eth_100base_t1_buffer(data_buffer):
     response = {
         'parsed': False,
         'parsed_end_index': len(data_buffer),
@@ -387,68 +386,28 @@ def _parse_eth_100base_t1_buffer(data_buffer, payload_length_format='<I'):
     }
 
     command_start = [0x55, 0x55]
+    PAYLOAD_INDEX = 8
+    PAYLOAD_LEN_INDEX = 4
+    PACKET_TYPE_INDEX = 2
     packet_type = []
-    packet_length = []
-    fmt_packet_length = -1
-    payload = []
-    match_state = PACKET_FOUND_INIT_STATE
-    packet_sync_match = collections.deque(maxlen=2)
-    payload_length_bytes_fmt = struct.calcsize(payload_length_format)
 
-    for value in data_buffer:
-        #print('state', match_state)
-        if match_state == PACKET_FOUND_INIT_STATE:
-            packet_sync_match.append(value)
+    if list(data_buffer[0:2]) == command_start and len(data_buffer) >= PAYLOAD_INDEX:
+        payload_len_byte = bytes(data_buffer[PAYLOAD_LEN_INDEX:PAYLOAD_INDEX])
+        payload_len = struct.unpack('<I', payload_len_byte)[0]
 
-        if len(packet_sync_match) == 2 and [x for x in packet_sync_match] == command_start:
-            match_state = PACKET_FOUND_START_STATE
-            packet_sync_match.clear()
-            continue
+        packet_type = data_buffer[PACKET_TYPE_INDEX:PAYLOAD_LEN_INDEX]
+ 
+        if len(data_buffer) >= PAYLOAD_INDEX + payload_len + 2:
+            crc = calc_crc(data_buffer[2:8+payload_len])   
 
-        if match_state == PACKET_FOUND_START_STATE:
-            packet_type.append(value)
-            if len(packet_type) >= 2:
-                match_state = PACKET_FOUND_TYPE_STATE
-                continue
-
-        if match_state == PACKET_FOUND_TYPE_STATE:
-            packet_length.append(value)
-            if len(packet_length) == payload_length_bytes_fmt:
-                try:
-                    fmt_packet_length = struct.unpack(
-                        '<I', bytes(packet_length))[0]
-                except Exception as ex:
-                    fmt_packet_length = -1
-
-                if fmt_packet_length > -1:
-                    match_state = PACKET_FOUND_LENGTH_STATE
-                    continue
-                else:
-                    packet_type = []
-                    packet_length = []
-                    fmt_packet_length = -1
-                    match_state = PACKET_FOUND_INIT_STATE
-                    continue
-
-        if match_state == PACKET_FOUND_LENGTH_STATE:
-            if len(payload) == fmt_packet_length:
+            if crc[0] == data_buffer[PAYLOAD_INDEX + payload_len] and crc[1] == data_buffer[PAYLOAD_INDEX + payload_len + 1]:
                 response['parsed'] = True
                 response['result'].append({
                     'type': packet_type,
-                    'data': payload
+                    'data': data_buffer[PAYLOAD_INDEX:PAYLOAD_INDEX + payload_len]
                 })
 
-                packet_type = []
-                packet_length = []
-                fmt_packet_length = -1
-                payload = []
-                match_state = PACKET_FOUND_INIT_STATE
-                continue
-
-            payload.append(value)
-
     return response
-
 
 def read_untils_have_data(communicator,
                           packet_type,
@@ -472,8 +431,7 @@ def read_untils_have_data(communicator,
         data_buffer_per_time = bytearray(read_data)
         data_buffer.extend(data_buffer_per_time)
         if hasattr(communicator, 'type') and communicator.type == INTERFACES.ETH_100BASE_T1:
-            response = _parse_eth_100base_t1_buffer(
-                data_buffer, payload_length_format)
+            response = _parse_eth_100base_t1_buffer(data_buffer)
         else:
             response = _parse_buffer(data_buffer)
 

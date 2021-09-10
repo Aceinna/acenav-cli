@@ -967,12 +967,15 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         while read_times > 0:
             packet_raw = self._communicator.read()
+            if packet_raw is None:
+                time.sleep(0.01)
+                read_times -= 1
+                continue
 
             packet_type = packet_raw[2:4]
             data_buffer = []
-            cmd = [0x07, 0xaa]
 
-            if packet_type == bytes(cmd):
+            if packet_type == bytes(WS):
                 packet_length = struct.unpack('<i', packet_raw[4:8])[0]
                 data_buffer = packet_raw[8: 8 + packet_length]
 
@@ -1170,11 +1173,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         self.send_packet(bin_info_list, buffer_size=512)
         time.sleep(8)
 
-        self.read_until(0xCC, 1)
-        self.read_until(0xCC, 1)
-        self.read_until(0xCC, 1)
-
-        return self.read_until(0xCC, 1)
+        return self.read_until(0xCC, 200)
 
     def get_bin_info_list(self, fs_len, bin_data):
         bootMode = 0x01
@@ -1280,7 +1279,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if self._is_stopped:
             return False
 
-        return self.read_until(0xCC, 500, 1)
+        return self.read_until(0xCC, 2000, 1)
 
     def flash_restart(self):
         if self._is_stopped:
@@ -1381,13 +1380,21 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
             else:
                 break   
 
-        if not self.flash_crc():
-            return self._raise_error('CRC check fail')
+        for i in range(3):
+            time.sleep(1)
+            result = self.flash_crc()
+            if not result and i == 2:
+                return self._raise_error('CRC check fail')
+            else:
+                break  
+
 
         if not self.send_sdk_cmd_JG():
             return self._raise_error('Send sdk command JG fail')
         else:
             # self._uart.close()
             self.emit(UPGRADE_EVENT.FINISH, self._key)
+        
+        time.sleep(5)
         
 

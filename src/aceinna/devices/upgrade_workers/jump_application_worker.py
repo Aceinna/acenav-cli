@@ -44,9 +44,6 @@ class JumpApplicationWorker(UpgradeWorkerBase):
         '''Send JA and ping device
         '''
         # run command JA
-        # command_line = helper.build_bootloader_input_packet('JA')
-        # self._communicator.serial_port.baudrate = self._bootloader_baudrate
-
         if self._is_stopped:
             return
 
@@ -69,23 +66,12 @@ class JumpApplicationWorker(UpgradeWorkerBase):
             self._communicator.reset_buffer()
             for i in range(self._wait_timeout_after_command):
                 self._communicator.write(actual_command)
-                time.sleep(1)
+                time.sleep(0.2)
                 response = helper.read_untils_have_data(
                     self._communicator, self._listen_packet, 100, 1000, payload_length_format)
                 if response:
                     break
 
             self.emit(UPGRADE_EVENT.AFTER_COMMAND)
-
-        # ping device
-        # can_ping = False
-        # self._communicator.serial_port.baudrate = self._original_baudrate
-
-        # while not can_ping:
-        #     self._communicator.reset_buffer()  # clear input and output buffer
-        #     info = ping(self._communicator, None)
-        #     if info:
-        #         can_ping = True
-        #     time.sleep(0.5)
 
         self.emit(UPGRADE_EVENT.FINISH, self._key)

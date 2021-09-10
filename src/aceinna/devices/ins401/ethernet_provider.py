@@ -489,7 +489,6 @@ class Provider(OpenDeviceBase):
         if self.communicator:
             self.communicator.reset_buffer()
             self.communicator.upgrade()
-            print('upgrading flag:{0}'.format(self.communicator.upgrading_flag))
 
         parsed_content = firmware_content_parser(firmware_content, rules)
 
@@ -770,7 +769,6 @@ class Provider(OpenDeviceBase):
             self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
             gP, message_bytes)
         result = yield self._message_center.build(command=command_line.actual_command)
-        #print(result, len(self.communicator.receive_cache))
         data = result['data']
         error = result['error']
 

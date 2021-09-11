@@ -34,6 +34,8 @@ Run the CLI software and connect with the INS401 system for the first time, ther
 
 ## Commands
 
+#### Log data
+
 Run the following command to log all data output from Ethernet port to binary files, and streaming GNSS RTK correction data through Ethernet port to INS401 (e.g. on Ubuntu)
 
 ```shell
@@ -42,11 +44,15 @@ Run the following command to log all data output from Ethernet port to binary fi
 
 A “data” subfolder will be created for the first time, and every session of data logging will be stored in a subfolder inside the “data” folder.
 
+#### Parse Data
+
 Run the following command to parse the logged data into text or csv files, 
 
 ```shell
 ./acenav parse -t ins401 -p <path to data folder/session data subfolder>
 ```
+
+#### Save Settings
 
 If user changed the GNSS/INS user settings in the "ins401.json" file, and wants to make it effective, run the data logging command with "-s" option like below, and the changed user settings will be saved into flash
 
@@ -54,3 +60,15 @@ If user changed the GNSS/INS user settings in the "ins401.json" file, and wants 
 ./acenav -i 100base-t1 -s
 ```
 
+## Firmware Upgrade
+
+INS401 supports In-Application Programming (IAP) firmware upgrade through the Ethernet interface, run the executable with the CLI option, and prompt for user input 
+
+```shell
+./acenav -i 100base-t1 --cli
+# console display with connection information
+# prompt for user input, type in command and file path after the arrow symbol
+>>upgrade <INS401 FW file path>
+```
+
+After successful FW upgrade, the INS401 system restarts and starts logging data automatically. 

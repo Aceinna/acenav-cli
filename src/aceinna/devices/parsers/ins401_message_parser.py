@@ -28,8 +28,7 @@ class EthernetMessageParser(MessageParserBase):
         pass
 
     def analyse(self, data_block):
-        sync_pattern = data_block[0:2]
-        if operator.eq(list(sync_pattern), MSG_HEADER) and len(data_block) >= PACKET_PAYLOAD_INDEX:
+        if operator.eq(list(data_block[0:2]), MSG_HEADER) and len(data_block) >= PACKET_PAYLOAD_INDEX:
             payload_len_byte = bytes(data_block[PACKET_PAYLOAD_LEN_INDEX:PACKET_PAYLOAD_INDEX])
             payload_len = struct.unpack('<I', payload_len_byte)[0]
    

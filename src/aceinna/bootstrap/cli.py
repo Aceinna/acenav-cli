@@ -142,8 +142,14 @@ class CommandLine:
         '''
         self.supported_commands = self._driver.execute('get_command_lines')
 
+        cmd_flag = True
+
         while True:
-            token = input(">>")
+            if cmd_flag:
+                token = input(">>")
+            else:
+                token = input("")
+                
             self.input_string = token.split(" ")
 
             if token.strip() == 'exit':
@@ -157,6 +163,7 @@ class CommandLine:
                 if command['name'] == self.input_string[0]:
                     self.current_command = command
                     eval('self.%s()' % (command['function']))
+                    cmd_flag = False
                     break
             else:
                 self.help_handler()

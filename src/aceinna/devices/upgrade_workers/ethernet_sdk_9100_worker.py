@@ -1362,14 +1362,14 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if not self.send_bin_info(bin_info_list):
             return self._raise_error('Send binary info failed')
 
-        # if not self.devinit_wait():
-        #     return self._raise_error('Wait devinit failed')
+        if not self.devinit_wait():
+            return self._raise_error('Wait devinit failed')
 
-        # if not self.erase_wait():
-        #     return self._raise_error('Wait erase failed')
+        if not self.erase_wait():
+            return self._raise_error('Wait erase failed')
 
-        # if not self.erase_nvm_wait():
-        #     return self._raise_error('Wait nvm failed')
+        if not self.erase_nvm_wait():
+            return self._raise_error('Wait nvm failed')
 
         time.sleep(2)
         for i in range(3):

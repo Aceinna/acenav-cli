@@ -283,11 +283,15 @@ class Provider(OpenDeviceBase):
         return int(cksum, 16), calc_cksum
 
     def on_read_raw(self, data):
+        if data[0] != 0x24 or data[1] != 0x47 or data[2] != 0x50:
+            return
+
         for bytedata in data:
             if bytedata == 0x24:
                 self.nmea_buffer = []
                 self.nmea_sync = 0
                 self.nmea_buffer.append(chr(bytedata))
+
             else:
                 self.nmea_buffer.append(chr(bytedata))
                 if self.nmea_sync == 0:
@@ -306,7 +310,7 @@ class Provider(OpenDeviceBase):
                             APP_CONTEXT.get_print_logger().info(
                                 str_nmea.replace('\r\n', ''))
                         except Exception as e:
-                            # print('NMEA fault:{0}'.format(e))
+                            print('NMEA fault:{0}'.format(e))
                             pass
                     self.nmea_buffer = []
                     self.nmea_sync = 0

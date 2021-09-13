@@ -306,7 +306,8 @@ class Provider(OpenDeviceBase):
                                 if str_nmea.find("$GPGGA") != -1:
                                     if self.ntrip_client:
                                         self.ntrip_client.send(str_nmea)
-                                self.user_logf.write(str_nmea.encode())
+                                if self.user_logf:
+                                    self.user_logf.write(str_nmea.encode())
                             APP_CONTEXT.get_print_logger().info(
                                 str_nmea.replace('\r\n', ''))
                         except Exception as e:

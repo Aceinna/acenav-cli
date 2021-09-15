@@ -69,7 +69,7 @@ class JumpBootloaderWorker(UpgradeWorkerBase):
                 if response:
                     break
 
-            if(response is None) and (self._wait_timeout_after_command == 30):
+            if(response is None) and (self._wait_timeout_after_command == 5):
                 self.emit(UPGRADE_EVENT.ERROR, self._key,
                     'jump imu bootloader fail')
                 print('jump imu bootloader fail, {0}'.format(self._key))

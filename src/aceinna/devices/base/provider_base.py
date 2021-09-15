@@ -419,7 +419,7 @@ class OpenDeviceBase(EventBase):
     def handle_upgrade_complete(self):
         if self._pbar:
             self._pbar.close()
-        time.sleep(3)
+        time.sleep(8)
         self.restart()
 
     def connect_log(self, params):

@@ -26,13 +26,13 @@ MESSAGE['Subject'] = Header(SUBJECT, 'utf-8')
 MESSAGE.attach(
     MIMEText('<p>Built executable on {0}</p><p>Version: {1}</p>'.format(SYS, VERSION), 'html', 'utf-8'))
 
-FILE_NAME = 'acenav.bak' if SYS == "Windows" else 'acenav'
+FILE_NAME = 'acenav.exe' if SYS == "Windows" else 'acenav'
 
 ATTACHMENT = MIMEText(open(os.path.join(os.getcwd(), 'dist', FILE_NAME),
                            'rb').read(), 'base64', 'utf-8')
 ATTACHMENT["Content-Type"] = 'application/octet-stream'
 ATTACHMENT["Content-Disposition"] = 'attachment; filename="{0}"'.format(
-    FILE_NAME)
+    FILE_NAME+'.bak')
 MESSAGE.attach(ATTACHMENT)
 
 try:

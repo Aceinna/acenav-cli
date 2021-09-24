@@ -213,7 +213,7 @@ def common_input_parser(payload, user_configuration):
     '''
     General input packet parser
     '''
-    print('common_input_parser:', payload)
+    #print('common_input_parser:', payload)
     return payload, False
 
 
@@ -332,6 +332,7 @@ def match_command_handler(packet_type):
         b'\x03\xcc': update_parameter_parser,
         b'\x04\xcc': update_parameter_parser,
         b'\x01\x0b': common_input_parser,
-        b'\x02\x0b': common_input_parser
+        b'\x02\x0b': common_input_parser,
+        b'\x09\x0a': common_input_parser
     }
     return parser_dict.get(packet_type)

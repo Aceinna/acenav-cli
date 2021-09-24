@@ -63,7 +63,7 @@ class Provider(OpenDeviceBase):
         self.connected = True
         self.rtk_log_file_name = ''
         self.rtcm_rover_logf = None
-
+        self.ins_save_logf = None
     def prepare_folders(self):
         '''
         Prepare folders for data storage and configuration
@@ -252,7 +252,8 @@ class Provider(OpenDeviceBase):
                     file_name + '/' + 'rtcm_base_' + file_time + '.bin', "wb")
                 self.rtcm_rover_logf = open(
                     file_name + '/' + 'rtcm_rover_' + file_time + '.bin', "wb")
-
+                self.ins_save_logf = open(
+                    file_name + '/' + 'ins_save_' + file_time + '.bin', "wb")
             if set_user_para:
                 result = self.set_params(
                     self.properties["initial"]["userParameters"])
@@ -264,7 +265,13 @@ class Provider(OpenDeviceBase):
                 self.check_predefined_result()
 
             self.save_device_info()
-
+            result = self.get_ins_message()
+            if result['packetType'] == 'success':
+                #print('data = ',bytes(result['data']))
+                self.ins_save_logf.write(bytes(result['data']))
+                self.ins_save_logf.flush() 
+            else:
+                print('can\'t get ins save message')
             # start ntrip client
             if not self.is_upgrading and not self.with_upgrade_error:
                 if self.properties["initial"].__contains__("ntrip") \
@@ -856,6 +863,21 @@ class Provider(OpenDeviceBase):
             yield {'packetType': 'error', 'data': data}
 
         yield {'packetType': 'success', 'data': data}
+    @with_device_message
+    def get_ins_message(self):
+        command_gi = b'\x09\x0a'
+
+        command_line = helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
+            command_gi)
+        result = yield self._message_center.build(command=command_line.actual_command, timeout=3)
+        error = result['error']
+        data = result['data']
+        if error:
+            yield {'packetType': 'error', 'data': {'error': error}}
+
+        yield {'packetType': 'success', 'data': data}
+        #result.send()
 
     @with_device_message
     def reset_params(self, params, *args):  # pylint: disable=unused-argument

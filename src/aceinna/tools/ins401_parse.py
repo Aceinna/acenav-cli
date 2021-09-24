@@ -801,7 +801,7 @@ def do_parse(folder_path, kml_rate, setting_file):
     lib = CDLL(lib_path)
     for root, _, file_name in os.walk(folder_path):
         for fname in file_name:
-            if fname.startswith('user') and fname.endswith('.bin'):
+            if (fname.startswith('user') and fname.endswith('.bin')) or (fname.startswith('ins_save') and fname.endswith('.bin')):
                 # file_path = os.path.join(root, fname)
                 # print_green(
                 #     'Parse is started. File path: {0}'.format(file_path))

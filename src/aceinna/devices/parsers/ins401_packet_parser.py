@@ -208,6 +208,15 @@ def update_parameters_parser(payload, user_configuration):
         error = True
     return data, error
 
+def set_mount_angle_parser(payload, user_configuration):
+    '''
+    uB parser
+    '''
+    error = False
+    data = decode_value('int32', payload[0:4])
+    if data != 0:
+        error = True
+    return data, error
 
 def common_input_parser(payload, user_configuration):
     '''
@@ -331,6 +340,7 @@ def match_command_handler(packet_type):
         b'\x02\xcc': get_parameter_parser,
         b'\x03\xcc': update_parameter_parser,
         b'\x04\xcc': update_parameter_parser,
+        b'\x05\xcc': set_mount_angle_parser,
         b'\x01\x0b': common_input_parser,
         b'\x02\x0b': common_input_parser,
         b'\x09\x0a': common_input_parser

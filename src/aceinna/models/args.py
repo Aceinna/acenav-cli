@@ -40,7 +40,8 @@ class WebserverArgs(KeyValuesArgumentBase):
         'console_log': False,
         'set_user_para': False,
         'ntrip_client': False,
-        'force_bootloader': False
+        'force_bootloader': False,
+        'set_mount_angle': False
     }
 
 

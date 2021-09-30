@@ -19,6 +19,8 @@ from ..decorator import with_device_message
 from ...models import InternalCombineAppParseRule
 from ..parsers.ins401_field_parser import encode_value
 from ...framework.utils.print import (print_yellow, print_green)
+from ...tools.ins401_parse import  (mkdir, INS401Parse)
+from ..ins401.mountangle.mountangle import MountAngle
 from ..upgrade_workers import (
     EthernetSDK9100UpgradeWorker,
     FirmwareUpgradeWorker,
@@ -63,7 +65,10 @@ class Provider(OpenDeviceBase):
         self.connected = True
         self.rtk_log_file_name = ''
         self.rtcm_rover_logf = None
-
+        self.big_mountangle_rvb = []
+        self.ins_save_logf = None
+        self.ins401_log_file_path = None
+        self.mountangle_thread = None
     def prepare_folders(self):
         '''
         Prepare folders for data storage and configuration
@@ -236,6 +241,7 @@ class Provider(OpenDeviceBase):
         set_user_para = self.cli_options and self.cli_options.set_user_para
         self.ntrip_client_enable = self.cli_options and self.cli_options.ntrip_client
         # with_raw_log = self.cli_options and self.cli_options.with_raw_log
+        set_mount_angle = self.cli_options and self.cli_options.set_mount_angle
 
         try:
             if self.data_folder:
@@ -246,13 +252,14 @@ class Provider(OpenDeviceBase):
                 os.mkdir(file_name)
                 self.rtk_log_file_name = file_name
 
-                self.user_logf = open(
-                    file_name + '/' + 'user_' + file_time + '.bin', "wb")
+                self.ins401_log_file_path = file_name + '/' + 'user_' + file_time + '.bin'
+                self.user_logf = open(self.ins401_log_file_path, "wb")
                 self.rtcm_logf = open(
                     file_name + '/' + 'rtcm_base_' + file_time + '.bin', "wb")
                 self.rtcm_rover_logf = open(
                     file_name + '/' + 'rtcm_rover_' + file_time + '.bin', "wb")
-
+                self.ins_save_logf = open(
+                    file_name + '/' + 'ins_save_' + file_time + '.bin', "wb")
             if set_user_para:
                 result = self.set_params(
                     self.properties["initial"]["userParameters"])
@@ -264,7 +271,17 @@ class Provider(OpenDeviceBase):
                 self.check_predefined_result()
 
             self.save_device_info()
-
+            if set_mount_angle:
+                self.set_mount_angle()
+                self.prepare_lib_folder()
+				
+            result = self.get_ins_message()
+            if result['packetType'] == 'success':
+                #print('data = ',bytes(result['data']))
+                self.ins_save_logf.write(bytes(result['data']))
+                self.ins_save_logf.flush() 
+            else:
+                print('can\'t get ins save message')
             # start ntrip client
             if not self.is_upgrading and not self.with_upgrade_error:
                 if self.properties["initial"].__contains__("ntrip") \
@@ -329,6 +346,95 @@ class Provider(OpenDeviceBase):
             self.properties, self.communicator, self.rtcm_logf)
         self.ethernet_rtcm_data_logger.run()
 
+    def set_mountangle_config(self, result = []):
+        # copy contents of app_config under executor path
+        setting_folder_path = os.path.join(resource.get_executor_path(),
+                                                'setting')
+        # Load the openimu.json based on its app
+        product_name = 'INS401'
+        app_name = 'RTK_INS'  # self.app_info['app_name']
+        app_file_path = os.path.join(setting_folder_path, product_name,
+                                        app_name, 'ins401.json')
+
+        with open(app_file_path, 'r') as json_data:
+            properties = json.load(json_data)
+        
+        # update mountangle config file
+        with open(app_file_path, 'w') as json_data: 
+            userParameters = properties["initial"]["userParameters"]   
+            for i in range(3):
+                userParameters[9 + i]['value'] = result[i]
+            
+            json.dump(properties, 
+                    json_data,
+                    indent=4,
+                    ensure_ascii=False)
+
+        # setting params
+        with open(app_file_path, 'r') as json_data:
+            self.properties = json.load(json_data)
+
+        result = self.set_params(self.properties["initial"]["userParameters"])
+        if result['packetType'] == 'success':
+            self.save_config()
+
+        # check saved result
+        self.check_predefined_result()
+
+
+    def save_mountangle_file(self, file_path, folder_path):
+        readlen = 0
+        readsize = 1024
+        f_bin = open(file_path, 'rb')
+        bin_zise = os.path.getsize(file_path)
+
+        if f_bin:        
+            parse = INS401Parse(f_bin, file_path)
+            parse.f_process = open(folder_path + '-process', 'w+')
+
+            while readlen < bin_zise:
+                array_buf = f_bin.read(readsize)
+                for i, new_byte in enumerate(array_buf):
+                    parse.parse_eth_packet(new_byte)
+                
+                readlen = readlen + readsize
+                f_bin.seek(readlen)
+
+            f_bin.close()
+
+    def mountangle_parse_thread(self):       
+        print('processing {0}'.format(self.ins401_log_file_path))
+        
+        path = mkdir(self.ins401_log_file_path)
+
+        temp_file_path, temp_fname = os.path.split(self.ins401_log_file_path)
+        fname, ext = os.path.splitext(temp_fname)
+
+        mountangle = MountAngle(os.getcwd(), path,  path + '/' + fname + '-process')
+        mountangle.mountangle_run()
+
+        while True:
+            if self._message_center._is_stop:
+                time.sleep(1)
+                continue 
+
+            if mountangle.runstatus_mountangle == 0 and mountangle.mountangle_result != []:
+                mountangle.mountangle_set_parameters(self.big_mountangle_rvb)
+
+                rvb = []
+                for i in range(3):
+                    rvb.append(self.big_mountangle_rvb[i] - mountangle.mountangle_result[i])
+                
+                self.set_mountangle_config(rvb)
+                self.save_mountangle_file(self.ins401_log_file_path, mountangle.process_file)
+
+            time.sleep(0.2)
+  
+    def start_mountangle_parse(self):
+        if self.ins401_log_file_path and self.mountangle_thread is None:
+            self.mountangle_thread = threading.Thread(target=self.mountangle_parse_thread)
+            self.mountangle_thread.start()
+
     def on_receive_output_packet(self, packet_type, data, *args, **kwargs):
         '''
         Listener for getting output packet
@@ -340,6 +446,16 @@ class Provider(OpenDeviceBase):
             raw_data = kwargs.get('raw')
             if self.user_logf and raw_data:
                 self.user_logf.write(bytes(raw_data))
+              
+                if packet_type == b'\x07\n':
+                    if self.cli_options and self.cli_options.set_mount_angle:
+                        content = raw_data[8:]
+                                    
+                        for i in range(3):
+                            self.big_mountangle_rvb.append(struct.unpack('<d', bytes(content[7 + 8 * i:15 + 8 * i]))[0])
+
+                        self.start_mountangle_parse()
+
 
     def after_jump_bootloader(self):
         self.communicator.reshake_hand()
@@ -856,6 +972,41 @@ class Provider(OpenDeviceBase):
             yield {'packetType': 'error', 'data': data}
 
         yield {'packetType': 'success', 'data': data}
+    @with_device_message
+    def set_mount_angle(self, *args):  # pylint: disable=unused-argument
+        '''
+        Save configuration
+        '''
+        sC = b'\x05\xcc'
+        command_line = helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
+            sC)
+
+        result = yield self._message_center.build(command=command_line.actual_command,
+                                                  timeout=2)
+
+        data = result['data']
+        error = result['error']
+        print('set mount angle result:', data)
+        if error:
+            yield {'packetType': 'error', 'data': data}
+
+        yield {'packetType': 'success', 'data': data}
+    @with_device_message
+    def get_ins_message(self):
+        command_gi = b'\x09\x0a'
+
+        command_line = helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
+            command_gi)
+        result = yield self._message_center.build(command=command_line.actual_command, timeout=3)
+        error = result['error']
+        data = result['data']
+        if error:
+            yield {'packetType': 'error', 'data': {'error': error}}
+
+        yield {'packetType': 'success', 'data': data}
+        #result.send()
 
     @with_device_message
     def reset_params(self, params, *args):  # pylint: disable=unused-argument
@@ -902,3 +1053,46 @@ class Provider(OpenDeviceBase):
             yield {'packetType': 'error', 'data': {'error': error}}
 
         yield {'packetType': 'success', 'data': data}
+    
+    def prepare_lib_folder(self):
+        executor_path = resource.get_executor_path()
+        lib_folder_name = 'libs'
+
+        # copy contents of libs file under executor path
+        lib_folder_path = os.path.join(
+            executor_path, lib_folder_name)
+
+        if not os.path.isdir(lib_folder_path):
+            os.makedirs(lib_folder_path)
+
+        DR_lib_file = "DR_MountAngle"
+        INS_lib_file = "INS"
+        if os.name == 'nt':  # windows
+            DR_lib_file = "DR_MountAngle.dll"
+            INS_lib_file = "INS.dll"
+
+        DR_lib_path = os.path.join(lib_folder_path, DR_lib_file)
+        if not os.path.isfile(DR_lib_path):
+            lib_content = resource.get_content_from_bundle(
+                lib_folder_name, DR_lib_file)
+            if lib_content is None:
+                raise ValueError('Lib file content is empty')
+
+            with open(DR_lib_path, "wb") as code:
+                code.write(lib_content)
+
+
+        INS_lib_path = os.path.join(lib_folder_path, INS_lib_file)
+        if not os.path.isfile(INS_lib_path):
+            lib_content = resource.get_content_from_bundle(
+                lib_folder_name, INS_lib_file)
+            if lib_content is None:
+                raise ValueError('Lib file content is empty')
+
+            with open(INS_lib_path, "wb") as code:
+                code.write(lib_content)
+        
+        if DR_lib_path and INS_lib_path:
+            return True
+
+        return False

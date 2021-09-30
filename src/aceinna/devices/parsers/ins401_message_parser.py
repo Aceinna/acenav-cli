@@ -15,9 +15,9 @@ PACKET_PAYLOAD_INDEX = 8
 
 # PRIVATE_PACKET_TYPE = ['RE', 'WE', 'UE', 'LE', 'SR']
 INPUT_PACKETS = [b'\x01\xcc', b'\x02\xcc',
-                 b'\x03\xcc', b'\x04\xcc', b'\x01\x0b', b'\x02\x0b']
+                 b'\x03\xcc', b'\x04\xcc', b'\x05\xcc', b'\x01\x0b', b'\x02\x0b', b'\x09\x0a']
 OTHER_OUTPUT_PACKETS = [b'\x01\n', b'\x02\n',
-                        b'\x03\n', b'\x04\n', b'\x05\n', b'\x06\n']
+                        b'\x03\n', b'\x04\n', b'\x05\n', b'\x06\n', b'\x09\x0a' , b'\x07\n']
 
 
 class EthernetMessageParser(MessageParserBase):

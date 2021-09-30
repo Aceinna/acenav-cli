@@ -55,6 +55,7 @@ class INS401Parse:
         self.frame = []
         self.payload_type = 0
         self.payload_len = 0
+        self.sync_pattern_mountangle = collections.deque(2*[0], 2)
         
         if json_setting:
             with open(json_setting) as json_data:
@@ -733,145 +734,146 @@ class INS401Parse:
         return crc
 
 
-def parse_eth_packet(self, data_block):
-    '''
-        0 : # check the sync header
-        1 : # check the packet type
-        2 : # recv the packet length
-        3 : # recv packet payload, check the crc16, check the sync end
-    '''
-    if self.state == 0:
-        self.sync_pattern.append(data_block)
-    else:
-        self.frame.append(data_block)
+    def parse_eth_packet(self, data_block, mountangle):
+        '''
+            0 : # check the sync header
+            1 : # check the packet type
+            2 : # recv the packet length
+            3 : # recv packet payload, check the crc16, check the sync end
+        '''
+        if self.state == 0:
+            self.sync_pattern_mountangle.append(data_block)
+        else:
+            self.frame.append(data_block)
 
-    if self.state == 0:
-        if operator.eq(list(self.sync_pattern), [0x55, 0x55]):
-            self.frame = [0x55, 0x55]
-            self.state = 1
+        if self.state == 0:
+            if operator.eq(list(self.sync_pattern_mountangle), [0x55, 0x55]):
+                self.frame = [0x55, 0x55]
+                self.state = 1
+                
+        elif self.state == 1:
+            if len(self.frame) == 4:
+                # check the packet type or not
+                self.payload_type = self.frame[2] + (self.frame[3] << 8)
+                self.state = 2
 
-    elif self.state == 1:
-        if len(self.frame) == 4:
-            # check the packet type or not
-            self.payload_type = self.frame[2] + (self.frame[3] << 8)
-            self.state = 2
+        elif self.state == 2:
+            if len(self.frame) == 8:
+                self.payload_len = self.frame[4] + (self.frame[5] << 8) + (self.frame[6] << 16) + (self.frame[7] << 24)
+                self.state = 3
 
-    elif self.state == 2:
-        if len(self.frame) == 8:
-            self.payload_len = self.frame[4] + (self.frame[5] << 8) + (self.frame[6] << 16) + (self.frame[7] << 24)
-            self.state = 3
+        elif self.state == 3:
+            if len(self.frame) == 8 + self.payload_len + 2:
+                crc = helper.calc_crc(self.frame[2:-2])
+                if ((crc[0] << 8) + crc[1]) == (self.frame[-2] << 8) + self.frame[-1]:
+                    # find a whole frame
+                    self.eth_rtx_packet(self.payload_type, self.payload_len, self.frame[8:-2], mountangle)
 
-    elif self.state == 3:
-        if len(self.frame) == 8 + self.payload_len + 2:
-            crc = helper.calc_crc(self.frame[2:-2])
-            if crc == (self.frame[-2] << 8) + self.frame[-1]:
-                # find a whole frame
-                self.eth_rtx_packet(self.payload_type, self.payload_len, self.frame[8:-2])
+                self.state = 0
+                self.sync_pattern_mountangle = collections.deque(2*[0], 2)
 
+        else:
             self.state = 0
-            self.sync_pattern = collections.deque(2*[0], 2)
 
-    else:
-        self.state = 0
+    def eth_rtx_packet(self, type, length, content, mountangle):
+        ''' Parse final packet
+        '''
+        if type == 0x0a01: # imu
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIffffff', b)
 
-def eth_rtx_packet(self, type, length, content):
-    ''' Parse final packet
-    '''
-    if type == 0x0a01: # imu
-        b = struct.pack('{0}B'.format(length), *content)
-        data = struct.unpack('<HIffffff', b)
-
-        buffer = format(data[0], '') + ","\
-            + format(data[1]/1000, '11.4f') + "," + "    ,"\
-            + format(data[2], '14.10f') + ","\
-            + format(data[3], '14.10f') + ","\
-            + format(data[4], '14.10f') + ","\
-            + format(data[5], '14.10f') + ","\
-            + format(data[6], '14.10f') + ","\
-            + format(data[7], '14.10f') + "\n"
-        self.f_process.write('$GPIMU,' + buffer)
-
-    elif type == 0x0a02:
-        b = struct.pack('{0}B'.format(length), *content)
-        data = struct.unpack('<HIBdddfffBBffffffff', b)
-
-        buffer = '$GPGNSS,' + format(data[0], '') + ","\
-            + format(data[1]/1000, '11.4f') + ","\
-            + format(data[3], '14.9f') + ","\
-            + format(data[4], '14.9f') + ","\
-            + format(data[5], '10.4f') + ","\
-            + format(data[6], '10.4f') + ","\
-            + format(data[7], '10.4f') + ","\
-            + format(data[8], '10.4f') + ","\
-            + format(data[2], '3') + "\n"
-        self.f_process.write(buffer)
-
-        horizontal_speed = math.sqrt(data[13] * data[13] + data[14] * data[14])
-        track_over_ground = math.atan2(data[14], data[13]) * (57.295779513082320)
-        buffer = '$GPVEL,' + format(data[0], '') + ","\
-            + format(data[1]/1000, '11.4f') + ","\
-            + format(horizontal_speed, '10.4f') + ","\
-            + format(track_over_ground, '10.4f') + ","\
-            + format(data[15], '10.4f') + "\n"
-        self.f_process.write(buffer)
-
-    elif type == 0x0a03:
-        b = struct.pack('{0}B'.format(length), *content)
-        data = struct.unpack('<HIBBdddfffffffffffffffffff', b)
-
-        if (data[1]%100) < 10:
             buffer = format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + "," + "    ,"\
+                + format(data[2], '14.10f') + ","\
+                + format(data[3], '14.10f') + ","\
+                + format(data[4], '14.10f') + ","\
+                + format(data[5], '14.10f') + ","\
+                + format(data[6], '14.10f') + ","\
+                + format(data[7], '14.10f') + "\n"
+            self.f_process.write('$GPIMU,' + buffer)
+
+        elif type == 0x0a02:
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIBdddfffBBffffffff', b)
+
+            buffer = '$GPGNSS,' + format(data[0], '') + ","\
                 + format(data[1]/1000, '11.4f') + ","\
+                + format(data[3], '14.9f') + ","\
                 + format(data[4], '14.9f') + ","\
-                + format(data[5], '14.9f') + ","\
+                + format(data[5], '10.4f') + ","\
                 + format(data[6], '10.4f') + ","\
                 + format(data[7], '10.4f') + ","\
                 + format(data[8], '10.4f') + ","\
-                + format(data[9], '10.4f') + ","\
-                + format(data[12], '10.4f') + ","\
-                + format(data[13], '10.4f') + ","\
-                + format(data[14], '10.4f') + ","\
-                + format(data[3], '3')
-            self.f_process.write('$GPINS,' + buffer + "\n")
+                + format(data[2], '3') + "\n"
+            self.f_process.write(buffer)
 
-            self.mountangle.process_live_data(data)
-            # ret = self.mountangle.process_live_data(data)
-            # if ret == 1:
-            #     self.f_process.close()
-            #     self.mountangle.mountangle_thread()
-            #     self.f_process = open(self.parsefile[0:-1] + '-process', 'a')
+            horizontal_speed = math.sqrt(data[13] * data[13] + data[14] * data[14])
+            track_over_ground = math.atan2(data[14], data[13]) * (57.295779513082320)
+            buffer = '$GPVEL,' + format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + ","\
+                + format(horizontal_speed, '10.4f') + ","\
+                + format(track_over_ground, '10.4f') + ","\
+                + format(data[15], '10.4f') + "\n"
+            self.f_process.write(buffer)
 
-            if abs(data[5]*data[4]) > 0.00000001:
-                self.insdata.append(data)
+        elif type == 0x0a03:
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIBBdddfffffffffffffffffff', b)
 
-    elif type == 0x0a04:
-        b = struct.pack('{0}B'.format(length), *content)
-        data = struct.unpack('<HIBdBQ', b)
+            if (data[1]%100) < 10:
+                buffer = format(data[0], '') + ","\
+                    + format(data[1]/1000, '11.4f') + ","\
+                    + format(data[4], '14.9f') + ","\
+                    + format(data[5], '14.9f') + ","\
+                    + format(data[6], '10.4f') + ","\
+                    + format(data[7], '10.4f') + ","\
+                    + format(data[8], '10.4f') + ","\
+                    + format(data[9], '10.4f') + ","\
+                    + format(data[12], '10.4f') + ","\
+                    + format(data[13], '10.4f') + ","\
+                    + format(data[14], '10.4f') + ","\
+                    + format(data[3], '3')
+                self.f_process.write('$GPINS,' + buffer + "\n")
 
-        buffer = format(data[0], '') + ","\
-            + format(data[1]/1000, '11.4f') + ","\
-            + format(data[2], '3') + ","\
-            + format(data[3], '10.4f') + ","\
-            + format(data[4], '3') + ","\
-            + format(data[5], '16') + "\n"
+                mountangle.process_live_data(data)
 
-        self.f_process.write('$GPODO,' + buffer)
-    
-    elif type == 0x0a05:
-        b = struct.pack('{0}B'.format(length), *content)
-        data = struct.unpack('<HIIff', b)
+                # ret = self.mountangle.process_live_data(data)
+                # if ret == 1:
+                #     self.f_process.close()
+                #     self.mountangle.mountangle_thread()
+                #     self.f_process = open(self.parsefile[0:-1] + '-process', 'a')
 
-        buffer = format(data[0], '') + ","\
-            + format(data[1]/1000, '11.4f') + ","\
-            + format(data[2], '16') + ","\
-            + format(data[3], '10.4') + ","\
-            + format(data[4], '10.4') + "\n"
+                if abs(data[5]*data[4]) > 0.00000001:
+                    self.insdata.append(data)
 
-    elif type == 0x0a06: # rover rtcm
-        pass
+        elif type == 0x0a04:
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIBdBQ', b)
 
-    elif type == 0x0a07: # corr imu
-        pass
+            buffer = format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + ","\
+                + format(data[2], '3') + ","\
+                + format(data[3], '10.4f') + ","\
+                + format(data[4], '3') + ","\
+                + format(data[5], '16') + "\n"
+
+            self.f_process.write('$GPODO,' + buffer)
+        
+        elif type == 0x0a05:
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIIff', b)
+
+            buffer = format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + ","\
+                + format(data[2], '16') + ","\
+                + format(data[3], '10.4') + ","\
+                + format(data[4], '10.4') + "\n"
+
+        elif type == 0x0a06: # rover rtcm
+            pass
+
+        elif type == 0x0a07: # corr imu
+            pass
 
 
 def mkdir(file_path):

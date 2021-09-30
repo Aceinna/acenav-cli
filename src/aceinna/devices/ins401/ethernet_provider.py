@@ -69,6 +69,7 @@ class Provider(OpenDeviceBase):
         self.ins_save_logf = None
         self.ins401_log_file_path = None
         self.mountangle_thread = None
+        self.mountangle= None
     def prepare_folders(self):
         '''
         Prepare folders for data storage and configuration
@@ -390,12 +391,13 @@ class Provider(OpenDeviceBase):
 
         if f_bin:        
             parse = INS401Parse(f_bin, file_path)
-            parse.f_process = open(folder_path + '-process', 'w+')
+            if parse.f_process is None:
+                parse.f_process = open(folder_path + '-process', 'w+')
 
             while readlen < bin_zise:
                 array_buf = f_bin.read(readsize)
                 for i, new_byte in enumerate(array_buf):
-                    parse.parse_eth_packet(new_byte)
+                    parse.parse_eth_packet(new_byte, self.mountangle)
                 
                 readlen = readlen + readsize
                 f_bin.seek(readlen)
@@ -403,32 +405,34 @@ class Provider(OpenDeviceBase):
             f_bin.close()
 
     def mountangle_parse_thread(self):       
-        print('processing {0}'.format(self.ins401_log_file_path))
+        print('processing {0}\n'.format(self.ins401_log_file_path))
         
         path = mkdir(self.ins401_log_file_path)
 
         temp_file_path, temp_fname = os.path.split(self.ins401_log_file_path)
         fname, ext = os.path.splitext(temp_fname)
 
-        mountangle = MountAngle(os.getcwd(), path,  path + '/' + fname + '-process')
-        mountangle.mountangle_run()
+        self.mountangle = MountAngle(os.getcwd(), path,  path + '/' + fname + '-process')
+        self.mountangle.mountangle_run()
 
         while True:
             if self._message_center._is_stop:
                 time.sleep(1)
                 continue 
 
-            if mountangle.runstatus_mountangle == 0 and mountangle.mountangle_result != []:
-                mountangle.mountangle_set_parameters(self.big_mountangle_rvb)
-
+            self.mountangle.mountangle_set_parameters(self.big_mountangle_rvb)
+            self.save_mountangle_file(self.ins401_log_file_path, self.mountangle.process_file)
+            
+            print(self.mountangle.mountangle_result, self.big_mountangle_rvb)
+            if self.mountangle.runstatus_mountangle == 0 and self.mountangle.mountangle_result != []:
                 rvb = []
                 for i in range(3):
-                    rvb.append(self.big_mountangle_rvb[i] - mountangle.mountangle_result[i])
+                    rvb.append(self.big_mountangle_rvb[i] - self.mountangle.mountangle_result[i])
                 
                 self.set_mountangle_config(rvb)
-                self.save_mountangle_file(self.ins401_log_file_path, mountangle.process_file)
 
-            time.sleep(0.2)
+
+            time.sleep(0.1)
   
     def start_mountangle_parse(self):
         if self.ins401_log_file_path and self.mountangle_thread is None:
@@ -1068,8 +1072,8 @@ class Provider(OpenDeviceBase):
         DR_lib_file = "DR_MountAngle"
         INS_lib_file = "INS"
         if os.name == 'nt':  # windows
-            DR_lib_file = "DR_MountAngle.dll"
-            INS_lib_file = "INS.dll"
+            DR_lib_file = "DR_MountAngle.exe"
+            INS_lib_file = "INS.exe"
 
         DR_lib_path = os.path.join(lib_folder_path, DR_lib_file)
         if not os.path.isfile(DR_lib_path):

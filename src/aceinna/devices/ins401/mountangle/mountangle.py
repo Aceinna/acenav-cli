@@ -33,7 +33,7 @@ class MountAngle:
         self.mountangle_result = []
 
         self.stop = 0
-        self.mountangle_thread = None
+        self.mountangle_thread_handle = None
 
         local_time = time.localtime()
         formatted_dir_time = time.strftime("%Y%m%d_%H%M%S", local_time)
@@ -66,14 +66,11 @@ class MountAngle:
     def mountangle_set_parameters(self, rvb = []):
         # postprocess config file in /mountangle/, user need to set configuration in this file
         # set process file in post config file
-        self.mountangle_big_result.extend(rvb)
-
         if os.name == 'nt':
             file_path = os.path.join(self.executor_path, 'src\\aceinna\\devices\\ins401\\mountangle')
         else:
             file_path = os.path.join(self.executor_path, 'src/aceinna/devices/ins401/mountangle')
 
-        print(file_path)
         self.ins_postconfig_filename = os.path.join(file_path, 'content_aceinna_config.txt')
         with open(self.ins_postconfig_filename, 'r') as postconfigfile:
             postconfig = json.load(postconfigfile)
@@ -87,10 +84,10 @@ class MountAngle:
         self.mountangle_logger.debug("set postconfig filename {0} in {1}".format(self.process_file, self.ins_postconfig_filename))
 
     def mountangle_run(self):
-        if self.mountangle_thread is None:
+        if self.mountangle_thread_handle is None:
             self.mountangle_logger.info('[mountangle] initial ok and can drive the car')
-            self.mountangle_thread = threading.Thread(target=self.mountangle_thread)
-            self.mountangle_thread.start()
+            self.mountangle_thread_handle = threading.Thread(target=self.mountangle_thread)
+            self.mountangle_thread_handle.start()
         
 
     def mountangle_calc(self, starttime, endtime):
@@ -101,18 +98,18 @@ class MountAngle:
         lib_folder_path = os.path.join(os.getcwd(),'libs')
         # self.mountangle_logger.info('[mountangle] calc {0} {1}'.format(starttime, endtime))
 
-        # call INS.dll to post process and out ima data file
+        # call INS.exe to post process and out ima data file
         if platform.system().lower() == 'windows':
-            execmd = lib_folder_path + "\\"+"INS.dll " + self.ins_postconfig_filename + " 0"
+            execmd = lib_folder_path + "\\"+"INS.exe " + self.ins_postconfig_filename + " 0"
         elif platform.system().lower() == 'linux':
             execmd = lib_folder_path + "/"+"INS " + self.ins_postconfig_filename + " 0"
         self.mountangle_logger.debug('[mountangle] {0}'.format(execmd))
         r_v = os.system(execmd)
 
-        # call DR_MountAngle.dll process ima data 
+        # call DR_MountAngle.exe process ima data 
         imainputfile = self.process_file + '_ins.txt'    # mountangle input file
         if platform.system().lower() == 'windows':
-            execmd = lib_folder_path + "\\"+"DR_MountAngle.dll " + imainputfile + " " + starttime + " " + endtime
+            execmd = lib_folder_path + "\\"+"DR_MountAngle.exe " + imainputfile + " " + starttime + " " + endtime
         if platform.system().lower() == 'linux':
             execmd = lib_folder_path + "/"+"DR_MountAngle " + imainputfile + " " + starttime + " " + endtime
         self.mountangle_logger.debug('[mountangle] {0}'.format(execmd))
@@ -219,6 +216,7 @@ class MountAngle:
                         (self.last_drive_res['type'] == 14 and drive_res['type'] == 15)):
                         self.drive_res = drive_res
                         self.runstatus_mountangle = 1
+                        print('runstatus_mountangle:\n', self.runstatus_mountangle)
                         
                 self.last_drive_res = copy.deepcopy(drive_res)
     

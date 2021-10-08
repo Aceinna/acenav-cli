@@ -392,7 +392,7 @@ class Provider(OpenDeviceBase):
         if f_bin:        
             parse = INS401Parse(f_bin, file_path)
             if parse.f_process is None:
-                parse.f_process = open(folder_path + '-process', 'w+')
+                parse.f_process = open(folder_path, 'w+')
 
             while readlen < bin_zise:
                 array_buf = f_bin.read(readsize)
@@ -426,13 +426,16 @@ class Provider(OpenDeviceBase):
             print(self.mountangle.mountangle_result, self.big_mountangle_rvb)
             if self.mountangle.runstatus_mountangle == 0 and self.mountangle.mountangle_result != []:
                 rvb = []
+                result = list(self.mountangle.mountangle_result[0].values())
+                self.mountangle.mountangle_result = []
+                print('result:', result)
                 for i in range(3):
-                    rvb.append(self.big_mountangle_rvb[i] - self.mountangle.mountangle_result[i])
+                    rvb.append(self.big_mountangle_rvb[0] - result[2 + i])
                 
+                print('rvb:', rvb)
                 self.set_mountangle_config(rvb)
 
-
-            time.sleep(0.1)
+            time.sleep(0.01)
   
     def start_mountangle_parse(self):
         if self.ins401_log_file_path and self.mountangle_thread is None:

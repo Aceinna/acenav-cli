@@ -7,11 +7,13 @@ import platform
 import threading
 import math
 import logging
-from numpy import loadtxt
-# import numpy as np
-# from numpy.core.defchararray import count
-from .drivestatus import DriveStatus
+#import matplotlib.pyplot as plt
+import numpy as np
+from numpy.core.defchararray import count
+from ...ins401.mountangle.drivestatus import DriveStatus
 import copy
+from ctypes import *
+from win32api import FreeLibrary
 
 class MountAngle:
     def __init__(self, executor_path, data_path, process_file):
@@ -98,22 +100,38 @@ class MountAngle:
         lib_folder_path = os.path.join(os.getcwd(),'libs')
         # self.mountangle_logger.info('[mountangle] calc {0} {1}'.format(starttime, endtime))
 
-        # call INS.exe to post process and out ima data file
-        if platform.system().lower() == 'windows':
-            execmd = lib_folder_path + "\\"+"INS.exe " + self.ins_postconfig_filename + " 0"
-        elif platform.system().lower() == 'linux':
-            execmd = lib_folder_path + "/"+"INS " + self.ins_postconfig_filename + " 0"
-        self.mountangle_logger.debug('[mountangle] {0}'.format(execmd))
-        r_v = os.system(execmd)
+        # # call INS.exe to post process and out ima data file
+        # if platform.system().lower() == 'windows':
+        #     execmd = "INS.exe " + self.ins_postconfig_filename + " 0"
+        # elif platform.system().lower() == 'linux':
+        #     execmd = "INS " + self.ins_postconfig_filename + " 0"
+        # self.mountangle_logger.debug('[mountangle] {0}'.format(execmd))
+        # r_v = os.system(execmd)
 
-        # call DR_MountAngle.exe process ima data 
-        imainputfile = self.process_file + '_ins.txt'    # mountangle input file
-        if platform.system().lower() == 'windows':
-            execmd = lib_folder_path + "\\"+"DR_MountAngle.exe " + imainputfile + " " + starttime + " " + endtime
-        if platform.system().lower() == 'linux':
-            execmd = lib_folder_path + "/"+"DR_MountAngle " + imainputfile + " " + starttime + " " + endtime
+        # # call DR_MountAngle.exe process ima data 
+        # imainputfile = self.process_file + '_ins.txt'    # mountangle input file
+        # if platform.system().lower() == 'windows':
+        #     execmd = "DR_MountAngle.exe " + imainputfile + " " + starttime + " " + endtime
+        # if platform.system().lower() == 'linux':
+        #     execmd = "DR_MountAngle " + imainputfile + " " + starttime + " " + endtime
+        # self.mountangle_logger.debug('[mountangle] {0}'.format(execmd))
+        # r_v = os.system(execmd)
+
+        INS_DLL = os.path.join(lib_folder_path,'INS.dll')
+        CINSDLL = CDLL(INS_DLL)
+        CINSDLL.ins_start(self.ins_postconfig_filename.encode('utf-8'), 0)
+        r_v = execmd = "INS " + self.ins_postconfig_filename + " 0"
         self.mountangle_logger.debug('[mountangle] {0}'.format(execmd))
-        r_v = os.system(execmd)
+        FreeLibrary(CINSDLL._handle)
+
+        imainputfile = self.process_file + '_ins.txt'    # mountangle input file
+        Dr_MountAngle_DLL = os.path.join(lib_folder_path,'DR_MountAngle.dll')
+        DRMADLL = CDLL(Dr_MountAngle_DLL)
+        r_v = DRMADLL.dr_mountangle_start(imainputfile.encode('utf-8'), starttime.encode('utf-8'), endtime.encode('utf-8'))
+        execmd = "DR_MountAngle " + imainputfile + " " + starttime + " " + endtime
+        self.mountangle_logger.debug('[mountangle] {0}'.format(execmd))
+        FreeLibrary(DRMADLL._handle)
+
         if r_v == 0:
             index = imainputfile.rfind('.')
             if index != -1:
@@ -124,7 +142,7 @@ class MountAngle:
             data = f_ima.readlines()
             for i in range(0, len(data)):
                 data[i] = data[i].replace(',', '')
-            ima_dataarray = loadtxt(data)    # ima_dataarray is the result data
+            ima_dataarray = np.loadtxt(data)    # ima_dataarray is the result data
             result = {
                 "starttime" : starttime,
                 "endtime" : endtime,
@@ -205,8 +223,8 @@ class MountAngle:
             if self.stop:
                 return
 
-    def process_live_data(self, data):
-        self.drivestatus.addrawdata(data)
+    def process_live_data(self, data, type):
+        self.drivestatus.addrawdata(data, type)
         drive_res = self.drivestatus.getresult()
         if drive_res != None:
             self.mountangle_logger.debug('{0} {1}'.format(data[1]/1000, drive_res))

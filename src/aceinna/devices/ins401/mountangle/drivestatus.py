@@ -199,22 +199,39 @@ class DriveStatus:
         return estcheckdata
 
 
-    def addrawdata(self, rawdata):
-        self.curinsresult = {
-            'week' : rawdata[0],
-            'timestamp': rawdata[1]/1000,
-            'insstatus': rawdata[2],
-            'inspostype': rawdata[3],
-            'lat' : rawdata[4],
-            'lon' : rawdata[5],
-            'hight' : rawdata[6],
-            'vn' : rawdata[7],
-            've' : rawdata[8],
-            'vd' : rawdata[9],
-            'roll' : rawdata[12],
-            'pitch' : rawdata[13],
-            'heading' : rawdata[14]
-        }
+    def addrawdata(self, rawdata, type):
+        if type == 0:
+            self.curinsresult = {
+                'week' : rawdata[0],
+                'timestamp': rawdata[1]/1000,
+                'insstatus': rawdata[2],
+                'inspostype': rawdata[3],
+                'lat' : rawdata[4],
+                'lon' : rawdata[5],
+                'hight' : rawdata[6],
+                'vn' : rawdata[7],
+                've' : rawdata[8],
+                'vd' : rawdata[9],
+                'roll' : rawdata[10],
+                'pitch' : rawdata[11],
+                'heading' : rawdata[12]
+            }
+        elif type == 1:
+            self.curinsresult = {
+                'week' : rawdata[0],
+                'timestamp': rawdata[1]/1000,
+                'insstatus': rawdata[2],
+                'inspostype': rawdata[3],
+                'lat' : rawdata[4],
+                'lon' : rawdata[5],
+                'hight' : rawdata[6],
+                'vn' : rawdata[7],
+                've' : rawdata[8],
+                'vd' : rawdata[9],
+                'roll' : rawdata[12],
+                'pitch' : rawdata[13],
+                'heading' : rawdata[14]
+            }
 
         if fmod(self.curinsresult['timestamp'], 1) < 0.01:
             if self.lastinsresult != None:

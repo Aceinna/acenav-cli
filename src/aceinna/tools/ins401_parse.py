@@ -835,7 +835,7 @@ class INS401Parse:
                     + format(data[3], '3')
                 self.f_process.write('$GPINS,' + buffer + "\n")
 
-                mountangle.process_live_data(data)
+                mountangle.process_live_data(data, 1)
 
                 # ret = self.mountangle.process_live_data(data)
                 # if ret == 1:

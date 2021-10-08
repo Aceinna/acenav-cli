@@ -462,6 +462,16 @@ class Provider(OpenDeviceBase):
                             self.big_mountangle_rvb.append(struct.unpack('<d', bytes(content[7 + 8 * i:15 + 8 * i]))[0])
 
                         self.start_mountangle_parse()
+            
+                # mount angle unit test
+                # if packet_type == b'\x03\n':
+                #     if self.cli_options and self.cli_options.set_mount_angle:
+        
+                #         for i in range(3):
+                #             self.big_mountangle_rvb.append(0x00)
+                #         self.ins401_log_file_path = 'D:\\Develop\\projects\\python_driver\\acenav\\mount_angle\\mountangle_post\\data\\user_2021_08_27_14_20_11.bin'
+
+                #         self.start_mountangle_parse()
 
 
     def after_jump_bootloader(self):
@@ -1075,8 +1085,8 @@ class Provider(OpenDeviceBase):
         DR_lib_file = "DR_MountAngle"
         INS_lib_file = "INS"
         if os.name == 'nt':  # windows
-            DR_lib_file = "DR_MountAngle.exe"
-            INS_lib_file = "INS.exe"
+            DR_lib_file = "DR_MountAngle.dll"
+            INS_lib_file = "INS.dll"
 
         DR_lib_path = os.path.join(lib_folder_path, DR_lib_file)
         if not os.path.isfile(DR_lib_path):

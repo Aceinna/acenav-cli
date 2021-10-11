@@ -279,7 +279,7 @@ class Provider(OpenDeviceBase):
             result = self.get_ins_message()
             if result['packetType'] == 'success':
                 #print('data = ',bytes(result['data']))
-                self.ins_save_logf.write(bytes(result['data']))
+                self.ins_save_logf.write(bytes(result['raw_data']))
                 self.ins_save_logf.flush() 
             else:
                 print('can\'t get ins save message')
@@ -1019,11 +1019,11 @@ class Provider(OpenDeviceBase):
         result = yield self._message_center.build(command=command_line.actual_command, timeout=3)
         error = result['error']
         data = result['data']
+        raw_data = result['raw']
         if error:
-            yield {'packetType': 'error', 'data': {'error': error}}
+            yield {'packetType': 'error', 'data': {'error': error}, 'raw_data': {'error': error}}
 
-        yield {'packetType': 'success', 'data': data}
-        #result.send()
+        yield {'packetType': 'success', 'data': data, 'raw_data': raw_data}
 
     @with_device_message
     def reset_params(self, params, *args):  # pylint: disable=unused-argument

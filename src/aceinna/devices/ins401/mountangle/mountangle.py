@@ -82,7 +82,7 @@ class MountAngle:
             postconfig['rotationRBV'] = rvb
             postconfigfile.seek(0)
             postconfigfile.truncate()
-            json.dump(postconfig, postconfigfile)
+            json.dump(postconfig, postconfigfile, indent=4, ensure_ascii=False)
         self.mountangle_logger.debug("set postconfig filename {0} in {1}".format(self.process_file, self.ins_postconfig_filename))
 
     def mountangle_run(self):

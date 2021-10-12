@@ -65,7 +65,7 @@ class Provider(OpenDeviceBase):
         self.connected = True
         self.rtk_log_file_name = ''
         self.rtcm_rover_logf = None
-        self.big_mountangle_rvb = []
+        self.big_mountangle_rvb = [0, 0, 0]
         self.ins_save_logf = None
         self.ins401_log_file_path = None
         self.mountangle_thread = None
@@ -423,7 +423,7 @@ class Provider(OpenDeviceBase):
             self.mountangle.mountangle_set_parameters(self.big_mountangle_rvb)
             self.save_mountangle_file(self.ins401_log_file_path, self.mountangle.process_file)
             
-            print(self.mountangle.mountangle_result, self.big_mountangle_rvb)
+            print('mountangle_result:', self.mountangle.mountangle_result, 'big_mountangle_rvb:', self.big_mountangle_rvb)
             if self.mountangle.runstatus_mountangle == 0 and self.mountangle.mountangle_result != []:
                 rvb = []
                 result = list(self.mountangle.mountangle_result[0].values())
@@ -457,10 +457,11 @@ class Provider(OpenDeviceBase):
                 if packet_type == b'\x07\n':
                     if self.cli_options and self.cli_options.set_mount_angle:
                         content = raw_data[8:]
-                                    
+                        big_mountangle_rvb = []            
                         for i in range(3):
-                            self.big_mountangle_rvb.append(struct.unpack('<d', bytes(content[7 + 8 * i:15 + 8 * i]))[0])
+                            big_mountangle_rvb.append(struct.unpack('<d', bytes(content[7 + 8 * i:15 + 8 * i]))[0])
 
+                        self.big_mountangle_rvb = big_mountangle_rvb
                         self.start_mountangle_parse()
             
                 # mount angle unit test

@@ -18,8 +18,6 @@ from win32api import FreeLibrary
 class MountAngle:
     def __init__(self, executor_path, data_path, process_file):
 
-        # self.process_data = ''
-
         self.executor_path = executor_path
         self.data_path = data_path
         self.process_file = process_file
@@ -31,8 +29,9 @@ class MountAngle:
         self.drivestatus = DriveStatus()
         self.last_drive_res = None
         self.runstatus_mountangle = 0
-
         self.mountangle_result = []
+        self.mountangle_estimate_result = []
+        self.out_result_flag = 0
 
         self.stop = 0
         self.mountangle_thread_handle = None
@@ -77,13 +76,38 @@ class MountAngle:
         with open(self.ins_postconfig_filename, 'r') as postconfigfile:
             postconfig = json.load(postconfigfile)
         
-        with open(self.ins_postconfig_filename, 'w') as postconfigfile:
-            postconfig['procfileNme'] = self.process_file
+            setting_folder_path = os.path.join(self.executor_path, 'setting')
+            # Load the openimu.json based on its app
+            product_name = 'INS401'
+            app_name = 'RTK_INS'  # self.app_info['app_name']
+            app_file_path = os.path.join(setting_folder_path, product_name,
+                                            app_name, 'ins401.json')
+            with open(app_file_path, 'r') as json_data:
+                properties = json.load(json_data)
+                # search paramId in device json file, search key is parameter name, don't change the parameter name in json file
+                gnssLeverArm_paramId = next(
+                    (x['paramId'] for x in properties['userConfiguration'] if x['name'] == 'gnss lever arm x'), None)
+                vrpLeverArm_paramId = next(
+                    (x['paramId'] for x in properties['userConfiguration'] if x['name'] == 'vrp lever arm x'), None)
+                userLeverArm_paramId = next(
+                    (x['paramId'] for x in properties['userConfiguration'] if x['name'] == 'user lever arm x'), None)
+                #print('gnssLeverArm_paramId:', gnssLeverArm_paramId, 'vrpLeverArm_paramId:', vrpLeverArm_paramId, 'userLeverArm_paramId:', userLeverArm_paramId)
+   
+                # use parameter value in post config file
+                for i in range(3):
+                    postconfig['priLeverArm'][i] = properties["initial"]["userParameters"][gnssLeverArm_paramId - 1 + i]["value"]
+                    postconfig['odoLeverarm'][i] = properties["initial"]["userParameters"][vrpLeverArm_paramId - 1 + i]["value"]
+                    postconfig['userLeverArm'][i] = properties["initial"]["userParameters"][userLeverArm_paramId - 1 + i]["value"]
+
             postconfig['rotationRBV'] = rvb
+            postconfig['procfileNme'] = self.process_file
+
+        with open(self.ins_postconfig_filename, 'w') as postconfigfile:
             postconfigfile.seek(0)
             postconfigfile.truncate()
             json.dump(postconfig, postconfigfile, indent=4, ensure_ascii=False)
         self.mountangle_logger.debug("set postconfig filename {0} in {1}".format(self.process_file, self.ins_postconfig_filename))
+        
 
     def mountangle_run(self):
         if self.mountangle_thread_handle is None:
@@ -210,6 +234,15 @@ class MountAngle:
                         pitch = pitch / len(res_valid)
                         heading = heading / len(res_valid)
 
+                        estimate_result = []
+                        
+                        estimate_result.append(roll) 
+                        estimate_result.append(pitch) 
+                        estimate_result.append(heading) 
+
+                        self.mountangle_estimate_result = estimate_result 
+                        self.out_result_flag = 1
+
                         self.mountangle_logger.info('[mountangle] calc result [roll:{0} pitch:{1} heading:{2}]'.format(roll, pitch, heading))
                         break
 
@@ -219,7 +252,7 @@ class MountAngle:
         self.mountangle_logger.debug("[mountangle] result:{0}".format(self.mountangle_result))
 
         while True:
-            time.sleep(1)
+            time.sleep(5)
             if self.stop:
                 return
 

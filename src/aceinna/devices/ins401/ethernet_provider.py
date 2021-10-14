@@ -70,6 +70,7 @@ class Provider(OpenDeviceBase):
         self.ins401_log_file_path = None
         self.mountangle_thread = None
         self.mountangle= None
+        self.f_process = None
     def prepare_folders(self):
         '''
         Prepare folders for data storage and configuration
@@ -346,7 +347,7 @@ class Provider(OpenDeviceBase):
         self.ethernet_rtcm_data_logger = EthernetRTCMDataLogger(
             self.properties, self.communicator, self.rtcm_logf)
         self.ethernet_rtcm_data_logger.run()
-
+        
     def set_mountangle_config(self, result = []):
         # copy contents of app_config under executor path
         setting_folder_path = os.path.join(resource.get_executor_path(),
@@ -358,15 +359,15 @@ class Provider(OpenDeviceBase):
                                         app_name, 'ins401.json')
 
         with open(app_file_path, 'r') as json_data:
-            properties = json.load(json_data)
+            self.properties = json.load(json_data)
         
         # update mountangle config file
         with open(app_file_path, 'w') as json_data: 
-            userParameters = properties["initial"]["userParameters"]   
+            userParameters = self.properties["initial"]["userParameters"]   
             for i in range(3):
                 userParameters[9 + i]['value'] = result[i]
             
-            json.dump(properties, 
+            json.dump(self.properties, 
                     json_data,
                     indent=4,
                     ensure_ascii=False)
@@ -383,26 +384,96 @@ class Provider(OpenDeviceBase):
         self.check_predefined_result()
 
 
-    def save_mountangle_file(self, file_path, folder_path):
-        readlen = 0
-        readsize = 1024
-        f_bin = open(file_path, 'rb')
-        bin_zise = os.path.getsize(file_path)
+    def save_mountangle_file(self, type, length, content):
+        ''' Parse final packet
+        '''
+        if type == b'\x01\n': # imu
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIffffff', b)
 
-        if f_bin:        
-            parse = INS401Parse(f_bin, file_path)
-            if parse.f_process is None:
-                parse.f_process = open(folder_path, 'w+')
+            buffer = format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + "," + "    ,"\
+                + format(data[2], '14.10f') + ","\
+                + format(data[3], '14.10f') + ","\
+                + format(data[4], '14.10f') + ","\
+                + format(data[5], '14.10f') + ","\
+                + format(data[6], '14.10f') + ","\
+                + format(data[7], '14.10f') + "\n"
+            self.f_process.write('$GPIMU,' + buffer)
 
-            while readlen < bin_zise:
-                array_buf = f_bin.read(readsize)
-                for i, new_byte in enumerate(array_buf):
-                    parse.parse_eth_packet(new_byte, self.mountangle)
-                
-                readlen = readlen + readsize
-                f_bin.seek(readlen)
+        elif type == b'\x02\n':
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIBdddfffBBffffffff', b)
 
-            f_bin.close()
+            buffer = '$GPGNSS,' + format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + ","\
+                + format(data[3], '14.9f') + ","\
+                + format(data[4], '14.9f') + ","\
+                + format(data[5], '10.4f') + ","\
+                + format(data[6], '10.4f') + ","\
+                + format(data[7], '10.4f') + ","\
+                + format(data[8], '10.4f') + ","\
+                + format(data[2], '3') + "\n"
+            self.f_process.write(buffer)
+
+            horizontal_speed = math.sqrt(data[13] * data[13] + data[14] * data[14])
+            track_over_ground = math.atan2(data[14], data[13]) * (57.295779513082320)
+            buffer = '$GPVEL,' + format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + ","\
+                + format(horizontal_speed, '10.4f') + ","\
+                + format(track_over_ground, '10.4f') + ","\
+                + format(data[15], '10.4f') + "\n"
+            self.f_process.write(buffer)
+
+        elif type == b'\x03\n':
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIBBdddfffffffffffffffffff', b)
+
+            if (data[1]%100) < 10:
+                buffer = format(data[0], '') + ","\
+                    + format(data[1]/1000, '11.4f') + ","\
+                    + format(data[4], '14.9f') + ","\
+                    + format(data[5], '14.9f') + ","\
+                    + format(data[6], '10.4f') + ","\
+                    + format(data[7], '10.4f') + ","\
+                    + format(data[8], '10.4f') + ","\
+                    + format(data[9], '10.4f') + ","\
+                    + format(data[12], '10.4f') + ","\
+                    + format(data[13], '10.4f') + ","\
+                    + format(data[14], '10.4f') + ","\
+                    + format(data[3], '3')
+                self.f_process.write('$GPINS,' + buffer + "\n")
+
+                self.mountangle.process_live_data(data, 1)
+
+        elif type == b'\x04\n':
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIBdBQ', b)
+
+            buffer = format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + ","\
+                + format(data[2], '3') + ","\
+                + format(data[3], '10.4f') + ","\
+                + format(data[4], '3') + ","\
+                + format(data[5], '16') + "\n"
+
+            self.f_process.write('$GPODO,' + buffer)
+        
+        elif type == b'\x05\n':
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIIff', b)
+
+            buffer = format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + ","\
+                + format(data[2], '16') + ","\
+                + format(data[3], '10.4') + ","\
+                + format(data[4], '10.4') + "\n"
+
+        elif type == b'\x06\n': # rover rtcm
+            pass
+
+        elif type == b'\x07\n': # corr imu
+            pass
 
     def mountangle_parse_thread(self):       
         print('processing {0}\n'.format(self.ins401_log_file_path))
@@ -411,8 +482,10 @@ class Provider(OpenDeviceBase):
 
         temp_file_path, temp_fname = os.path.split(self.ins401_log_file_path)
         fname, ext = os.path.splitext(temp_fname)
+        self.f_process = open(path + '/' + fname + '-process', 'w+')
 
         self.mountangle = MountAngle(os.getcwd(), path,  path + '/' + fname + '-process')
+        self.mountangle.mountangle_set_parameters(self.big_mountangle_rvb)
         self.mountangle.mountangle_run()
 
         while True:
@@ -420,22 +493,20 @@ class Provider(OpenDeviceBase):
                 time.sleep(1)
                 continue 
 
-            self.mountangle.mountangle_set_parameters(self.big_mountangle_rvb)
-            self.save_mountangle_file(self.ins401_log_file_path, self.mountangle.process_file)
-            
-            print('mountangle_result:', self.mountangle.mountangle_result, 'big_mountangle_rvb:', self.big_mountangle_rvb)
-            if self.mountangle.runstatus_mountangle == 0 and self.mountangle.mountangle_result != []:
+            if self.mountangle.out_result_flag:
                 rvb = []
-                result = list(self.mountangle.mountangle_result[0].values())
-                self.mountangle.mountangle_result = []
-                print('result:', result)
                 for i in range(3):
-                    rvb.append(self.big_mountangle_rvb[0] - result[2 + i])
+                    f = self.big_mountangle_rvb[i] -self.mountangle.mountangle_estimate_result[i]
+                    rvb.append(float('%.4f'% f))
                 
-                print('rvb:', rvb)
                 self.set_mountangle_config(rvb)
+                time.sleep(2)
+                self.save_device_info()
+                time.sleep(2)
+                print('mountangle_result:', rvb)
+                os._exit(1)
 
-            time.sleep(0.01)
+            time.sleep(5)
   
     def start_mountangle_parse(self):
         if self.ins401_log_file_path and self.mountangle_thread is None:
@@ -453,6 +524,10 @@ class Provider(OpenDeviceBase):
             raw_data = kwargs.get('raw')
             if self.user_logf and raw_data:
                 self.user_logf.write(bytes(raw_data))
+
+                if self.mountangle:
+                    payload_len = struct.unpack('<I', bytes(raw_data[4:8]))[0]
+                    self.save_mountangle_file(packet_type, payload_len, raw_data[8:8+payload_len])
               
                 if packet_type == b'\x07\n':
                     if self.cli_options and self.cli_options.set_mount_angle:
@@ -461,18 +536,11 @@ class Provider(OpenDeviceBase):
                         for i in range(3):
                             big_mountangle_rvb.append(struct.unpack('<d', bytes(content[7 + 8 * i:15 + 8 * i]))[0])
 
-                        self.big_mountangle_rvb = big_mountangle_rvb
+                        for i in range(3):
+                            self.big_mountangle_rvb[i] = big_mountangle_rvb[i] * 57.29577951308232
+                        if self.mountangle:
+                            self.mountangle.mountangle_logger.debug("[mountangle] big_mountangle_rvb: {0}, {1}, {2}".format(self.big_mountangle_rvb[0], self.big_mountangle_rvb[1], self.big_mountangle_rvb[2]))
                         self.start_mountangle_parse()
-            
-                # mount angle unit test
-                # if packet_type == b'\x03\n':
-                #     if self.cli_options and self.cli_options.set_mount_angle:
-        
-                #         for i in range(3):
-                #             self.big_mountangle_rvb.append(0x00)
-                #         self.ins401_log_file_path = 'D:\\Develop\\projects\\python_driver\\acenav\\mount_angle\\mountangle_post\\data\\user_2021_08_27_14_20_11.bin'
-
-                #         self.start_mountangle_parse()
 
 
     def after_jump_bootloader(self):
@@ -733,7 +801,7 @@ class Provider(OpenDeviceBase):
         result = self.get_params()
         if result['packetType'] == 'inputParams':
             with open(file_path, 'w') as outfile:
-                json.dump(result['data'], outfile)
+                json.dump(result['data'], outfile, indent=4, ensure_ascii=False)
 
         # compare saved parameters with predefined parameters
         hashed_predefined_parameters = helper.collection_to_dict(
@@ -886,7 +954,7 @@ class Provider(OpenDeviceBase):
                 break
 
             parameter_values.append(result['data'])
-            time.sleep(0.2)
+            time.sleep(0.3)
 
         if not has_error:
             self.parameters = parameter_values
@@ -933,6 +1001,7 @@ class Provider(OpenDeviceBase):
             if exist_parameter:
                 parameter['type'] = exist_parameter['type']
                 result = self.set_param(parameter)
+                # print('result:', result)
 
                 packet_type = result['packetType']
                 data = result['data']

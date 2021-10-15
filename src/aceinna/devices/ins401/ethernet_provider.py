@@ -530,7 +530,7 @@ class Provider(OpenDeviceBase):
                     self.save_mountangle_file(packet_type, payload_len, raw_data[8:8+payload_len])
               
                 if packet_type == b'\x07\n':
-                    if self.cli_options and self.cli_options.set_mount_angle:
+                    if self.cli_options and self.cli_options.set_mount_angle and self.mountangle_thread is None:
                         content = raw_data[8:]
                         big_mountangle_rvb = []            
                         for i in range(3):

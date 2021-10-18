@@ -23,14 +23,15 @@ class LogParser:
         if self._options.log_type == 'ins401':
             do_parse_ins401_logs(self._options.path,
                                self._options.kml_rate,
-                               setting_file)
+                               setting_file,
+                               self._options.powerdr)
         else:
             raise ValueError('No matched log parser')
 
         os._exit(1)
 
     def _validate_params(self):
-        for attr_name in ['log_type', 'path', 'kml_rate']:
+        for attr_name in ['log_type', 'path', 'kml_rate', 'powerdr']:
             attr_value = getattr(self._options, attr_name)
             if not attr_value:
                 raise ValueError(

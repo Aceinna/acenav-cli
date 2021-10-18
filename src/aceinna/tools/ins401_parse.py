@@ -942,7 +942,7 @@ def prepare_lib_folder():
 
     return lib_path
 
-def do_parse(folder_path, kml_rate, setting_file):
+def do_parse(folder_path, kml_rate, setting_file, dr_parse):
     setting_path = prepare_setting_folder(setting_file)
 
     lib_path = prepare_lib_folder()
@@ -969,5 +969,5 @@ def do_parse(folder_path, kml_rate, setting_file):
                     file_path = folder_path + "\\" + fname
                 else:
                     file_path = folder_path + "/" + fname
-                lib.decode_ins401(bytes(file_path, encoding='utf8'))
+                lib.decode_ins401(bytes(file_path, encoding='utf8'), bytes(dr_parse, encoding='utf8'))
                 pass

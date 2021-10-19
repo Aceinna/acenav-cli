@@ -969,5 +969,5 @@ def do_parse(folder_path, kml_rate, setting_file, dr_parse):
                     file_path = folder_path + "\\" + fname
                 else:
                     file_path = folder_path + "/" + fname
-                lib.decode_ins401(bytes(file_path, encoding='utf8'), bytes(dr_parse, encoding='utf8'))
+                lib.decode_ins401(bytes(file_path, encoding='utf8'), bytes(dr_parse, encoding='utf8'), kml_rate)
                 pass

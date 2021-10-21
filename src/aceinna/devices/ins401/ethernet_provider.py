@@ -460,14 +460,7 @@ class Provider(OpenDeviceBase):
             self.f_process.write('$GPODO,' + buffer)
         
         elif type == b'\x05\n':
-            b = struct.pack('{0}B'.format(length), *content)
-            data = struct.unpack('<HIIff', b)
-
-            buffer = format(data[0], '') + ","\
-                + format(data[1]/1000, '11.4f') + ","\
-                + format(data[2], '16') + ","\
-                + format(data[3], '10.4') + ","\
-                + format(data[4], '10.4') + "\n"
+            pass
 
         elif type == b'\x06\n': # rover rtcm
             pass

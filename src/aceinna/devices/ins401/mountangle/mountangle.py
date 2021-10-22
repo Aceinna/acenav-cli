@@ -7,16 +7,16 @@ import platform
 import threading
 import math
 import logging
-from numpy import loadtxt
-# import numpy as np
-# from numpy.core.defchararray import count
-from .drivestatus import DriveStatus
+#import matplotlib.pyplot as plt
+import numpy as np
+from numpy.core.defchararray import count
+from ...ins401.mountangle.drivestatus import DriveStatus
 import copy
+from ctypes import *
+from win32api import FreeLibrary
 
 class MountAngle:
     def __init__(self, executor_path, data_path, process_file):
-
-        # self.process_data = ''
 
         self.executor_path = executor_path
         self.data_path = data_path
@@ -29,11 +29,12 @@ class MountAngle:
         self.drivestatus = DriveStatus()
         self.last_drive_res = None
         self.runstatus_mountangle = 0
-
         self.mountangle_result = []
+        self.mountangle_estimate_result = []
+        self.out_result_flag = 0
 
         self.stop = 0
-        self.mountangle_thread = None
+        self.mountangle_thread_handle = None
 
         local_time = time.localtime()
         formatted_dir_time = time.strftime("%Y%m%d_%H%M%S", local_time)
@@ -66,31 +67,53 @@ class MountAngle:
     def mountangle_set_parameters(self, rvb = []):
         # postprocess config file in /mountangle/, user need to set configuration in this file
         # set process file in post config file
-        self.mountangle_big_result.extend(rvb)
-
         if os.name == 'nt':
             file_path = os.path.join(self.executor_path, 'src\\aceinna\\devices\\ins401\\mountangle')
         else:
             file_path = os.path.join(self.executor_path, 'src/aceinna/devices/ins401/mountangle')
 
-        print(file_path)
         self.ins_postconfig_filename = os.path.join(file_path, 'content_aceinna_config.txt')
         with open(self.ins_postconfig_filename, 'r') as postconfigfile:
             postconfig = json.load(postconfigfile)
         
-        with open(self.ins_postconfig_filename, 'w') as postconfigfile:
-            postconfig['procfileNme'] = self.process_file
+            setting_folder_path = os.path.join(self.executor_path, 'setting')
+            # Load the openimu.json based on its app
+            product_name = 'INS401'
+            app_name = 'RTK_INS'  # self.app_info['app_name']
+            app_file_path = os.path.join(setting_folder_path, product_name,
+                                            app_name, 'ins401.json')
+            with open(app_file_path, 'r') as json_data:
+                properties = json.load(json_data)
+                # search paramId in device json file, search key is parameter name, don't change the parameter name in json file
+                gnssLeverArm_paramId = next(
+                    (x['paramId'] for x in properties['userConfiguration'] if x['name'] == 'gnss lever arm x'), None)
+                vrpLeverArm_paramId = next(
+                    (x['paramId'] for x in properties['userConfiguration'] if x['name'] == 'vrp lever arm x'), None)
+                userLeverArm_paramId = next(
+                    (x['paramId'] for x in properties['userConfiguration'] if x['name'] == 'user lever arm x'), None)
+                #print('gnssLeverArm_paramId:', gnssLeverArm_paramId, 'vrpLeverArm_paramId:', vrpLeverArm_paramId, 'userLeverArm_paramId:', userLeverArm_paramId)
+   
+                # use parameter value in post config file
+                for i in range(3):
+                    postconfig['priLeverArm'][i] = properties["initial"]["userParameters"][gnssLeverArm_paramId - 1 + i]["value"]
+                    postconfig['odoLeverarm'][i] = properties["initial"]["userParameters"][vrpLeverArm_paramId - 1 + i]["value"]
+                    postconfig['userLeverArm'][i] = properties["initial"]["userParameters"][userLeverArm_paramId - 1 + i]["value"]
+
             postconfig['rotationRBV'] = rvb
+            postconfig['procfileNme'] = self.process_file
+
+        with open(self.ins_postconfig_filename, 'w') as postconfigfile:
             postconfigfile.seek(0)
             postconfigfile.truncate()
-            json.dump(postconfig, postconfigfile)
+            json.dump(postconfig, postconfigfile, indent=4, ensure_ascii=False)
         self.mountangle_logger.debug("set postconfig filename {0} in {1}".format(self.process_file, self.ins_postconfig_filename))
+        
 
     def mountangle_run(self):
-        if self.mountangle_thread is None:
+        if self.mountangle_thread_handle is None:
             self.mountangle_logger.info('[mountangle] initial ok and can drive the car')
-            self.mountangle_thread = threading.Thread(target=self.mountangle_thread)
-            self.mountangle_thread.start()
+            self.mountangle_thread_handle = threading.Thread(target=self.mountangle_thread)
+            self.mountangle_thread_handle.start()
         
 
     def mountangle_calc(self, starttime, endtime):
@@ -101,22 +124,38 @@ class MountAngle:
         lib_folder_path = os.path.join(os.getcwd(),'libs')
         # self.mountangle_logger.info('[mountangle] calc {0} {1}'.format(starttime, endtime))
 
-        # call INS.dll to post process and out ima data file
-        if platform.system().lower() == 'windows':
-            execmd = lib_folder_path + "\\"+"INS.dll " + self.ins_postconfig_filename + " 0"
-        elif platform.system().lower() == 'linux':
-            execmd = lib_folder_path + "/"+"INS " + self.ins_postconfig_filename + " 0"
-        self.mountangle_logger.debug('[mountangle] {0}'.format(execmd))
-        r_v = os.system(execmd)
+        # # call INS.exe to post process and out ima data file
+        # if platform.system().lower() == 'windows':
+        #     execmd = "INS.exe " + self.ins_postconfig_filename + " 0"
+        # elif platform.system().lower() == 'linux':
+        #     execmd = "INS " + self.ins_postconfig_filename + " 0"
+        # self.mountangle_logger.debug('[mountangle] {0}'.format(execmd))
+        # r_v = os.system(execmd)
 
-        # call DR_MountAngle.dll process ima data 
-        imainputfile = self.process_file + '_ins.txt'    # mountangle input file
-        if platform.system().lower() == 'windows':
-            execmd = lib_folder_path + "\\"+"DR_MountAngle.dll " + imainputfile + " " + starttime + " " + endtime
-        if platform.system().lower() == 'linux':
-            execmd = lib_folder_path + "/"+"DR_MountAngle " + imainputfile + " " + starttime + " " + endtime
+        # # call DR_MountAngle.exe process ima data 
+        # imainputfile = self.process_file + '_ins.txt'    # mountangle input file
+        # if platform.system().lower() == 'windows':
+        #     execmd = "DR_MountAngle.exe " + imainputfile + " " + starttime + " " + endtime
+        # if platform.system().lower() == 'linux':
+        #     execmd = "DR_MountAngle " + imainputfile + " " + starttime + " " + endtime
+        # self.mountangle_logger.debug('[mountangle] {0}'.format(execmd))
+        # r_v = os.system(execmd)
+
+        INS_DLL = os.path.join(lib_folder_path,'INS.dll')
+        CINSDLL = CDLL(INS_DLL)
+        CINSDLL.ins_start(self.ins_postconfig_filename.encode('utf-8'), 0)
+        r_v = execmd = "INS " + self.ins_postconfig_filename + " 0"
         self.mountangle_logger.debug('[mountangle] {0}'.format(execmd))
-        r_v = os.system(execmd)
+        FreeLibrary(CINSDLL._handle)
+
+        imainputfile = self.process_file + '_ins.txt'    # mountangle input file
+        Dr_MountAngle_DLL = os.path.join(lib_folder_path,'DR_MountAngle.dll')
+        DRMADLL = CDLL(Dr_MountAngle_DLL)
+        r_v = DRMADLL.dr_mountangle_start(imainputfile.encode('utf-8'), starttime.encode('utf-8'), endtime.encode('utf-8'))
+        execmd = "DR_MountAngle " + imainputfile + " " + starttime + " " + endtime
+        self.mountangle_logger.debug('[mountangle] {0}'.format(execmd))
+        FreeLibrary(DRMADLL._handle)
+
         if r_v == 0:
             index = imainputfile.rfind('.')
             if index != -1:
@@ -127,7 +166,7 @@ class MountAngle:
             data = f_ima.readlines()
             for i in range(0, len(data)):
                 data[i] = data[i].replace(',', '')
-            ima_dataarray = loadtxt(data)    # ima_dataarray is the result data
+            ima_dataarray = np.loadtxt(data)    # ima_dataarray is the result data
             result = {
                 "starttime" : starttime,
                 "endtime" : endtime,
@@ -195,6 +234,15 @@ class MountAngle:
                         pitch = pitch / len(res_valid)
                         heading = heading / len(res_valid)
 
+                        estimate_result = []
+                        
+                        estimate_result.append(roll) 
+                        estimate_result.append(pitch) 
+                        estimate_result.append(heading) 
+
+                        self.mountangle_estimate_result = estimate_result 
+                        self.out_result_flag = 1
+
                         self.mountangle_logger.info('[mountangle] calc result [roll:{0} pitch:{1} heading:{2}]'.format(roll, pitch, heading))
                         break
 
@@ -204,12 +252,12 @@ class MountAngle:
         self.mountangle_logger.debug("[mountangle] result:{0}".format(self.mountangle_result))
 
         while True:
-            time.sleep(1)
+            time.sleep(5)
             if self.stop:
                 return
 
-    def process_live_data(self, data):
-        self.drivestatus.addrawdata(data)
+    def process_live_data(self, data, type):
+        self.drivestatus.addrawdata(data, type)
         drive_res = self.drivestatus.getresult()
         if drive_res != None:
             self.mountangle_logger.debug('{0} {1}'.format(data[1]/1000, drive_res))
@@ -219,6 +267,7 @@ class MountAngle:
                         (self.last_drive_res['type'] == 14 and drive_res['type'] == 15)):
                         self.drive_res = drive_res
                         self.runstatus_mountangle = 1
+                        print('runstatus_mountangle:\n', self.runstatus_mountangle)
                         
                 self.last_drive_res = copy.deepcopy(drive_res)
     

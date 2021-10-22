@@ -99,11 +99,11 @@ class DriveStatus:
             self.liveresult['totalangle_r'] = totalangle[0]
             self.liveresult['totalangle_l'] = totalangle[1]
 
-            if (totalangle[0] > 270 and totalangle[1] < -270):
+            if (totalangle[0] > 220 and totalangle[1] < -220):
                 estflag = 3
-            elif (totalangle[0] > 270):
+            elif (totalangle[0] > 220):
                 estflag = 2
-            elif (totalangle[1] < -270):
+            elif (totalangle[1] < -220):
                 estflag = 1
             else:
                 estflag = 0
@@ -199,22 +199,39 @@ class DriveStatus:
         return estcheckdata
 
 
-    def addrawdata(self, rawdata):
-        self.curinsresult = {
-            'week' : rawdata[0],
-            'timestamp': rawdata[1]/1000,
-            'insstatus': rawdata[2],
-            'inspostype': rawdata[3],
-            'lat' : rawdata[4],
-            'lon' : rawdata[5],
-            'hight' : rawdata[6],
-            'vn' : rawdata[7],
-            've' : rawdata[8],
-            'vd' : rawdata[9],
-            'roll' : rawdata[12],
-            'pitch' : rawdata[13],
-            'heading' : rawdata[14]
-        }
+    def addrawdata(self, rawdata, type):
+        if type == 0:
+            self.curinsresult = {
+                'week' : rawdata[0],
+                'timestamp': rawdata[1]/1000,
+                'insstatus': rawdata[2],
+                'inspostype': rawdata[3],
+                'lat' : rawdata[4],
+                'lon' : rawdata[5],
+                'hight' : rawdata[6],
+                'vn' : rawdata[7],
+                've' : rawdata[8],
+                'vd' : rawdata[9],
+                'roll' : rawdata[10],
+                'pitch' : rawdata[11],
+                'heading' : rawdata[12]
+            }
+        elif type == 1:
+            self.curinsresult = {
+                'week' : rawdata[0],
+                'timestamp': rawdata[1]/1000,
+                'insstatus': rawdata[2],
+                'inspostype': rawdata[3],
+                'lat' : rawdata[4],
+                'lon' : rawdata[5],
+                'hight' : rawdata[6],
+                'vn' : rawdata[7],
+                've' : rawdata[8],
+                'vd' : rawdata[9],
+                'roll' : rawdata[12],
+                'pitch' : rawdata[13],
+                'heading' : rawdata[14]
+            }
 
         if fmod(self.curinsresult['timestamp'], 1) < 0.01:
             if self.lastinsresult != None:

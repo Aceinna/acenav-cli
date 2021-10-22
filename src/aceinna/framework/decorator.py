@@ -6,7 +6,7 @@ import signal
 from datetime import datetime, timedelta
 from functools import wraps
 from typing import TypeVar
-from .constants import (DEVICE_TYPES, INTERFACES)
+from .constants import (DEVICE_TYPES, BAUDRATE_LIST, INTERFACES)
 from .utils.print import print_red
 from .utils.resource import is_dev_mode
 
@@ -15,7 +15,7 @@ T = TypeVar('T')
 
 INTERFACE_LIST = INTERFACES.list()
 MODES = ['default', 'cli', 'receiver']
-TYPES_OF_LOG = ['ins401']
+TYPES_OF_LOG = ['rtkl', 'ins401']
 KML_RATES = [1, 2, 5, 10]
 
 
@@ -29,6 +29,10 @@ def _build_args():
                         help="Interface. Allowed one of values: {0}".format(INTERFACE_LIST), default=INTERFACES.ETH_100BASE_T1, choices=INTERFACE_LIST)
     parser.add_argument("--device-type", dest="device_type", type=str,
                         help="Open Device Type. Allowed one of values: {0}".format(DEVICE_TYPES), choices=DEVICE_TYPES, metavar='')
+    parser.add_argument("-b", "--baudrate", dest="baudrate", type=int, metavar='',
+                        help="Baudrate for uart. Allowed one of values: {0}".format(BAUDRATE_LIST), choices=BAUDRATE_LIST)
+    parser.add_argument("-c", "--com-port", dest="com_port", metavar='', type=str,
+                        help="COM Port")
     parser.add_argument("-s", "--set-user-para", dest='set_user_para', action='store_true',
                         help="Set user parameters", default=False)
     parser.add_argument("--cli", dest='use_cli', action='store_true',

@@ -19,7 +19,6 @@ from ..decorator import with_device_message
 from ...models import InternalCombineAppParseRule
 from ..parsers.ins401_field_parser import encode_value
 from ...framework.utils.print import (print_yellow, print_green)
-from ...tools.ins401_parse import  (mkdir, INS401Parse)
 from ..ins401.mountangle.mountangle import MountAngle
 from ..upgrade_workers import (
     EthernetSDK9100UpgradeWorker,

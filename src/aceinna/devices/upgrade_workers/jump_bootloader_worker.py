@@ -60,7 +60,7 @@ class JumpBootloaderWorker(UpgradeWorkerBase):
 
             self.emit(UPGRADE_EVENT.BEFORE_COMMAND)
             self._communicator.reset_buffer()
-
+            
             for i in range(self._wait_timeout_after_command):
                 self._communicator.write(actual_command)
                 time.sleep(0.2)
@@ -69,10 +69,10 @@ class JumpBootloaderWorker(UpgradeWorkerBase):
                 if response:
                     break
 
-            if(response is None) and (self._wait_timeout_after_command == 5):
+            if(response is None) and (i == self._wait_timeout_after_command):
                 self.emit(UPGRADE_EVENT.ERROR, self._key,
-                    'jump imu bootloader fail')
-                print('jump imu bootloader fail, {0}'.format(self._key))
+                    'jump bootloader fail')
+                print('jump bootloader fail, {0}'.format(self._key))
                 os._exit(1)
 
             self.emit(UPGRADE_EVENT.AFTER_COMMAND)

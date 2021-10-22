@@ -16,8 +16,8 @@ from ...framework.context import APP_CONTEXT
 from ...framework.utils.firmware_parser import parser as firmware_content_parser
 from ...framework.utils.print import (print_green, print_yellow, print_red)
 from ..base import OpenDeviceBase
-from ..configs.openrtk_predefine import (
-    APP_STR, get_openrtk_products, get_configuratin_file_mapping
+from ..configs.rtk_predefine import (
+    APP_STR, get_rtk_products, get_configuratin_file_mapping
 )
 from ..decorator import with_device_message
 from ...models import InternalCombineAppParseRule
@@ -93,7 +93,7 @@ class RTKProviderBase(OpenDeviceBase):
         self.setting_folder_path = os.path.join(
             executor_path, setting_folder_name)
 
-        all_products = get_openrtk_products()
+        all_products = get_rtk_products()
         config_file_mapping = get_configuratin_file_mapping()
 
         for product in all_products:

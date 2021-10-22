@@ -3,11 +3,9 @@ predefined params for openrtk
 """
 
 
-def get_openrtk_products():
+def get_rtk_products():
     return {
-        'OpenRTK330L': ['RTK_INS'],
-        'RTK330L': ['RTK_INS'],
-        'INS401':['RTK_INS']
+        'RTK330L': ['RTK_INS']
     }
 
 
@@ -21,9 +19,7 @@ def get_app_names():
 
 def get_configuratin_file_mapping():
     return {
-        'OpenRTK330L': 'openrtk.json',
-        'RTK330L': 'RTK330L.json',
-        'INS401':'ins401.json'
+        'RTK330L': 'RTK330L.json'
     }
 
 

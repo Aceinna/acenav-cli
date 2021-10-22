@@ -56,7 +56,7 @@ def run_command_as_string(communicator, command, size=1000, retry=10):
 
 
 def ping(communicator, *args):
-    '''OpenDevice Ping
+    '''RTK330LA Ping
     '''
     filter_device_type = args[0]
 
@@ -69,7 +69,7 @@ def ping(communicator, *args):
         app_info_text = run_command_as_string(communicator, gV)
 
 
-    # a bad check, to distinguish RTK330L or OpenRTK330L
+    # a bad check, to distinguish RTK330L
     if _need_check(filter_device_type, 'RTKL') and device_info_text.find('RTK330L') > -1  and device_info_text.find('OpenRTK') == -1 :
         return {
             'device_type': 'RTKL',

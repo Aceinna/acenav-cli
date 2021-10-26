@@ -207,10 +207,7 @@ class Provider(OpenDeviceBase):
 
         if not self.is_app_matched:
             print_yellow(
-                'Failed to extract app version information from unit.' +
-                '\nThe supported application list is {0}.'.format(APP_STR) +
-                '\nTo keep runing, use INS configuration as default.' +
-                '\nYou can choose to place your json file under execution path if it is an unknown application.'
+                'Failed to extract app version information from unit.'
             )
 
     def ntrip_client_thread(self): 
@@ -275,16 +272,18 @@ class Provider(OpenDeviceBase):
             if set_mount_angle:
                 self.set_mount_angle()
                 self.prepare_lib_folder()
-				
-            result = self.get_ins_message()
-            if result['packetType'] == 'success':
-                #print('data = ',bytes(result['data']))
-                self.ins_save_logf.write(bytes(result['raw_data']))
-                self.ins_save_logf.flush() 
-            else:
-                print('can\'t get ins save message')
-            # start ntrip client
+
+            if not self.is_in_bootloader:
+                result = self.get_ins_message()
+                if result['packetType'] == 'success':
+                    #print('data = ',bytes(result['data']))
+                    self.ins_save_logf.write(bytes(result['raw_data']))
+                    self.ins_save_logf.flush() 
+                else:
+                    print('can\'t get ins save message')
+
             if not self.is_upgrading and not self.with_upgrade_error:
+                # start ntrip client
                 if self.properties["initial"].__contains__("ntrip") \
                         and not self.ntrip_client and not self.is_in_bootloader:
                     threading.Thread(target=self.ntrip_client_thread).start()

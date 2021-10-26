@@ -60,7 +60,6 @@ class DeviceManager:
 
         APP_CONTEXT.get_logger().logger.info(
             'Connected Device info {0}'.format(format_device_info))
-
         return provider
 
     @staticmethod

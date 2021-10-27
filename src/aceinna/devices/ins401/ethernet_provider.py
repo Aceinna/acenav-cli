@@ -304,7 +304,7 @@ class Provider(OpenDeviceBase):
         return int(cksum, 16), calc_cksum
 
     def on_read_raw(self, data):
-        if data[0] != 0x24 or data[1] != 0x47 or data[2] != 0x50:
+        if data[0] != 0x24 or data[1] != 0x47:
             return
         
         temp_str_nmea = data.decode('utf-8')

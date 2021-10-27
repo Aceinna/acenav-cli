@@ -54,11 +54,10 @@ class Provider(RTKProviderBase):
         if self.rtcm_logf is None:
             return
         while True:
+            if self.is_upgrading:
+                time.sleep(0.1)
+                continue
             try:
-                if self.is_upgrading:
-                    time.sleep(0.1)
-                    continue
-
                 data = bytearray(self.rtcm_serial_port.read_all())
             except Exception as e:
                 print_red('RTCM PORT Thread error: {0}'.format(e))
@@ -79,7 +78,7 @@ class Provider(RTKProviderBase):
             self.communicator.write(command_line, True)
             time.sleep(1)
             result = helper.read_untils_have_data(
-                self.communicator, 'CS', 200, 1000)
+                self.communicator, 'CS', 200, 100)
             if result:
                 break
 
@@ -106,7 +105,7 @@ class Provider(RTKProviderBase):
                 self.firmware_write_command_generator,
                 192)
             rtk_upgrade_worker.on(
-                UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(1))
+                UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(15))
             rtk_upgrade_worker.on(UPGRADE_EVENT.BEFORE_WRITE,
                                   lambda: self.before_write_content('0', len(content)))
             return rtk_upgrade_worker
@@ -118,7 +117,7 @@ class Provider(RTKProviderBase):
                 self.firmware_write_command_generator,
                 192)
             ins_upgrade_worker.on(
-                UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(1))
+                UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(15))
             ins_upgrade_worker.on(UPGRADE_EVENT.BEFORE_WRITE,
                                   lambda: self.before_write_content('1', len(content)))
             return ins_upgrade_worker

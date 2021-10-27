@@ -1,6 +1,14 @@
 # CHANGELOG
 
 ---
+## 2.6.2， 10/25/2021
+
+- [INS401] Support real time installation angle estimation
+- [INS401] Support dead reckoning right after power up before GNSS fix
+- [RTK330LA] Add RTK330LA driver
+
+
+
 ## 2.6.1,  09/03/2021
 
 - [INS401] Support FW IAP upgrade through 100base-t1 Ethernet interface

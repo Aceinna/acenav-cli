@@ -13,7 +13,9 @@ from numpy.core.defchararray import count
 from ...ins401.mountangle.drivestatus import DriveStatus
 import copy
 from ctypes import *
-from win32api import FreeLibrary
+
+if os.name == 'nt':
+    from win32api import FreeLibrary
 
 class MountAngle:
     def __init__(self, executor_path, data_path, process_file):

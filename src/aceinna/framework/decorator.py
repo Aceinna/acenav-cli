@@ -39,7 +39,9 @@ def _build_args():
                         help="start as cli mode", default=False)
     parser.add_argument("-a", "--set-mount-angle-enable", dest='set_mount_angle', action='store_true',
                         help="set mount angle", default=False)
-                        
+    parser.add_argument("-debug", dest='debug', metavar='', type=str,
+                        help="true or false")
+
     subparsers = parser.add_subparsers(
         title='Sub commands', help='use `<command> -h` to get sub command help', dest="sub_command")
     parse_log_action = subparsers.add_parser(

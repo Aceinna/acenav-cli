@@ -319,14 +319,14 @@ class Provider(OpenDeviceBase):
                     self.ins_save_logf.flush() 
                 else:
                     print('can\'t get ins save message')
-
-            result = self.get_compile_message()
-            if result['packetType'] == 'success':
-                format_compile_info = self.bind_compile_info(
-                    result['data'])
-                print_blue(format_compile_info)
-            else:
-                print('can\'t get get_compile_message')
+            if self.cli_options.debug == 'true':
+                result = self.get_compile_message()
+                if result['packetType'] == 'success':
+                    format_compile_info = self.bind_compile_info(
+                        result['data'])
+                    print_blue(format_compile_info)
+                else:
+                    print('can\'t get get_compile_message')
             self.save_device_info()
 
             # start ntrip client
@@ -896,7 +896,8 @@ class Provider(OpenDeviceBase):
                                                  time.localtime())
             session_info['device'] = self.device_info
             session_info['app'] = self.app_info
-            session_info['compile'] = self.compile_info
+            if self.cli_options.debug == 'true':
+                session_info['compile'] = self.compile_info
             session_info['interface'] = self.cli_options.interface
             parameters_configuration = dict()
             for item in result['data']:

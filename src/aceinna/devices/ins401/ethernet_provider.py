@@ -18,7 +18,7 @@ from ..configs.ins401_predefine import (APP_STR, get_ins401_products,
 from ..decorator import with_device_message
 from ...models import InternalCombineAppParseRule
 from ..parsers.ins401_field_parser import encode_value
-from ...framework.utils.print import (print_yellow, print_green)
+from ...framework.utils.print import (print_yellow, print_green, print_blue)
 from ..ins401.mountangle.mountangle import MountAngle
 from ..upgrade_workers import (
     EthernetSDK9100UpgradeWorker,
@@ -137,6 +137,10 @@ class Provider(OpenDeviceBase):
 
         return self._device_info_string
 
+    def bind_compile_info(self, compile_info):
+        compile_info_str = str(compile_info, encoding='utf-8')
+        compile_info_str = compile_info_str.replace('\x0b','\\')
+        return (compile_info_str)
     def _build_device_info(self, text):
         '''
         Build device info
@@ -282,6 +286,14 @@ class Provider(OpenDeviceBase):
                 else:
                     print('can\'t get ins save message')
 
+            result = self.get_compile_message()
+            if result['packetType'] == 'success':
+                format_compile_info = self.bind_compile_info(
+                    result['data'])
+                print_blue(format_compile_info)
+            else:
+                print('can\'t get get_compile_message')
+            # start ntrip client
             if not self.is_upgrading and not self.with_upgrade_error:
                 # start ntrip client
                 if self.properties["initial"].__contains__("ntrip") \
@@ -1077,6 +1089,23 @@ class Provider(OpenDeviceBase):
         command_line = helper.build_ethernet_packet(
             self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
             command_gi)
+        result = yield self._message_center.build(command=command_line.actual_command, timeout=3)
+        error = result['error']
+        data = result['data']
+        raw_data = result['raw']
+        if error:
+            yield {'packetType': 'error', 'data': {'error': error}, 'raw_data': {'error': error}}
+
+        yield {'packetType': 'success', 'data': data, 'raw_data': raw_data}
+
+
+    @with_device_message
+    def get_compile_message(self):
+        command_gc = b'\x09\xaa'
+
+        command_line = helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
+            command_gc)
         result = yield self._message_center.build(command=command_line.actual_command, timeout=3)
         error = result['error']
         data = result['data']

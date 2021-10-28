@@ -344,6 +344,7 @@ def match_command_handler(packet_type):
         b'\x06\xcc': common_input_parser,
         b'\x01\x0b': common_input_parser,
         b'\x02\x0b': common_input_parser,
-        b'\x09\x0a': common_input_parser
+        b'\x09\x0a': common_input_parser,
+        b'\x09\xaa': common_input_parser
     }
     return parser_dict.get(packet_type)

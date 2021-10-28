@@ -45,6 +45,7 @@ class Provider(OpenDeviceBase):
         self.app_config_folder = ''
         self.device_info = None
         self.app_info = None
+        self.compile_info = None
         self.parameters = None
         self.setting_folder_path = None
         self.data_folder = None
@@ -140,7 +141,40 @@ class Provider(OpenDeviceBase):
     def bind_compile_info(self, compile_info):
         compile_info_str = str(compile_info, encoding='utf-8')
         compile_info_str = compile_info_str.replace('\x0b','\\')
+        self._build_compile_info(compile_info_str)
         return (compile_info_str)
+    def _build_compile_info(self, text):
+        '''
+        Build compile info
+        '''
+        split_text = text.split(',')
+        self.compile_info = {
+            'ins_lib':{
+                'version': split_text[0],
+                'time': split_text[1],
+                'author': split_text[2],
+                'commit':split_text[3]
+            },
+            'ins_app':{
+                'version': split_text[4],
+                'time': split_text[5],
+                'author': split_text[6],
+                'commit':split_text[7]
+            },
+            'rtk_lib':{
+                'version': split_text[8],
+                'time': split_text[9],
+                'author': split_text[10],
+                'commit':split_text[11]
+            },
+            'rtk_app':{
+                'version': split_text[12],
+                'time': split_text[13],
+                'author': split_text[14],
+                'commit':split_text[15]
+            }
+        }        
+        print(self.compile_info)
     def _build_device_info(self, text):
         '''
         Build device info
@@ -272,7 +306,7 @@ class Provider(OpenDeviceBase):
                 # check saved result
                 self.check_predefined_result()
 
-            self.save_device_info()
+
             if set_mount_angle:
                 self.set_mount_angle()
                 self.prepare_lib_folder()
@@ -293,6 +327,8 @@ class Provider(OpenDeviceBase):
                 print_blue(format_compile_info)
             else:
                 print('can\'t get get_compile_message')
+            self.save_device_info()
+
             # start ntrip client
             if not self.is_upgrading and not self.with_upgrade_error:
                 # start ntrip client
@@ -860,6 +896,7 @@ class Provider(OpenDeviceBase):
                                                  time.localtime())
             session_info['device'] = self.device_info
             session_info['app'] = self.app_info
+            session_info['compile'] = self.compile_info
             session_info['interface'] = self.cli_options.interface
             parameters_configuration = dict()
             for item in result['data']:

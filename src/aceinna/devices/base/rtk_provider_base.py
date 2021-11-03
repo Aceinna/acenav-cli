@@ -373,7 +373,7 @@ class RTKProviderBase(OpenDeviceBase):
                             cksum, calc_cksum = self.nmea_checksum(
                                 str_nmea)
                             if cksum == calc_cksum:
-                                if str_nmea.find("$GPGGA") != -1:
+                                if str_nmea.find("$GPGGA") != -1 or str_nmea.find("$GNGGA") != -1:
                                     if self.ntrip_client:
                                         self.ntrip_client.send(str_nmea)
                                     #self.add_output_packet('gga', str_nmea)
@@ -406,7 +406,7 @@ class RTKProviderBase(OpenDeviceBase):
         if packet_type == 'gN':
             if self.ntrip_client:
                 # $GPGGA
-                gpgga = '$GPGGA'
+                gpgga = '$GNGGA' #'$GPGGA'
                 # time
                 timeOfWeek = float(data['GPS_TimeofWeek']) - 18
                 dsec = int(timeOfWeek)
@@ -601,12 +601,7 @@ class RTKProviderBase(OpenDeviceBase):
         '''
         pass
 
-    def before_jump_app_command(self):
-        self.communicator.serial_port.baudrate = self.bootloader_baudrate
-
-    def after_jump_app_command(self):
-        self.communicator.serial_port.baudrate = self.original_baudrate
-
+    # override
     def get_upgrade_workers(self, firmware_content):
         workers = []
         rules = [
@@ -617,6 +612,7 @@ class RTKProviderBase(OpenDeviceBase):
 
         parsed_content = firmware_content_parser(firmware_content, rules)
         # foreach parsed content, if empty, skip register into upgrade center
+        device_info = self.get_device_connection_info()
         for _, rule in enumerate(parsed_content):
             content = parsed_content[rule]
             if len(content) == 0:
@@ -625,9 +621,10 @@ class RTKProviderBase(OpenDeviceBase):
             worker = self.build_worker(rule, content)
             if not worker:
                 continue
-
-            workers.append(worker)
-
+            if (device_info['modelName'] == 'RTK330L') and (rule == 'sdk') and ((int(device_info['serialNumber']) <= 2178200080) and (int(device_info['serialNumber']) >= 2178200001)):
+                continue
+            else:
+                workers.append(worker)
         # prepare jump bootloader worker and jump application workder
         # append jump bootloader worker before the first firmware upgrade workder
         # append jump application worker after the last firmware uprade worker
@@ -638,33 +635,11 @@ class RTKProviderBase(OpenDeviceBase):
                 start_index = i if start_index == -1 else start_index
                 end_index = i
 
-        jump_bootloader_command = helper.build_bootloader_input_packet(
-            'JI')
-        jumpBootloaderWorker = JumpBootloaderWorker(
-            self.communicator,
-            command=jump_bootloader_command,
-            listen_packet='JI',
-            wait_timeout_after_command=1)
-        jumpBootloaderWorker.group = UPGRADE_GROUP.BEFORE_ALL
-
-        jump_application_command = helper.build_bootloader_input_packet('JA')
-        jumpApplicationWorker = JumpApplicationWorker(
-            self.communicator,
-            command=jump_application_command,
-            listen_packet='JA',
-            wait_timeout_after_command=1)
-        jumpApplicationWorker.group = UPGRADE_GROUP.AFTER_ALL
-
-        jumpApplicationWorker.on(
-            UPGRADE_EVENT.BEFORE_COMMAND, self.before_jump_app_command)
-        jumpApplicationWorker.on(
-            UPGRADE_EVENT.AFTER_COMMAND, self.after_jump_app_command)
-
         if start_index > -1 and end_index > -1:
             workers.insert(
-                start_index, jumpBootloaderWorker)
+                start_index, JumpBootloaderWorker(self.communicator))
             workers.insert(
-                end_index+2, jumpApplicationWorker)
+                end_index+2, JumpApplicationWorker(self.communicator))
         return workers
 
     def get_device_connection_info(self):

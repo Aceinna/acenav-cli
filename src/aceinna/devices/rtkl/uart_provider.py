@@ -5,8 +5,9 @@ import struct
 from ..base.rtk_provider_base import RTKProviderBase
 from ..upgrade_workers import (
     FirmwareUpgradeWorker,
+    SDK9100UpgradeWorker,
     UPGRADE_EVENT,
-    SDK9100UpgradeWorker
+    UPGRADE_GROUP
 )
 from ...framework.utils import (
     helper
@@ -84,9 +85,6 @@ class Provider(RTKProviderBase):
 
         if not result:
             raise Exception('Cannot run set core command')
-
-    def reopen_rtcm_serial_port(self, *args):
-        self.rtcm_serial_port.baudrate = 460800
 
     def firmware_write_command_generator(self, data_len, current, data):
         command_WA = 'WA'

@@ -29,7 +29,7 @@ def handle_discovered(device_provider):
         if device_provider.is_upgrading == False:     
             loop_upgrade_cnt += 1
             print("loop_upgrade_cnt:", loop_upgrade_cnt)
-        device_provider.upgrade_framework("./RTK330LA_v24.02_ceshi3.bin")
+        device_provider.upgrade_framework("./RTK330LA_RTK_INS_STA_v24.02.02.bin")
 
         time.sleep(5)
 

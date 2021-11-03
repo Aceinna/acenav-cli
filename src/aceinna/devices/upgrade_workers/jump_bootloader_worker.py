@@ -69,7 +69,7 @@ class JumpBootloaderWorker(UpgradeWorkerBase):
                 if response:
                     break
 
-            if(response is None) and (i == self._wait_timeout_after_command):
+            if(response is None):
                 self.emit(UPGRADE_EVENT.ERROR, self._key,
                     'jump bootloader fail')
                 print('jump bootloader fail, {0}'.format(self._key))

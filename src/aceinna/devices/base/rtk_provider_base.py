@@ -30,6 +30,7 @@ from ..upgrade_workers import (
 )
 from ..parsers.rtk330l_field_parser import encode_value
 from abc import ABCMeta, abstractmethod
+from ..ping.rtk330l import ping
 
 
 class RTKProviderBase(OpenDeviceBase):
@@ -601,7 +602,23 @@ class RTKProviderBase(OpenDeviceBase):
         '''
         pass
 
-    # override
+
+    def after_jump_bootloader_command(self):
+        pass
+
+
+    def after_jump_app_command(self):
+        # rtk330l ping device
+        can_ping = False
+
+        while not can_ping:
+            self.communicator.reset_buffer()  # clear input and output buffer
+            info = ping(self.communicator, None)
+            if info:
+                can_ping = True
+            time.sleep(0.5)
+        pass
+
     def get_upgrade_workers(self, firmware_content):
         workers = []
         rules = [
@@ -635,11 +652,30 @@ class RTKProviderBase(OpenDeviceBase):
                 start_index = i if start_index == -1 else start_index
                 end_index = i
 
+        jump_bootloader_command = helper.build_bootloader_input_packet(
+            'JI')
+        jumpBootloaderWorker = JumpBootloaderWorker(
+            self.communicator,
+            command=jump_bootloader_command,
+            listen_packet='JI',
+            wait_timeout_after_command=1)
+        jumpBootloaderWorker.on(
+            UPGRADE_EVENT.AFTER_COMMAND, self.after_jump_bootloader_command)
+
+        jump_application_command = helper.build_bootloader_input_packet('JA')
+        jumpApplicationWorker = JumpApplicationWorker(
+            self.communicator,
+            command=jump_application_command,
+            listen_packet='JA',
+            wait_timeout_after_command=1)
+        jumpApplicationWorker.on(
+            UPGRADE_EVENT.AFTER_COMMAND, self.after_jump_app_command)
+
         if start_index > -1 and end_index > -1:
             workers.insert(
-                start_index, JumpBootloaderWorker(self.communicator))
+                start_index, jumpBootloaderWorker)
             workers.insert(
-                end_index+2, JumpApplicationWorker(self.communicator))
+                end_index+2, jumpApplicationWorker)
         return workers
 
     def get_device_connection_info(self):
@@ -815,7 +851,7 @@ class RTKProviderBase(OpenDeviceBase):
             for i in range(2, conf_parameters_len, step):
                 start_byte = i
                 end_byte = i+step-1 if i+step < conf_parameters_len else conf_parameters_len
-                time.sleep(0.1)
+                time.sleep(0.2)
                 command_line = helper.build_packet(
                     'gB', [start_byte, end_byte])
                 result = yield self._message_center.build(command=command_line, timeout=10)

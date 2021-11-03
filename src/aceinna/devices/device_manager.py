@@ -1,10 +1,14 @@
 from .ping import ping_tool
+from .rtkl.uart_provider import Provider as RTKLUartProvider
 from .ins401.ethernet_provider import Provider as INS401EthernetProvider
 from ..framework.context import APP_CONTEXT
 from ..framework.utils.print import print_green
 from ..framework.constants import INTERFACES
 
 def create_provider(device_type, communicator):
+    if communicator.type == INTERFACES.UART:
+        if device_type == 'RTKL':
+            return RTKLUartProvider(communicator)
 
     if communicator.type==INTERFACES.ETH_100BASE_T1:
         if device_type == 'INS401':
@@ -56,7 +60,6 @@ class DeviceManager:
 
         APP_CONTEXT.get_logger().logger.info(
             'Connected Device info {0}'.format(format_device_info))
-
         return provider
 
     @staticmethod
@@ -66,6 +69,14 @@ class DeviceManager:
             uart: communicator, device_type
             lan: communicator
         '''
+        if communicator.type == INTERFACES.UART:
+            device_access = args[0]
+            filter_device_type = args[1]
+
+            ping_result = ping_tool.do_ping(
+                communicator.type, device_access, filter_device_type)
+            if ping_result is not None:
+                return DeviceManager.build_provider(communicator, device_access, ping_result)
         if communicator.type == INTERFACES.ETH_100BASE_T1:
             device_access = args[0]
             

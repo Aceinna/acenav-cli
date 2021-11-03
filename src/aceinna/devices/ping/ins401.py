@@ -58,7 +58,7 @@ def run_command_as_string(communicator, command):
 def try_parse_app_mode(info_text):
     is_app_mode = False
     app_ping_info = None
-
+    
     split_text = info_text.split(' RTK_INS')
 
     if len(split_text) == 2:
@@ -79,9 +79,8 @@ def try_parse_app_mode(info_text):
 def try_parse_bootloader_mode(info_text):
     is_bootloader_mode = False
     bootloader_ping_info = None
-
+    
     split_text = info_text.split('SN:')
-    print(split_text)
     if len(split_text) == 2:
         is_bootloader_mode = True
 

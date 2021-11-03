@@ -1,4 +1,5 @@
 import time
+import serial
 from .event_base import EventBase
 from ..framework.communicator import CommunicatorFactory
 from ..devices import DeviceManager
@@ -129,5 +130,103 @@ class Driver(EventBase):
         ''' Execute command on device
         '''
 
+        if method == 'check_mode':
+            mode = -1
+            if self._device_provider:
+                mode = 1 if self._device_provider.is_in_bootloader else 0
+
+            return {
+                'packetType': 'mode',
+                'data': mode
+            }
+
+        if method == 'list_ports':
+            ports = self._communicator.list_ports()
+            return {
+                'packetType': 'ports',
+                'data': ports
+            }
+
+        if method == 'force_bootloader':
+            port_name = parameters['port']
+            device_type = parameters['device_type']
+
+            if self._device_provider:
+                return {
+                    'packetType': 'success',
+                    'data': {
+                        'status': 0,
+                        'message': 'The device is already connected. There is no need to enter bootloader.'
+                    }
+                }
+
+            self._communicator.pause_find()
+
+            result = self._process_force_bootloader(port_name, device_type)
+
+            # return fail result
+            if result['data']['status'] == 0:
+                return result
+
+            self._communicator.set_find_options({
+                'com_port': port_name,
+                'device_type': device_type,
+                'baudrate': BAUDRATE_MAPPING[device_type]
+            })
+            self._communicator.resume_find()
+
+            while not self._device_provider:
+                time.sleep(1)
+
+            return result
+
         return getattr(self._device_provider, method, None)(parameters)
 
+    def _process_force_bootloader(self, port_name, device_type):
+        # OpenRTK has a bootloader switch, no need force enter bootloader
+
+        # communicator open
+        serial_port = None
+        left_time = 10
+
+        while left_time > 0:
+            if not serial_port:
+                try:
+                    serial_port = serial.Serial(
+                        port=port_name,
+                        baudrate=BAUDRATE_MAPPING[device_type],
+                        timeout=0.1)
+                except serial.serialutil.SerialException:
+                    serial_port = None
+
+                    time.sleep(0.01)
+                    left_time -= 0.01
+                    continue
+
+            # send JB commands
+            serial_port.write([0x55, 0x55, 0x4A, 0x42, 0x00, 0xA0, 0xCE])
+            time.sleep(0.02)
+            left_time -= 0.02
+
+        # ping as bootloader
+        device_provider = DeviceManager.ping(
+            self._communicator, serial_port, device_type)
+
+        if serial_port:
+            serial_port.close()
+
+        if device_provider:
+            return {
+                'packetType': 'success',
+                'data': {
+                    'status': 1
+                }
+            }
+
+        return {
+            'packetType': 'success',
+            'data': {
+                'status': 0,
+                'message': 'Cannot enter bootloader, please try it again.'
+            }
+        }

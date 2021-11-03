@@ -3,7 +3,6 @@ import time
 from ..base.upgrade_worker_base import UpgradeWorkerBase
 from ...framework.utils import helper
 from ...framework.command import Command
-#from ..ping.open import ping
 from . import (UPGRADE_EVENT, UPGRADE_GROUP)
 
 #TODO may merge with jump bootloader worker

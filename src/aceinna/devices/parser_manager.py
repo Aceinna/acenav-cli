@@ -1,3 +1,4 @@
+from .parsers.rtk330l_message_parser import UartMessageParser as Rtk330lUartMessageParser
 from .parsers.ins401_message_parser import EthernetMessageParser as INS401EthernetMessageParser
 
 class ParserManager:
@@ -14,3 +15,5 @@ class ParserManager:
         '''
         if device_type == 'INS401':
             return INS401EthernetMessageParser(properties)
+        else:
+            return Rtk330lUartMessageParser(properties)

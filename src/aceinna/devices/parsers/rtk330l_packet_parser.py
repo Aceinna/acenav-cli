@@ -2,7 +2,7 @@ import sys
 import struct
 import collections
 from . import filter_nan
-from .ins401_field_parser import decode_value
+from .rtk330l_field_parser import decode_value
 from ...framework.utils.print import print_yellow
 from ...framework.context import APP_CONTEXT
 
@@ -10,38 +10,18 @@ from ...framework.context import APP_CONTEXT
 error_decode_packet = 0
 
 
-def _format_string(data_buffer):
-    parsed = bytearray(data_buffer) if data_buffer and len(
-        data_buffer) > 0 else None
-
-    formatted = ''
-    if parsed is not None:
-        try:
-            if sys.version_info < (3, 0):
-                formatted = str(struct.pack(
-                    '{0}B'.format(len(parsed)), *parsed))
-            else:
-                formatted = str(struct.pack(
-                    '{0}B'.format(len(parsed)), *parsed), 'utf-8')
-        except UnicodeDecodeError:
-            APP_CONTEXT.get_logger().logger.error('Parse data as string failed')
-            formatted = ''
-
-    return formatted
-
-
 def string_parser(payload, user_configuration):
     error = False
     data = ''
-
-    data_str = _format_string(payload)
-
-    if data_str and (data_str.find('INS401') > -1) \
-       and (data_str.find('RTK_INS App') > -1) \
-       and (data_str.find('Bootloader') > -1):
-        data = data_str
-    else:
-        error = True
+    try:
+        if sys.version_info < (3, 0):
+            data = str(struct.pack(
+                '{0}B'.format(len(payload)), *payload))
+        else:
+            data = str(struct.pack(
+                '{0}B'.format(len(payload)), *payload), 'utf-8')
+    except UnicodeDecodeError:
+        data = ''
 
     return data, error
 
@@ -174,7 +154,7 @@ def get_parameter_parser(payload, user_configuration):
         try:
             first_item = next(iter(param), None)
             param_value = decode_value(
-                first_item['type'], payload[4:12], first_item)
+                first_item['type'], payload[4:12])
             data = {"paramId": param_id,
                     "name": first_item['name'], "value": param_value}
         except StopIteration:
@@ -192,8 +172,8 @@ def update_parameter_parser(payload, user_configuration):
     uP parser
     '''
     error = False
-    data = decode_value('int32', payload[0:4])
-    if data != 0:
+    data = decode_value('uint32', payload[0:4])
+    if data:
         error = True
     return data, error
 
@@ -208,21 +188,11 @@ def update_parameters_parser(payload, user_configuration):
         error = True
     return data, error
 
-def set_mount_angle_parser(payload, user_configuration):
-    '''
-    uB parser
-    '''
-    error = False
-    data = decode_value('int32', payload[0:4])
-    if data != 0:
-        error = True
-    return data, error
 
 def common_input_parser(payload, user_configuration):
     '''
     General input packet parser
     '''
-    #print('common_input_parser:', payload)
     return payload, False
 
 
@@ -336,15 +306,30 @@ def match_command_handler(packet_type):
     Find the handler for specified packet
     '''
     parser_dict = {
-        b'\x01\xcc': string_parser,
-        b'\x02\xcc': get_parameter_parser,
-        b'\x03\xcc': update_parameter_parser,
-        b'\x04\xcc': update_parameter_parser,
-        b'\x05\xcc': set_mount_angle_parser,
-        b'\x06\xcc': common_input_parser,
-        b'\x01\x0b': common_input_parser,
-        b'\x02\x0b': common_input_parser,
-        b'\x09\x0a': common_input_parser,
-        b'\x09\xaa': common_input_parser
+        'pG': string_parser,
+        'uC': common_input_parser,  # update_command_parser,
+        'uP': update_parameter_parser,
+        'uA': common_input_parser,  # update_all_command_parser,
+        'sC': common_input_parser,
+        'rD': common_input_parser,
+        'gC': common_input_parser,  # get_command_parser,
+        'gA': get_all_parameters_parser,
+        'gP': get_parameter_parser,
+        'gB': get_parameters_by_block_parser,
+        'gV': string_parser,
+        'uB': update_parameters_parser,
+        'ma': common_input_parser,
+        'RE': read_eeprom_parser,
+        'WE': common_input_parser,
+        'UE': common_input_parser,
+        'LE': common_input_parser,
+        'SR': common_input_parser,
+        'JI': common_input_parser,
+        'JA': common_input_parser,
+        'WA': common_input_parser,
+        'RF': common_input_parser,
+        'GF': common_input_parser,
+        'SF': common_input_parser,
+        'WF': common_input_parser,
     }
     return parser_dict.get(packet_type)

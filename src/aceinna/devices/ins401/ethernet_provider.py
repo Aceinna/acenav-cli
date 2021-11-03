@@ -18,7 +18,8 @@ from ..configs.ins401_predefine import (APP_STR, get_ins401_products,
 from ..decorator import with_device_message
 from ...models import InternalCombineAppParseRule
 from ..parsers.ins401_field_parser import encode_value
-from ...framework.utils.print import (print_yellow, print_green)
+from ...framework.utils.print import (print_yellow, print_green, print_blue)
+from ..ins401.mountangle.mountangle import MountAngle
 from ..upgrade_workers import (
     EthernetSDK9100UpgradeWorker,
     FirmwareUpgradeWorker,
@@ -44,6 +45,7 @@ class Provider(OpenDeviceBase):
         self.app_config_folder = ''
         self.device_info = None
         self.app_info = None
+        self.compile_info = None
         self.parameters = None
         self.setting_folder_path = None
         self.data_folder = None
@@ -63,7 +65,12 @@ class Provider(OpenDeviceBase):
         self.connected = True
         self.rtk_log_file_name = ''
         self.rtcm_rover_logf = None
-
+        self.big_mountangle_rvb = [0, 0, 0]
+        self.ins_save_logf = None
+        self.ins401_log_file_path = None
+        self.mountangle_thread = None
+        self.mountangle= None
+        self.f_process = None
     def prepare_folders(self):
         '''
         Prepare folders for data storage and configuration
@@ -131,6 +138,43 @@ class Provider(OpenDeviceBase):
 
         return self._device_info_string
 
+    def bind_compile_info(self, compile_info):
+        compile_info_str = str(compile_info, encoding='utf-8')
+        compile_info_str = compile_info_str.replace('\x0b','\\')
+        self._build_compile_info(compile_info_str)
+        return (compile_info_str)
+    def _build_compile_info(self, text):
+        '''
+        Build compile info
+        '''
+        split_text = text.split(',')
+        self.compile_info = {
+            'ins_lib':{
+                'version': split_text[0],
+                'time': split_text[1],
+                'author': split_text[2],
+                'commit':split_text[3]
+            },
+            'ins_app':{
+                'version': split_text[4],
+                'time': split_text[5],
+                'author': split_text[6],
+                'commit':split_text[7]
+            },
+            'rtk_lib':{
+                'version': split_text[8],
+                'time': split_text[9],
+                'author': split_text[10],
+                'commit':split_text[11]
+            },
+            'rtk_app':{
+                'version': split_text[12],
+                'time': split_text[13],
+                'author': split_text[14],
+                'commit':split_text[15]
+            }
+        }        
+        print(self.compile_info)
     def _build_device_info(self, text):
         '''
         Build device info
@@ -201,10 +245,7 @@ class Provider(OpenDeviceBase):
 
         if not self.is_app_matched:
             print_yellow(
-                'Failed to extract app version information from unit.' +
-                '\nThe supported application list is {0}.'.format(APP_STR) +
-                '\nTo keep runing, use INS configuration as default.' +
-                '\nYou can choose to place your json file under execution path if it is an unknown application.'
+                'Failed to extract app version information from unit.'
             )
 
     def ntrip_client_thread(self): 
@@ -236,6 +277,7 @@ class Provider(OpenDeviceBase):
         set_user_para = self.cli_options and self.cli_options.set_user_para
         self.ntrip_client_enable = self.cli_options and self.cli_options.ntrip_client
         # with_raw_log = self.cli_options and self.cli_options.with_raw_log
+        set_mount_angle = self.cli_options and self.cli_options.set_mount_angle
 
         try:
             if self.data_folder:
@@ -246,13 +288,14 @@ class Provider(OpenDeviceBase):
                 os.mkdir(file_name)
                 self.rtk_log_file_name = file_name
 
-                self.user_logf = open(
-                    file_name + '/' + 'user_' + file_time + '.bin', "wb")
+                self.ins401_log_file_path = file_name + '/' + 'user_' + file_time + '.bin'
+                self.user_logf = open(self.ins401_log_file_path, "wb")
                 self.rtcm_logf = open(
                     file_name + '/' + 'rtcm_base_' + file_time + '.bin', "wb")
                 self.rtcm_rover_logf = open(
                     file_name + '/' + 'rtcm_rover_' + file_time + '.bin', "wb")
-
+                self.ins_save_logf = open(
+                    file_name + '/' + 'ins_save_' + file_time + '.bin', "wb")
             if set_user_para:
                 result = self.set_params(
                     self.properties["initial"]["userParameters"])
@@ -263,10 +306,32 @@ class Provider(OpenDeviceBase):
                 # check saved result
                 self.check_predefined_result()
 
+
+            if set_mount_angle:
+                self.set_mount_angle()
+                self.prepare_lib_folder()
+
+            if not self.is_in_bootloader:
+                result = self.get_ins_message()
+                if result['packetType'] == 'success':
+                    #print('data = ',bytes(result['data']))
+                    self.ins_save_logf.write(bytes(result['raw_data']))
+                    self.ins_save_logf.flush() 
+                else:
+                    print('can\'t get ins save message')
+            if self.cli_options.debug == 'true':
+                result = self.get_compile_message()
+                if result['packetType'] == 'success':
+                    format_compile_info = self.bind_compile_info(
+                        result['data'])
+                    print_blue(format_compile_info)
+                else:
+                    print('can\'t get get_compile_message')
             self.save_device_info()
 
             # start ntrip client
             if not self.is_upgrading and not self.with_upgrade_error:
+                # start ntrip client
                 if self.properties["initial"].__contains__("ntrip") \
                         and not self.ntrip_client and not self.is_in_bootloader:
                     threading.Thread(target=self.ntrip_client_thread).start()
@@ -287,7 +352,7 @@ class Provider(OpenDeviceBase):
         return int(cksum, 16), calc_cksum
 
     def on_read_raw(self, data):
-        if data[0] != 0x24 or data[1] != 0x47 or data[2] != 0x50:
+        if data[0] != 0x24 or data[1] != 0x47:
             return
         
         temp_str_nmea = data.decode('utf-8')
@@ -328,6 +393,164 @@ class Provider(OpenDeviceBase):
         self.ethernet_rtcm_data_logger = EthernetRTCMDataLogger(
             self.properties, self.communicator, self.rtcm_logf)
         self.ethernet_rtcm_data_logger.run()
+        
+    def set_mountangle_config(self, result = []):
+        # copy contents of app_config under executor path
+        setting_folder_path = os.path.join(resource.get_executor_path(),
+                                                'setting')
+        # Load the openimu.json based on its app
+        product_name = 'INS401'
+        app_name = 'RTK_INS'  # self.app_info['app_name']
+        app_file_path = os.path.join(setting_folder_path, product_name,
+                                        app_name, 'ins401.json')
+
+        with open(app_file_path, 'r') as json_data:
+            self.properties = json.load(json_data)
+        
+        # update mountangle config file
+        with open(app_file_path, 'w') as json_data: 
+            userParameters = self.properties["initial"]["userParameters"]   
+            for i in range(3):
+                userParameters[9 + i]['value'] = result[i]
+            
+            json.dump(self.properties, 
+                    json_data,
+                    indent=4,
+                    ensure_ascii=False)
+
+        # setting params
+        with open(app_file_path, 'r') as json_data:
+            self.properties = json.load(json_data)
+
+        result = self.set_params(self.properties["initial"]["userParameters"])
+        if result['packetType'] == 'success':
+            self.save_config()
+
+        # check saved result
+        self.check_predefined_result()
+
+
+    def save_mountangle_file(self, type, length, content):
+        ''' Parse final packet
+        '''
+        if type == b'\x01\n': # imu
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIffffff', b)
+
+            buffer = format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + "," + "    ,"\
+                + format(data[2], '14.10f') + ","\
+                + format(data[3], '14.10f') + ","\
+                + format(data[4], '14.10f') + ","\
+                + format(data[5], '14.10f') + ","\
+                + format(data[6], '14.10f') + ","\
+                + format(data[7], '14.10f') + "\n"
+            self.f_process.write('$GPIMU,' + buffer)
+
+        elif type == b'\x02\n':
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIBdddfffBBffffffff', b)
+
+            buffer = '$GPGNSS,' + format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + ","\
+                + format(data[3], '14.9f') + ","\
+                + format(data[4], '14.9f') + ","\
+                + format(data[5], '10.4f') + ","\
+                + format(data[6], '10.4f') + ","\
+                + format(data[7], '10.4f') + ","\
+                + format(data[8], '10.4f') + ","\
+                + format(data[2], '3') + "\n"
+            self.f_process.write(buffer)
+
+            horizontal_speed = math.sqrt(data[13] * data[13] + data[14] * data[14])
+            track_over_ground = math.atan2(data[14], data[13]) * (57.295779513082320)
+            buffer = '$GPVEL,' + format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + ","\
+                + format(horizontal_speed, '10.4f') + ","\
+                + format(track_over_ground, '10.4f') + ","\
+                + format(data[15], '10.4f') + "\n"
+            self.f_process.write(buffer)
+
+        elif type == b'\x03\n':
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIBBdddfffffffffffffffffff', b)
+
+            if (data[1]%100) < 10:
+                buffer = format(data[0], '') + ","\
+                    + format(data[1]/1000, '11.4f') + ","\
+                    + format(data[4], '14.9f') + ","\
+                    + format(data[5], '14.9f') + ","\
+                    + format(data[6], '10.4f') + ","\
+                    + format(data[7], '10.4f') + ","\
+                    + format(data[8], '10.4f') + ","\
+                    + format(data[9], '10.4f') + ","\
+                    + format(data[12], '10.4f') + ","\
+                    + format(data[13], '10.4f') + ","\
+                    + format(data[14], '10.4f') + ","\
+                    + format(data[3], '3')
+                self.f_process.write('$GPINS,' + buffer + "\n")
+
+                self.mountangle.process_live_data(data, 1)
+
+        elif type == b'\x04\n':
+            b = struct.pack('{0}B'.format(length), *content)
+            data = struct.unpack('<HIBdBQ', b)
+
+            buffer = format(data[0], '') + ","\
+                + format(data[1]/1000, '11.4f') + ","\
+                + format(data[2], '3') + ","\
+                + format(data[3], '10.4f') + ","\
+                + format(data[4], '3') + ","\
+                + format(data[5], '16') + "\n"
+
+            self.f_process.write('$GPODO,' + buffer)
+        
+        elif type == b'\x05\n':
+            pass
+
+        elif type == b'\x06\n': # rover rtcm
+            pass
+
+        elif type == b'\x07\n': # corr imu
+            pass
+
+    def mountangle_parse_thread(self):       
+        print('processing {0}\n'.format(self.ins401_log_file_path))
+        
+        path = mkdir(self.ins401_log_file_path)
+
+        temp_file_path, temp_fname = os.path.split(self.ins401_log_file_path)
+        fname, ext = os.path.splitext(temp_fname)
+        self.f_process = open(path + '/' + fname + '-process', 'w+')
+
+        self.mountangle = MountAngle(os.getcwd(), path,  path + '/' + fname + '-process')
+        self.mountangle.mountangle_set_parameters(self.big_mountangle_rvb)
+        self.mountangle.mountangle_run()
+
+        while True:
+            if self._message_center._is_stop:
+                time.sleep(1)
+                continue 
+
+            if self.mountangle.out_result_flag:
+                rvb = []
+                for i in range(3):
+                    f = self.big_mountangle_rvb[i] -self.mountangle.mountangle_estimate_result[i]
+                    rvb.append(float('%.4f'% f))
+                
+                self.set_mountangle_config(rvb)
+                time.sleep(2)
+                self.save_device_info()
+                time.sleep(2)
+                print('mountangle_result:', rvb)
+                os._exit(1)
+
+            time.sleep(5)
+  
+    def start_mountangle_parse(self):
+        if self.ins401_log_file_path and self.mountangle_thread is None:
+            self.mountangle_thread = threading.Thread(target=self.mountangle_parse_thread)
+            self.mountangle_thread.start()
 
     def on_receive_output_packet(self, packet_type, data, *args, **kwargs):
         '''
@@ -340,6 +563,24 @@ class Provider(OpenDeviceBase):
             raw_data = kwargs.get('raw')
             if self.user_logf and raw_data:
                 self.user_logf.write(bytes(raw_data))
+
+                if self.mountangle:
+                    payload_len = struct.unpack('<I', bytes(raw_data[4:8]))[0]
+                    self.save_mountangle_file(packet_type, payload_len, raw_data[8:8+payload_len])
+              
+                if packet_type == b'\x07\n':
+                    if self.cli_options and self.cli_options.set_mount_angle and self.mountangle_thread is None:
+                        content = raw_data[8:]
+                        big_mountangle_rvb = []            
+                        for i in range(3):
+                            big_mountangle_rvb.append(struct.unpack('<d', bytes(content[7 + 8 * i:15 + 8 * i]))[0])
+
+                        for i in range(3):
+                            self.big_mountangle_rvb[i] = big_mountangle_rvb[i] * 57.29577951308232
+                        if self.mountangle:
+                            self.mountangle.mountangle_logger.debug("[mountangle] big_mountangle_rvb: {0}, {1}, {2}".format(self.big_mountangle_rvb[0], self.big_mountangle_rvb[1], self.big_mountangle_rvb[2]))
+                        self.start_mountangle_parse()
+
 
     def after_jump_bootloader(self):
         self.communicator.reshake_hand()
@@ -599,7 +840,7 @@ class Provider(OpenDeviceBase):
         result = self.get_params()
         if result['packetType'] == 'inputParams':
             with open(file_path, 'w') as outfile:
-                json.dump(result['data'], outfile)
+                json.dump(result['data'], outfile, indent=4, ensure_ascii=False)
 
         # compare saved parameters with predefined parameters
         hashed_predefined_parameters = helper.collection_to_dict(
@@ -655,6 +896,8 @@ class Provider(OpenDeviceBase):
                                                  time.localtime())
             session_info['device'] = self.device_info
             session_info['app'] = self.app_info
+            if self.cli_options.debug == 'true':
+                session_info['compile'] = self.compile_info
             session_info['interface'] = self.cli_options.interface
             parameters_configuration = dict()
             for item in result['data']:
@@ -752,7 +995,7 @@ class Provider(OpenDeviceBase):
                 break
 
             parameter_values.append(result['data'])
-            time.sleep(0.2)
+            time.sleep(0.3)
 
         if not has_error:
             self.parameters = parameter_values
@@ -799,6 +1042,7 @@ class Provider(OpenDeviceBase):
             if exist_parameter:
                 parameter['type'] = exist_parameter['type']
                 result = self.set_param(parameter)
+                # print('result:', result)
 
                 packet_type = result['packetType']
                 data = result['data']
@@ -856,6 +1100,58 @@ class Provider(OpenDeviceBase):
             yield {'packetType': 'error', 'data': data}
 
         yield {'packetType': 'success', 'data': data}
+    @with_device_message
+    def set_mount_angle(self, *args):  # pylint: disable=unused-argument
+        '''
+        Save configuration
+        '''
+        sC = b'\x05\xcc'
+        command_line = helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
+            sC)
+
+        result = yield self._message_center.build(command=command_line.actual_command,
+                                                  timeout=2)
+
+        data = result['data']
+        error = result['error']
+        print('set mount angle result:', data)
+        if error:
+            yield {'packetType': 'error', 'data': data}
+
+        yield {'packetType': 'success', 'data': data}
+    @with_device_message
+    def get_ins_message(self):
+        command_gi = b'\x09\x0a'
+
+        command_line = helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
+            command_gi)
+        result = yield self._message_center.build(command=command_line.actual_command, timeout=3)
+        error = result['error']
+        data = result['data']
+        raw_data = result['raw']
+        if error:
+            yield {'packetType': 'error', 'data': {'error': error}, 'raw_data': {'error': error}}
+
+        yield {'packetType': 'success', 'data': data, 'raw_data': raw_data}
+
+
+    @with_device_message
+    def get_compile_message(self):
+        command_gc = b'\x09\xaa'
+
+        command_line = helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
+            command_gc)
+        result = yield self._message_center.build(command=command_line.actual_command, timeout=3)
+        error = result['error']
+        data = result['data']
+        raw_data = result['raw']
+        if error:
+            yield {'packetType': 'error', 'data': {'error': error}, 'raw_data': {'error': error}}
+
+        yield {'packetType': 'success', 'data': data, 'raw_data': raw_data}
 
     @with_device_message
     def reset_params(self, params, *args):  # pylint: disable=unused-argument
@@ -902,3 +1198,46 @@ class Provider(OpenDeviceBase):
             yield {'packetType': 'error', 'data': {'error': error}}
 
         yield {'packetType': 'success', 'data': data}
+    
+    def prepare_lib_folder(self):
+        executor_path = resource.get_executor_path()
+        lib_folder_name = 'libs'
+
+        # copy contents of libs file under executor path
+        lib_folder_path = os.path.join(
+            executor_path, lib_folder_name)
+
+        if not os.path.isdir(lib_folder_path):
+            os.makedirs(lib_folder_path)
+
+        DR_lib_file = "DR_MountAngle"
+        INS_lib_file = "INS"
+        if os.name == 'nt':  # windows
+            DR_lib_file = "DR_MountAngle.dll"
+            INS_lib_file = "INS.dll"
+
+        DR_lib_path = os.path.join(lib_folder_path, DR_lib_file)
+        if not os.path.isfile(DR_lib_path):
+            lib_content = resource.get_content_from_bundle(
+                lib_folder_name, DR_lib_file)
+            if lib_content is None:
+                raise ValueError('Lib file content is empty')
+
+            with open(DR_lib_path, "wb") as code:
+                code.write(lib_content)
+
+
+        INS_lib_path = os.path.join(lib_folder_path, INS_lib_file)
+        if not os.path.isfile(INS_lib_path):
+            lib_content = resource.get_content_from_bundle(
+                lib_folder_name, INS_lib_file)
+            if lib_content is None:
+                raise ValueError('Lib file content is empty')
+
+            with open(INS_lib_path, "wb") as code:
+                code.write(lib_content)
+        
+        if DR_lib_path and INS_lib_path:
+            return True
+
+        return False

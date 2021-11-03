@@ -34,8 +34,7 @@ class Default:
         '''
         # prepare driver
         threading.Thread(target=self._prepare_driver).start()
-        # prepare tunnel
-        threading.Thread(target=self._prepare_tunnel).start()
+
         # prepage logger
         self._prepare_logger()
 

@@ -776,12 +776,8 @@ class RTKProviderBase(OpenDeviceBase):
                           indent=4, ensure_ascii=False)
 
     def after_upgrade_completed(self):
-        # start ntrip client
-        if self.properties["initial"].__contains__("ntrip") and not self.ntrip_client and not self.is_in_bootloader:
-            thead = threading.Thread(target=self.ntrip_client_thread)
-            thead.start()
-
-        self.save_device_info()
+        self.communicator.reset_buffer()
+        pass
 
     def get_operation_status(self):
         if self.is_logging:

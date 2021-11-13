@@ -413,7 +413,7 @@ class SerialPort(Communicator):
             if self.serial_port.isOpen():
                 self.serial_port.close()
 
-    def write(self, data, is_flush=False):
+    def write(self, data, is_flush=True):
         '''
         write the bytes data to the port
 

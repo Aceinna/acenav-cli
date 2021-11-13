@@ -30,6 +30,7 @@ from ..upgrade_workers import (
 )
 from ..parsers.rtk330l_field_parser import encode_value
 from abc import ABCMeta, abstractmethod
+from ..ping.rtk330l import ping
 
 
 class RTKProviderBase(OpenDeviceBase):
@@ -59,6 +60,7 @@ class RTKProviderBase(OpenDeviceBase):
         self.debug_logf = None
         self.rtcm_logf = None
         self.debug_c_f = None
+        self.ntrip_rtcm_logf = None
         self.enable_data_log = False
         self.is_app_matched = False
         self.ntrip_client_enable = False
@@ -229,8 +231,11 @@ class RTKProviderBase(OpenDeviceBase):
         self.ntrip_client.run()
 
     def handle_rtcm_data_parsed(self, data):
+        bytes_data = bytearray(data)
         if self.communicator.can_write() and not self.is_upgrading:
-            self.communicator.write(data)
+            self.communicator.write(bytes_data)
+
+        self.ntrip_rtcm_logf.write(bytes_data)
 
     def build_connected_serial_port_info(self):
         if not self.communicator.serial_port:
@@ -283,6 +288,9 @@ class RTKProviderBase(OpenDeviceBase):
 
         # start ntrip client
         if self.properties["initial"].__contains__("ntrip") and not self.ntrip_client and not self.is_in_bootloader:
+            self.ntrip_rtcm_logf = open(os.path.join(self.rtk_log_file_name, 'ntrip_rtcm_{0}.bin'.format(
+                formatted_file_time)), "wb")
+
             thead = threading.Thread(target=self.ntrip_client_thread)
             thead.start()
 
@@ -373,7 +381,7 @@ class RTKProviderBase(OpenDeviceBase):
                             cksum, calc_cksum = self.nmea_checksum(
                                 str_nmea)
                             if cksum == calc_cksum:
-                                if str_nmea.find("$GPGGA") != -1:
+                                if str_nmea.find("$GPGGA") != -1 or str_nmea.find("$GNGGA") != -1:
                                     if self.ntrip_client:
                                         self.ntrip_client.send(str_nmea)
                                     #self.add_output_packet('gga', str_nmea)
@@ -406,7 +414,7 @@ class RTKProviderBase(OpenDeviceBase):
         if packet_type == 'gN':
             if self.ntrip_client:
                 # $GPGGA
-                gpgga = '$GPGGA'
+                gpgga = '$GNGGA' #'$GPGGA'
                 # time
                 timeOfWeek = float(data['GPS_TimeofWeek']) - 18
                 dsec = int(timeOfWeek)
@@ -601,11 +609,22 @@ class RTKProviderBase(OpenDeviceBase):
         '''
         pass
 
-    def before_jump_app_command(self):
-        self.communicator.serial_port.baudrate = self.bootloader_baudrate
+
+    def after_jump_bootloader_command(self):
+        pass
+
 
     def after_jump_app_command(self):
-        self.communicator.serial_port.baudrate = self.original_baudrate
+        # rtk330l ping device
+        can_ping = False
+
+        while not can_ping:
+            self.communicator.reset_buffer()  # clear input and output buffer
+            info = ping(self.communicator, None)
+            if info:
+                can_ping = True
+            time.sleep(0.5)
+        pass
 
     def get_upgrade_workers(self, firmware_content):
         workers = []
@@ -617,6 +636,7 @@ class RTKProviderBase(OpenDeviceBase):
 
         parsed_content = firmware_content_parser(firmware_content, rules)
         # foreach parsed content, if empty, skip register into upgrade center
+        device_info = self.get_device_connection_info()
         for _, rule in enumerate(parsed_content):
             content = parsed_content[rule]
             if len(content) == 0:
@@ -625,9 +645,10 @@ class RTKProviderBase(OpenDeviceBase):
             worker = self.build_worker(rule, content)
             if not worker:
                 continue
-
-            workers.append(worker)
-
+            if (device_info['modelName'] == 'RTK330L') and (rule == 'sdk') and ((int(device_info['serialNumber']) <= 2178200080) and (int(device_info['serialNumber']) >= 2178200001)):
+                continue
+            else:
+                workers.append(worker)
         # prepare jump bootloader worker and jump application workder
         # append jump bootloader worker before the first firmware upgrade workder
         # append jump application worker after the last firmware uprade worker
@@ -645,7 +666,8 @@ class RTKProviderBase(OpenDeviceBase):
             command=jump_bootloader_command,
             listen_packet='JI',
             wait_timeout_after_command=1)
-        jumpBootloaderWorker.group = UPGRADE_GROUP.BEFORE_ALL
+        jumpBootloaderWorker.on(
+            UPGRADE_EVENT.AFTER_COMMAND, self.after_jump_bootloader_command)
 
         jump_application_command = helper.build_bootloader_input_packet('JA')
         jumpApplicationWorker = JumpApplicationWorker(
@@ -653,10 +675,6 @@ class RTKProviderBase(OpenDeviceBase):
             command=jump_application_command,
             listen_packet='JA',
             wait_timeout_after_command=1)
-        jumpApplicationWorker.group = UPGRADE_GROUP.AFTER_ALL
-
-        jumpApplicationWorker.on(
-            UPGRADE_EVENT.BEFORE_COMMAND, self.before_jump_app_command)
         jumpApplicationWorker.on(
             UPGRADE_EVENT.AFTER_COMMAND, self.after_jump_app_command)
 
@@ -758,12 +776,8 @@ class RTKProviderBase(OpenDeviceBase):
                           indent=4, ensure_ascii=False)
 
     def after_upgrade_completed(self):
-        # start ntrip client
-        if self.properties["initial"].__contains__("ntrip") and not self.ntrip_client and not self.is_in_bootloader:
-            thead = threading.Thread(target=self.ntrip_client_thread)
-            thead.start()
-
-        self.save_device_info()
+        self.communicator.reset_buffer()
+        pass
 
     def get_operation_status(self):
         if self.is_logging:
@@ -840,7 +854,7 @@ class RTKProviderBase(OpenDeviceBase):
             for i in range(2, conf_parameters_len, step):
                 start_byte = i
                 end_byte = i+step-1 if i+step < conf_parameters_len else conf_parameters_len
-                time.sleep(0.1)
+                time.sleep(0.2)
                 command_line = helper.build_packet(
                     'gB', [start_byte, end_byte])
                 result = yield self._message_center.build(command=command_line, timeout=10)

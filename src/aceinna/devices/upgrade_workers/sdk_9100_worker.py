@@ -1,7 +1,8 @@
 import time
 import math
 from ..base.upgrade_worker_base import UpgradeWorkerBase
-from . import UPGRADE_EVENT, UPGRADE_GROUP
+from ...framework.utils import helper
+from . import (UPGRADE_EVENT, UPGRADE_GROUP)
 
 XLDR_TESEO5_BOOTLOADER_CUT2 = \
     [
@@ -872,19 +873,24 @@ CRC32_TAB = \
         0x2d02ef8d
     ]
 
+BLOCK_SIZE = 5120
+
 
 class SDKUpgradeWorker(UpgradeWorkerBase):
     '''
     Upgrade tool for SDK of RTK330LA
     '''
 
-    def __init__(self, uart, file_content):
+    def __init__(self, communicator, baudrate, file_content):
         super(SDKUpgradeWorker, self).__init__()
-        self._uart = uart
+        self._uart = communicator.serial_port
         self._file_content = file_content
-        # self._key = None
-        # self._is_stopped = False
-        # self._uart = None
+
+        self._baudrate = baudrate
+        self._group = UPGRADE_GROUP.FIRMWARE
+
+    def write_wrapper(self, data):
+        self._uart.write(data)
 
     def _match(self, result, check_data):
         if isinstance(check_data, list):
@@ -932,14 +938,14 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         value_list[3] = (value >> 24) & 0xff
         return value_list
 
-    def read_until(self, check_data, read_times, read_len=None):
+    def read_until(self, check_data, read_times=1000, read_len=None):
         is_match = False
+
         while read_times > 0:
             if read_len:
                 result = self._uart.read(read_len)
             else:
                 result = self._uart.read_all()
-            # print(result)
             if len(result) > 0:
                 is_match = self._match(result, check_data)
                 break
@@ -948,6 +954,54 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
             read_times -= 1
 
         return is_match
+
+    def send_packet(self, data, buffer_size=512):
+        total = len(data)
+        start = 0
+
+        if total == 0 or buffer_size <= 0:
+            return
+
+        if total <= buffer_size:
+            self.write_wrapper(data)
+            return
+
+        split_range = []
+
+        while total > 0:
+            if total-buffer_size > 0:
+                split_range.append(buffer_size)
+                total -= buffer_size
+            else:
+                split_range.append(total)
+                total = 0
+
+        for actual_size in split_range:
+            self.write_wrapper(data[start: start+actual_size])
+            start += actual_size
+            time.sleep(0.01)
+
+    def send_sdk_cmd(self):
+        if self._is_stopped:
+            return False
+
+        command_line = helper.build_bootloader_input_packet('JS')
+        self.write_wrapper(command_line)
+        time.sleep(0.5)
+
+        response = helper.read_untils_have_data(self._uart, 'JS')
+        # print(rev_data)
+        return True  # if response is not None else False
+
+    def send_sdk_cmd_JG(self):
+        if self._is_stopped:
+            return False
+
+        command_line = helper.build_bootloader_input_packet('JG')
+        self.write_wrapper(command_line)
+        time.sleep(0.5)
+        response = helper.read_untils_have_data(self._uart, 'JG')
+        return True if response is not None else False
 
     def send_sync(self):
         if self._is_stopped:
@@ -958,7 +1012,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         is_matched = False
 
         for i in range(retry_times):
-            self._uart.write([0x00, 0x00, 0x00, 0x00])
+            self._uart.write(sync)
             self._uart.write(sync)
             self._uart.write(sync)
             time.sleep(0.5)
@@ -975,7 +1029,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         change_baud_cmd = [0x71]
 
-        self._uart.write(change_baud_cmd)
+        self.write_wrapper(change_baud_cmd)
 
         return self.read_until(0xCC, 10, 1)
 
@@ -986,12 +1040,12 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         baud_list = []
         baud_list = self.get_list_from_int(baud_int)
 
-        self._uart.write(baud_list)
+        self.write_wrapper(baud_list)
 
-        has_read = self.read_until(0xCC, 10)
+        has_read = self.read_until(0xCC, 10, 1)
 
-        if has_read:
-            self._uart.baudrate = baud_int
+        # if has_read:
+        #     self._uart.baudrate = baud_int
 
         return has_read
 
@@ -1001,7 +1055,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         check_baud = [0x38]
         time.sleep(0.01)
-        self._uart.write(check_baud)
+        self.write_wrapper(check_baud)
 
         return self.read_until(0xCC, 10, 1)
 
@@ -1011,9 +1065,9 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         host = [0x5a]
         # fs.write(bytes(host))
-        self._uart.write(host)
+        self.write_wrapper(host)
 
-        return self.read_until(0xCC, 10)
+        return self.read_until(0xCC, 10, 1)
 
     def send_boot(self):
         if self._is_stopped:
@@ -1044,14 +1098,6 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         self._uart.write(entry_hex)
         self._uart.write(boot_part1)
         self._uart.write(boot_part2)
-        '''
-        fs.write(bytes(preamble))
-        fs.write(bytes(crc_val_boot_hex))
-        fs.write(bytes(boot_size_hex))
-        fs.write(bytes(entry_hex))
-        fs.write(bytes(boot_part1))
-        fs.write(bytes(boot_part2))
-        '''
 
         return self.read_until(0xCC, 100, 1)
 
@@ -1060,14 +1106,14 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
             return False
         write_cmd = [0x4A]
 
-        self._uart.write(write_cmd)
+        self.write_wrapper(write_cmd)
 
         return self.read_until(0xCC, 10, 1)
 
     def send_bin_info(self, bin_info_list):
         if self._is_stopped:
             return False
-        self._uart.write(bin_info_list)
+        self.write_wrapper(bin_info_list)
 
         return self.read_until(0xCC, 10, 1)
 
@@ -1133,24 +1179,27 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         return self.read_until(0xCC, 500, 1)
 
+    def erase_nvm_wait(self):
+        if self._is_stopped:
+            return False
+        return self.read_until(0xCC, 500, 1)
+
     def flash_write(self, fs_len, bin_data):
         write_result = True
-        block_size = 5120
-        packet_num = math.ceil(fs_len/block_size)
+        packet_num = math.ceil(fs_len/BLOCK_SIZE)
         current = 0
         for i in range(packet_num):
             if self._is_stopped:
                 return False
 
             if i == packet_num:
-                data_to_sdk = bin_data[packet_num*block_size:]
+                data_to_sdk = bin_data[packet_num*BLOCK_SIZE:]
             else:
-                data_to_sdk = bin_data[i*block_size:(i+1)*block_size]
-
+                data_to_sdk = bin_data[i*BLOCK_SIZE:(i+1)*BLOCK_SIZE]
+            # fs.write(bytes(data_to_sdk))
             current += len(data_to_sdk)
-            self._uart.write(data_to_sdk)
-
-            has_read = self.read_until(0xCC, 100)
+            self.send_packet(data_to_sdk, BLOCK_SIZE)
+            has_read = self.read_until(0xCC, 100, 1)
 
             if has_read:
                 self.emit(UPGRADE_EVENT.PROGRESS,
@@ -1165,7 +1214,13 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if self._is_stopped:
             return False
 
-        return self.read_until(0xCC, 500)
+        return self.read_until(0xCC, 500, 1)
+
+    def flash_restart(self):
+        if self._is_stopped:
+            return False
+
+        return self.read_until(0xCC, 200, 1)
 
     def _raise_error(self, message):
         # if self._uart.isOpen():
@@ -1194,12 +1249,19 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         fs_len = len(self._file_content)
         bin_info_list = self.get_bin_info_list(fs_len, self._file_content)
-        self._uart.close()
+
         # if not self.connect_serail_port():
         #     return self._raise_error('Connect serial Port failed')
-        time.sleep(5)  # Wait for bootloader ready
-        self._uart.open()
+        if not self.send_sdk_cmd():
+            return self._raise_error('Send sdk command failed')
+
+        time.sleep(2)
+        self._uart.baudrate = self._baudrate
         self._uart.reset_input_buffer()
+        self._uart.close()
+        time.sleep(2)
+
+        self._uart.open()
 
         if not self.send_sync():
             return self._raise_error('Sync failed')
@@ -1236,6 +1298,9 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         if not self.flash_crc():
             return self._raise_error('CRC check fail')
+
+        if not self.send_sdk_cmd_JG():
+            return self._raise_error('Send sdk command JG fail')
         else:
             # self._uart.close()
             self.emit(UPGRADE_EVENT.FINISH, self._key)

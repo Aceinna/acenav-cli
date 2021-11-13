@@ -10,7 +10,7 @@ try:
     from aceinna.models.args import WebserverArgs
     from aceinna.framework.utils import (helper)
     from aceinna.framework.decorator import handle_application_exception
-    from aceinna.devices.ins401.ethernet_provider import Provider as EhternetProvider
+    from aceinna.devices.rtkl.uart_provider import Provider as UartProvider
     from aceinna.framework.constants import INTERFACES
 except:  # pylint: disable=bare-except
     print('load package from local')
@@ -19,7 +19,7 @@ except:  # pylint: disable=bare-except
     from aceinna.models.args import WebserverArgs
     from aceinna.framework.utils import (helper)
     from aceinna.framework.decorator import handle_application_exception
-    from aceinna.devices.ins401.ethernet_provider import Provider as EhternetProvider
+    from aceinna.devices.rtkl.uart_provider import Provider as UartProvider
     from aceinna.framework.constants import INTERFACES
 
 def handle_discovered(device_provider):
@@ -29,7 +29,7 @@ def handle_discovered(device_provider):
         if device_provider.is_upgrading == False:     
             loop_upgrade_cnt += 1
             print("loop_upgrade_cnt:", loop_upgrade_cnt)
-        device_provider.upgrade_framework("./all.bin")
+        device_provider.upgrade_framework("./RTK330LA_RTK_INS_STA_v24.02.02.bin")
 
         time.sleep(5)
 
@@ -45,7 +45,7 @@ def kill_app(signal_int, call_back):
 @handle_application_exception
 def simple_start():
     driver = Driver(WebserverArgs(
-        interface=INTERFACES.ETH_100BASE_T1
+        interface=INTERFACES.UART
     ))
     driver.on(DriverEvents.Discovered, handle_discovered)
     driver.detect()

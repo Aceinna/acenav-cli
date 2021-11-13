@@ -5,8 +5,9 @@ import struct
 from ..base.rtk_provider_base import RTKProviderBase
 from ..upgrade_workers import (
     FirmwareUpgradeWorker,
+    SDK9100UpgradeWorker,
     UPGRADE_EVENT,
-    SDK9100UpgradeWorker
+    UPGRADE_GROUP
 )
 from ...framework.utils import (
     helper
@@ -85,9 +86,6 @@ class Provider(RTKProviderBase):
         if not result:
             raise Exception('Cannot run set core command')
 
-    def reopen_rtcm_serial_port(self, *args):
-        self.rtcm_serial_port.baudrate = 460800
-
     def firmware_write_command_generator(self, data_len, current, data):
         command_WA = 'WA'
         message_bytes = []
@@ -123,22 +121,8 @@ class Provider(RTKProviderBase):
             return ins_upgrade_worker
 
         if rule == 'sdk':
-            if not self.rtcm_serial_port:
-                raise Exception(
-                    'SDK upgrade serial port is not ready, please try again.')
-
-            sdk_uart = self.rtcm_serial_port
-            sdk_uart.baudrate = self.bootloader_baudrate
-            # sdk_uart.reset_input_buffer()
-
-            if not sdk_uart.isOpen():
-                raise Exception('Cannot open SDK upgrade port')
-
-            sdk_upgrade_worker = SDK9100UpgradeWorker(sdk_uart, content)
-            sdk_upgrade_worker.on(UPGRADE_EVENT.ERROR,
-                                  self.reopen_rtcm_serial_port)
-            sdk_upgrade_worker.on(UPGRADE_EVENT.FINISH,
-                                  self.reopen_rtcm_serial_port)
+            sdk_upgrade_worker = SDK9100UpgradeWorker(
+                self.communicator, self.bootloader_baudrate, content)
             return sdk_upgrade_worker
 
     # command list

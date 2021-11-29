@@ -218,6 +218,13 @@ def set_mount_angle_parser(payload, user_configuration):
         error = True
     return data, error
 
+def set_serial_number_parser(payload, user_configuration):
+    error = False
+    data = decode_value('int32', payload[0:4])
+    if data != 0:
+        error = True
+    return data, error
+
 def common_input_parser(payload, user_configuration):
     '''
     General input packet parser
@@ -345,6 +352,7 @@ def match_command_handler(packet_type):
         b'\x01\x0b': common_input_parser,
         b'\x02\x0b': common_input_parser,
         b'\x09\x0a': common_input_parser,
-        b'\x09\xaa': common_input_parser
+        b'\x09\xaa': common_input_parser,
+        b'\x01\xfc': set_serial_number_parser
     }
     return parser_dict.get(packet_type)

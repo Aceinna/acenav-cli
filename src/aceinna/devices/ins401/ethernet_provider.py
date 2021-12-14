@@ -589,12 +589,13 @@ class Provider(OpenDeviceBase):
         '''
             check if in application mode
         '''
-        for i in range(10):
+        for i in range(40):
             try:
                 result = self.communicator.reshake_hand()
                 if result:
                     break
             except:
+                time.sleep(0.5)
                 continue
 
     def before_write_content(self, core, content_len):

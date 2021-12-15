@@ -11,7 +11,7 @@ def create_provider(device_type, communicator):
     if communicator.type == INTERFACES.UART:
         if device_type == 'RTKL':
             return RTKLUartProvider(communicator)
-        elif device_type == 'beidou':
+        elif device_type == 'beidou':       #TODO: test6
             return beidouUartProvider(communicator)
     if communicator.type==INTERFACES.ETH_100BASE_T1:
         if device_type == 'INS401':

@@ -1,5 +1,7 @@
 from .ping import ping_tool
 from .rtkl.uart_provider import Provider as RTKLUartProvider
+from .rtkl.uart_provider import beidouProvider as beidouUartProvider
+
 from .ins401.ethernet_provider import Provider as INS401EthernetProvider
 from ..framework.context import APP_CONTEXT
 from ..framework.utils.print import print_green
@@ -9,7 +11,8 @@ def create_provider(device_type, communicator):
     if communicator.type == INTERFACES.UART:
         if device_type == 'RTKL':
             return RTKLUartProvider(communicator)
-
+        elif device_type == 'beidou':
+            return beidouUartProvider(communicator)
     if communicator.type==INTERFACES.ETH_100BASE_T1:
         if device_type == 'INS401':
             return INS401EthernetProvider(communicator)
@@ -73,7 +76,7 @@ class DeviceManager:
             device_access = args[0]
             filter_device_type = args[1]
 
-            ping_result = ping_tool.do_ping(
+            ping_result = ping_tool.do_ping(    #TODO: step4
                 communicator.type, device_access, filter_device_type)
             if ping_result is not None:
                 return DeviceManager.build_provider(communicator, device_access, ping_result)

@@ -129,7 +129,7 @@ class SerialPort(Communicator):
                     if self.try_last_port():
                         break
                     self._available_ports = self.find_ports()
-                    self.autobaud(self._available_ports)
+                    self.autobaud(self._available_ports)    #TODO: step3
 
                 self._tried += 1
 

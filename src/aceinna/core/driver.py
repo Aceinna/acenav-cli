@@ -124,7 +124,7 @@ class Driver(EventBase):
             self._communicator = CommunicatorFactory.create(
                 self._interface, self._options)
 
-        self._communicator.find_device(self._device_discover_handler)
+        self._communicator.find_device(self._device_discover_handler)   #TODO: step2
 
     def execute(self, method, parameters=None):
         ''' Execute command on device

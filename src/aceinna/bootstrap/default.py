@@ -83,7 +83,7 @@ class Default:
         self._driver.on(DriverEvents.Continous,
                         self.handle_receive_continous_data)
 
-        self._driver.detect()
+        self._driver.detect()           #TODO: step1
 
     def _prepare_tunnel(self):
         pass

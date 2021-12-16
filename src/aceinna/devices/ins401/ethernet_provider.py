@@ -589,7 +589,7 @@ class Provider(OpenDeviceBase):
         '''
             check if in application mode
         '''
-        for i in range(40):
+        for i in range(100):
             try:
                 result = self.communicator.reshake_hand()
                 if result:

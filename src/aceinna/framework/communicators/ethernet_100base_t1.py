@@ -160,7 +160,6 @@ class Ethernet(Communicator):
             self.start_listen_data()
             return True
         else:
-            raise Exception('Cannot finish shake hand.')
             return False
 
     def start_listen_data(self):

@@ -6,7 +6,7 @@ from ...framework.constants import INTERFACES
 #TODO:
 def do_ping(communicator_type, device_access, filter_device_type):
     if communicator_type == INTERFACES.UART:
-        if filter_device_type is None or filter_device_type in ['RTKL']:
+        if filter_device_type is None or filter_device_type in ['RTKL', 'beidou']:
             APP_CONTEXT.get_logger().logger.debug(
                 'Checking if is RTK330L device...')
             ping_result = ping_beidou(

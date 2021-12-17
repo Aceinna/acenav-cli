@@ -3,23 +3,8 @@
 	"type": "openrtk",
     "description": "6-axis OpenRTK with INS application",
     "initial":{
-        "useDefaultUart": 1,
+        "useDefaultUart": 0,
         "uart":[
-            {
-                "name": "GNSS",
-                "value": "com10",
-                "enable": 0
-            },
-            {
-                "name": "DEBUG",
-                "value": "com11",
-                "enable": 0 
-            },
-            {
-                "name": "SDK",
-                "value": "com12",
-                "enable": 0 
-            }
         ],
         "userParameters": [
             {

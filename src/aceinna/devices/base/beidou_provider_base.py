@@ -284,8 +284,8 @@ class beidouProviderBase(OpenDeviceBase):
                 self.save_config()
 
             # check saved result
-            self.check_predefined_result()
-
+            result = self.check_predefined_result()
+            self.save_device_info(result)
         # start ntrip client
         if self.properties["initial"].__contains__("ntrip") and not self.ntrip_client and not self.is_in_bootloader:
             self.ntrip_rtcm_logf = open(os.path.join(self.beidou_log_file_name, 'ntrip_rtcm_{0}.bin'.format(
@@ -340,7 +340,7 @@ class beidouProviderBase(OpenDeviceBase):
                         target=self.thread_debug_port_receiver, args=(self.beidou_log_file_name,))
                     thead.start()
 
-            self.save_device_info()
+            # self.save_device_info()
         except Exception as ex:
             if self.debug_serial_port is not None:
                 if self.debug_serial_port.isOpen():
@@ -732,15 +732,15 @@ class beidouProviderBase(OpenDeviceBase):
         if fail_count > 0:
             print_yellow(check_result)
             print_yellow('The failed parameters: {0}'.format(fail_parameters))
-
-    def save_device_info(self):
+        return result
+    def save_device_info(self, result):
         ''' Save device configuration
             File name: configuration.json
         '''
         if self.is_in_bootloader:
             return
 
-        result = self.get_params()
+        #result = self.get_params()
 
         device_configuration = None
         file_path = os.path.join(

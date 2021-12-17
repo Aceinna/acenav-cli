@@ -706,13 +706,12 @@ class beidouProviderBase(OpenDeviceBase):
         if result['packetType'] == 'inputParams':
             with open(file_path, 'w') as outfile:
                 json.dump(result['data'], outfile)
-
+        #print(result)
         # compare saved parameters with predefined parameters
         hashed_predefined_parameters = helper.collection_to_dict(
             self.properties["initial"]["userParameters"], key='paramId')
         hashed_current_parameters = helper.collection_to_dict(
             result['data'], key='paramId')
-
         success_count = 0
         fail_count = 0
         fail_parameters = []
@@ -849,12 +848,12 @@ class beidouProviderBase(OpenDeviceBase):
         if self.app_info['app_name'] == 'INS':
             conf_parameters = self.properties['userConfiguration']
             conf_parameters_len = len(conf_parameters)-1
-            step = 10
-
+            step = 20
             for i in range(2, conf_parameters_len, step):
                 start_byte = i
                 end_byte = i+step-1 if i+step < conf_parameters_len else conf_parameters_len
-                time.sleep(0.2)
+                time.sleep(0.5)
+                #print('xxxxxxxxxxxxxxxxxxxx',start_byte, end_byte)
                 command_line = helper.build_packet(
                     'gB', [start_byte, end_byte])
                 result = yield self._message_center.build(command=command_line, timeout=10)

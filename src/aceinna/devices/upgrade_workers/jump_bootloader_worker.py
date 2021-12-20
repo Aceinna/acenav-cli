@@ -68,7 +68,7 @@ class JumpBootloaderWorker(UpgradeWorkerBase):
                             self._communicator, self._listen_packet, 100, 1000, payload_length_format)
                 if response:
                     break
-
+            
             if(response is None):
                 self.emit(UPGRADE_EVENT.ERROR, self._key,
                     'jump bootloader fail')

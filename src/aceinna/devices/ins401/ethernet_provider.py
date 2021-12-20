@@ -29,7 +29,7 @@ from ..upgrade_workers import (
     UPGRADE_GROUP
 )
 
-GPZDA_DATA_LEN = 39
+GNZDA_DATA_LEN = 39
 
 class Provider(OpenDeviceBase):
     '''
@@ -358,15 +358,15 @@ class Provider(OpenDeviceBase):
         temp_str_nmea = data.decode('utf-8')
         if (temp_str_nmea.find("\r\n", len(temp_str_nmea)-2, len(temp_str_nmea)) != -1):
             str_nmea = temp_str_nmea            
-        elif(temp_str_nmea.find("\r\n", GPZDA_DATA_LEN-2, GPZDA_DATA_LEN) != -1):
-            str_nmea = temp_str_nmea[0:GPZDA_DATA_LEN]
+        elif(temp_str_nmea.find("\r\n", GNZDA_DATA_LEN-2, GNZDA_DATA_LEN) != -1):
+            str_nmea = temp_str_nmea[0:GNZDA_DATA_LEN]
         else:
             return
 
         try:
             cksum, calc_cksum = self.nmea_checksum(str_nmea)
             if cksum == calc_cksum:
-                if str_nmea.find("$GPGGA", 0, 6) != -1:
+                if str_nmea.find("$GPGGA", 0, 6) != -1 or str_nmea.find("$GNGGA", 0, 6) != -1:
                     if self.ntrip_client:
                         self.ntrip_client.send(str_nmea)
                 if self.user_logf:
@@ -589,12 +589,13 @@ class Provider(OpenDeviceBase):
         '''
             check if in application mode
         '''
-        for i in range(10):
+        for i in range(100):
             try:
                 result = self.communicator.reshake_hand()
                 if result:
                     break
             except:
+                time.sleep(0.5)
                 continue
 
     def before_write_content(self, core, content_len):

@@ -21,7 +21,7 @@ except:  # pylint: disable=bare-except
     from aceinna.devices.ins401.ethernet_provider import Provider as EhternetProvider
     from aceinna.framework.constants import INTERFACES
 
-INPUT_PACKETS = [b'\x01\xcc', b'\x02\xcc', b'\x03\xcc', b'\x04\xcc', b'\x06\xcc', b'\x01\x0b', b'\x02\x0b']
+INPUT_PACKETS = [b'\x01\xcc', b'\x02\xcc', b'\x03\xcc', b'\x04\xcc', b'\x06\xcc', b'\x01\x0b', b'\x02\x0b', b'\x01\xfc']
 user_parameters = [0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 
@@ -170,8 +170,34 @@ def ethernet_command_send_receive(device_provider:EhternetProvider):
         return False
     return True
 
+
+def set_product_serial_number(dest, src, command):
+    message_bytes = []
+    serial_number = 0x56789123;
+
+    serial_number_bytes = struct.pack('<I', serial_number)
+    message_bytes.extend(serial_number_bytes)
+
+    command_line = helper.build_ethernet_packet(dest, src, command, message_bytes)
+    return command_line
+
+def ethernet_configuration_command_send_receive(device_provider:EhternetProvider):
+    # get production info
+    command_line = set_product_serial_number(device_provider.communicator.get_dst_mac(),
+                                            device_provider.communicator.get_src_mac(),
+                                            list(INPUT_PACKETS[7]))
+
+    if command_line:
+        result = device_provider.send_command(command_line.actual_command)
+        print('set_product_serial_number:', result)
+    else:
+        return False
+
+    return True
+
 def handle_discovered(device_provider):
-    result = ethernet_command_send_receive(device_provider)
+    # result = ethernet_command_send_receive(device_provider)
+    result = ethernet_configuration_command_send_receive(device_provider)
     if result:
         print('ethernet command test ok.')
     else:

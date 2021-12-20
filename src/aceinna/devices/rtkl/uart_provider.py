@@ -75,7 +75,7 @@ class Provider(RTKProviderBase):
         message_bytes = [ord('C'), ord(core)]
         message_bytes.extend(struct.pack('>I', content_len))
         command_line = helper.build_packet('CS', message_bytes)
-        for i in range(3):
+        for i in range(5):
             self.communicator.write(command_line, True)
             time.sleep(1)
             result = helper.read_untils_have_data(

@@ -29,7 +29,7 @@ def handle_discovered(device_provider):
         if device_provider.is_upgrading == False:     
             loop_upgrade_cnt += 1
             print("loop_upgrade_cnt:", loop_upgrade_cnt)
-        device_provider.upgrade_framework("./all.bin")
+        device_provider.upgrade_framework("./INS401_28.01.09.bin")
 
         time.sleep(5)
 

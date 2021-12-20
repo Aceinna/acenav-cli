@@ -59,9 +59,10 @@ def try_parse_app_mode(info_text):
     is_app_mode = False
     app_ping_info = None
     
-    split_text = info_text.split(' RTK_INS')
+    split_text = info_text.split(' SN:')
 
-    if len(split_text) == 2:
+    if len(split_text) == 1:
+        split_text = info_text.split(' RTK_INS')
         is_app_mode = True
 
         device_info_text = split_text[0]

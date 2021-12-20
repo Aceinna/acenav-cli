@@ -282,10 +282,12 @@ class beidouProviderBase(OpenDeviceBase):
                 self.properties["initial"]["userParameters"])
             if (result['packetType'] == 'success'):
                 self.save_config()
-
+            time.sleep(1)
             # check saved result
             result = self.check_predefined_result()
             self.save_device_info(result)
+        else:
+            self.save_device_info()
         # start ntrip client
         if self.properties["initial"].__contains__("ntrip") and not self.ntrip_client and not self.is_in_bootloader:
             self.ntrip_rtcm_logf = open(os.path.join(self.beidou_log_file_name, 'ntrip_rtcm_{0}.bin'.format(
@@ -733,14 +735,14 @@ class beidouProviderBase(OpenDeviceBase):
             print_yellow(check_result)
             print_yellow('The failed parameters: {0}'.format(fail_parameters))
         return result
-    def save_device_info(self, result):
+    def save_device_info(self, result=None):
         ''' Save device configuration
             File name: configuration.json
         '''
         if self.is_in_bootloader:
             return
-
-        #result = self.get_params()
+        if result == None:
+            result = self.get_params()
 
         device_configuration = None
         file_path = os.path.join(

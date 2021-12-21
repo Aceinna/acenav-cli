@@ -426,6 +426,7 @@ class OpenDeviceBase(EventBase):
         if self._pbar:
             self._pbar.close()
         time.sleep(8)
+        print('prepare to restart')
         self.restart()
 
     def connect_log(self, params):

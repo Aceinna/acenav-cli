@@ -421,6 +421,7 @@ class SerialPort(Communicator):
                 length of data sent via serial port.
                 False: Exception when sending data, eg. serial port hasn't been opened.
         '''
+        # print(self.serial_port.baudrate)
         try:
             len_of_data = self.serial_port.write(data)
             if is_flush:

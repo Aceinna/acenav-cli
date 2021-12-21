@@ -31,6 +31,7 @@ from ..upgrade_workers import (
 from ..parsers.rtk330l_field_parser import encode_value
 from abc import ABCMeta, abstractmethod
 from ..ping.rtk330l import ping
+from ..ping.beidou import ping as beidou_ping
 
 
 class beidouProviderBase(OpenDeviceBase):
@@ -618,11 +619,13 @@ class beidouProviderBase(OpenDeviceBase):
 
     def after_jump_app_command(self):
         # beidou ping device
+        self.communicator.serial_port.baudrate = self.original_baudrate
         can_ping = False
 
         while not can_ping:
             self.communicator.reset_buffer()  # clear input and output buffer
-            info = ping(self.communicator, None)
+            info = beidou_ping(self.communicator, None)
+            # print('JA ping', info)
             if info:
                 can_ping = True
             time.sleep(0.5)
@@ -631,9 +634,7 @@ class beidouProviderBase(OpenDeviceBase):
     def get_upgrade_workers(self, firmware_content):
         workers = []
         rules = [
-            InternalCombineAppParseRule('rtk', 'rtk_start:', 4),
             InternalCombineAppParseRule('ins', 'ins_start:', 4),
-            InternalCombineAppParseRule('sdk', 'sdk_start:', 4),
         ]
 
         parsed_content = firmware_content_parser(firmware_content, rules)
@@ -647,10 +648,7 @@ class beidouProviderBase(OpenDeviceBase):
             worker = self.build_worker(rule, content)
             if not worker:
                 continue
-            if (device_info['modelName'] == 'beidou') and (rule == 'sdk') and ((int(device_info['serialNumber']) <= 2178200080) and (int(device_info['serialNumber']) >= 2178200001)):
-                continue
-            else:
-                workers.append(worker)
+            workers.append(worker)
         # prepare jump bootloader worker and jump application workder
         # append jump bootloader worker before the first firmware upgrade workder
         # append jump application worker after the last firmware uprade worker
@@ -685,6 +683,7 @@ class beidouProviderBase(OpenDeviceBase):
                 start_index, jumpBootloaderWorker)
             workers.insert(
                 end_index+2, jumpApplicationWorker)
+        print('.............................',workers)
         return workers
 
     def get_device_connection_info(self):

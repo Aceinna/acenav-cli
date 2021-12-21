@@ -683,7 +683,6 @@ class beidouProviderBase(OpenDeviceBase):
                 start_index, jumpBootloaderWorker)
             workers.insert(
                 end_index+2, jumpApplicationWorker)
-        print('.............................',workers)
         return workers
 
     def get_device_connection_info(self):

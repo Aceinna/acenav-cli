@@ -66,6 +66,36 @@
                 "paramId": 13,
                 "name": "rotation rbvz",
                 "value": 0.0
+            },
+            {
+                "paramId": 14,
+                "name": "sec lever arm x",
+                "value": 1.18
+            },
+            {
+                "paramId": 15,
+                "name": "sec lever arm y",
+                "value": -0.24
+            },
+            {
+                "paramId": 16,
+                "name": "sec lever arm z",
+                "value": -0.9
+            },
+            {
+                "paramId": 17,
+                "name": "rotation alignx",
+                "value": 0.
+            },
+            {
+                "paramId": 18,
+                "name": "rotation aligny",
+                "value": 0.0
+            },
+            {
+                "paramId": 19,
+                "name": "rotation alignz",
+                "value": 0.0
             }
 		],
 		"ntrip":[
@@ -200,6 +230,54 @@
 			"paramType": "input",
 			"type": "float",
 			"name": "rotation rbvz",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 14,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "sec lever arm x",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 15,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "sec lever arm y",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 16,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "sec lever arm z",
+			"value_accuracy": 4
+		},
+        {
+			"paramId": 17,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "rotation rbhx",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 18,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "rotation rbhy",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 19,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "rotation rbhz",
 			"value_accuracy": 4
 		}
 	],

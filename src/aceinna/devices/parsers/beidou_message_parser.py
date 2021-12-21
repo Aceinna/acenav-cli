@@ -208,6 +208,7 @@ class UartMessageParser(MessageParserBase):
         self.sync_pattern = collections.deque(2*[0], 4)
         self.find_header = False
         self.payload_len = 0
+        self.userPacketsTypeList = configuration['userPacketsTypeList']
         # command,continuous_message
         self.sync_state = 0
     def set_run_command(self, command):
@@ -260,7 +261,7 @@ class UartMessageParser(MessageParserBase):
                 if len(self.sync_pattern) == 4:
                     packet_type = ''.join(
                         ["%c" % x for x in list(self.sync_pattern)[2:4]])
-                if operator.eq(list(self.sync_pattern)[0:2], MSG_HEADER) and packet_type in ["s1", "gN", "iN", "s2", "o1", "hG", "gB", "uB", "sC"]:
+                if operator.eq(list(self.sync_pattern)[0:2], MSG_HEADER) and packet_type in self.userPacketsTypeList:
                     self.frame = list(self.sync_pattern)[:]  # header_tp.copy()
                     self.find_header = True
                     #print(packet_type)

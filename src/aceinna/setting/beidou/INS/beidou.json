@@ -2,6 +2,7 @@
 	"appVersion": "RTK330LA INS 24.00",
 	"type": "openrtk",
     "description": "6-axis OpenRTK with INS application",
+	"userPacketsTypeList": ["s1", "gN", "iN", "s2", "o1", "hG", "gB", "uB", "sC"],
     "initial":{
         "useDefaultUart": 0,
         "uart":[

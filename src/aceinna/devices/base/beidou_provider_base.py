@@ -474,6 +474,7 @@ class beidouProviderBase(OpenDeviceBase):
                     str_checksum = str_checksum[2:]
                 gpgga = gpgga + '*' + str_checksum + '\r\n'
                 APP_CONTEXT.get_print_logger().info(gpgga)
+                print(gpgga)
                 self.ntrip_client.send(gpgga)
                 return
 

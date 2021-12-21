@@ -261,7 +261,7 @@
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
-			"name": "rotation rbhx",
+			"name": "rotation alignx",
 			"value_accuracy": 4
 		},
 		{
@@ -269,7 +269,7 @@
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
-			"name": "rotation rbhy",
+			"name": "rotation aligny",
 			"value_accuracy": 4
 		},
 		{
@@ -277,7 +277,7 @@
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
-			"name": "rotation rbhz",
+			"name": "rotation alignz",
 			"value_accuracy": 4
 		}
 	],

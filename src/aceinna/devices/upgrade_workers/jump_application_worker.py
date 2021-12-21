@@ -42,7 +42,6 @@ class JumpApplicationWorker(UpgradeWorkerBase):
     def work(self):
         '''Send JA and ping device
         '''
-        print('.....................', 'JA')
         # run command JA
         if self._is_stopped:
             return

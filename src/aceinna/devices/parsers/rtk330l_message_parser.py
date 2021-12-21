@@ -236,7 +236,7 @@ class UartMessageParser(MessageParserBase):
                     else:
                         APP_CONTEXT.get_logger().logger.info(
                             "crc check error! packet_type:{0}".format(packet_type))
-                        print('crc',packet_type,'calc',result,'expect',self.frame[-2:])
+                        # print('crc',packet_type,'calc',result,'expect',self.frame[-2:])
                         #print(self.frame)
                         self.emit('crc_failure', packet_type=packet_type,
                                 event_time=time.time())

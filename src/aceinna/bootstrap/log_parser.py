@@ -40,7 +40,6 @@ def prepare_lib_folder():
 
 def do_parse(log_type, folder_path, kml_rate, dr_parse):
     lib_path = prepare_lib_folder()
-
     lib = CDLL(lib_path)
     for root, _, file_name in os.walk(folder_path):
         for fname in file_name:
@@ -49,6 +48,8 @@ def do_parse(log_type, folder_path, kml_rate, dr_parse):
 
                 if log_type == 'rtkl':
                     lib.decode_openrtk_inceptio(bytes(file_path, encoding='utf8'))
+                elif log_type == 'beidou':
+                    lib.decode_beidou(bytes(file_path, encoding='utf8'))
                 elif log_type == 'ins401':
                     lib.decode_ins401(bytes(file_path, encoding='utf8'), bytes(dr_parse, encoding='utf8'), kml_rate)
 

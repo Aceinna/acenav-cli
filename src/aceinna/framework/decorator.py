@@ -15,7 +15,7 @@ T = TypeVar('T')
 
 INTERFACE_LIST = INTERFACES.list()
 MODES = ['default', 'cli', 'receiver']
-TYPES_OF_LOG = ['rtkl', 'ins401']
+TYPES_OF_LOG = ['rtkl', 'ins401', 'beidou']
 KML_RATES = [1, 2, 5, 10]
 
 

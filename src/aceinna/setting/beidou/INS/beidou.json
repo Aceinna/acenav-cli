@@ -11,17 +11,17 @@
             {
                 "paramId": 2,
                 "name": "pri lever arm x",
-                "value": 1.18
+                "value": 1.5
             },
             {
                 "paramId": 3,
                 "name": "pri lever arm y",
-                "value": -0.24
+                "value": 0
             },
             {
                 "paramId": 4,
                 "name": "pri lever arm z",
-                "value": -0.9
+                "value": -1.3
             },
             {
                 "paramId": 5,
@@ -41,17 +41,17 @@
             {
                 "paramId": 8,
                 "name": "user lever arm x",
-                "value": 1.19
+                "value": 1.5
             },
             {
                 "paramId": 9,
                 "name": "user lever arm y",
-                "value": -0.24
+                "value": 0
             },
             {
                 "paramId": 10,
                 "name": "user lever arm z",
-                "value": -0.91
+                "value": -1.3
             },
             {
                 "paramId": 11,
@@ -71,17 +71,17 @@
             {
                 "paramId": 14,
                 "name": "sec lever arm x",
-                "value": 1.18
+                "value": 0
             },
             {
                 "paramId": 15,
                 "name": "sec lever arm y",
-                "value": -0.24
+                "value": 0
             },
             {
                 "paramId": 16,
                 "name": "sec lever arm z",
-                "value": -0.9
+                "value": -1.3
             },
             {
                 "paramId": 17,

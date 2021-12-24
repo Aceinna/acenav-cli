@@ -1041,12 +1041,12 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         self._communicator.reset_buffer()
 
-        for i in range(3):
+        for i in range(6):
             self.send_packet([], send_method=JG)
-            time.sleep(5)
+            time.sleep(3)
             response = helper.read_untils_have_data(
                 self._communicator, JG, 10, 1000)
-            if response:
+            if response is not None:
                 break
 
         if response is not None:
@@ -1338,7 +1338,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         # need a device ping command, ping 5 times
         self._communicator.reset_buffer()
-        for i in range(3):
+        for i in range(30):
             self.write_wrapper(
                 bytes([int(x, 16) for x in 'ff:ff:ff:ff:ff:ff'.split(':')]),
                 self._communicator.get_src_mac(), pG, [])
@@ -1347,17 +1347,17 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
                 self._communicator, pG, 10, 200)
             if response:
                 break
-
+        time.sleep(30)
         if not self.send_sdk_cmd_JS():
             return self._raise_error('Send sdk JS command failed')
 
-        for i in range(3):
+        for i in range(30):
             self.write_wrapper(
                 bytes([int(x, 16) for x in 'ff:ff:ff:ff:ff:ff'.split(':')]),
                 self._communicator.get_src_mac(), pG, [])
             time.sleep(0.2)
             response = helper.read_untils_have_data(
-                self._communicator, pG, 10, 200)
+                self._communicator, pG, 10, 1000)
             if response:
                 break
 

@@ -21,4 +21,4 @@ tornado==6.0.3
 urllib3==1.25.7
 scapy==2.4.5
 numpy==1.21.5
-pywin==303
+pywin32==303

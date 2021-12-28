@@ -15,7 +15,7 @@ T = TypeVar('T')
 
 INTERFACE_LIST = INTERFACES.list()
 MODES = ['default', 'cli', 'receiver']
-TYPES_OF_LOG = ['rtkl', 'ins401']
+TYPES_OF_LOG = ['rtkl', 'ins401', 'beidou']
 KML_RATES = [1, 2, 5, 10]
 
 
@@ -41,7 +41,10 @@ def _build_args():
                         help="set mount angle", default=False)
     parser.add_argument("-debug", dest='debug', metavar='', type=str,
                         help="true or false")
-
+    '''
+    parser.add_argument("-board", dest='board', metavar='', type=str,
+                        help="RTK330LA beidou")
+    '''
     subparsers = parser.add_subparsers(
         title='Sub commands', help='use `<command> -h` to get sub command help', dest="sub_command")
     parse_log_action = subparsers.add_parser(

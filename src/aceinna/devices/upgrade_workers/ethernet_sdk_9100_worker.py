@@ -1344,10 +1344,10 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
                 self._communicator.get_src_mac(), pG, [])
             time.sleep(0.2)
             response = helper.read_untils_have_data(
-                self._communicator, pG, 10, 200)
+                self._communicator, pG, 10, 1000)
             if response:
                 break
-        time.sleep(30)
+
         if not self.send_sdk_cmd_JS():
             return self._raise_error('Send sdk JS command failed')
 

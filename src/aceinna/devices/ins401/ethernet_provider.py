@@ -800,7 +800,7 @@ class Provider(OpenDeviceBase):
             self.communicator,
             command=self.imu_jump_bootloader_command_generator,
             listen_packet=[0x4a, 0x49],
-            wait_timeout_after_command=5)
+            wait_timeout_after_command=10)
         imu_jump_bootloader_worker.on(
             UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
         imu_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE

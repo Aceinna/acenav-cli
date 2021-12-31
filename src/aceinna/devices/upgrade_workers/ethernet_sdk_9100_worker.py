@@ -1175,7 +1175,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         for i in range(3):
             self.send_packet(write_cmd)
             time.sleep(2)
-            result = self.read_until(0xCC, 200, 1)
+            result = self.read_until(0xCC, 1000, 1)
             if result:
                 break
 
@@ -1338,7 +1338,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         # need a device ping command, ping 5 times
         self._communicator.reset_buffer()
-        for i in range(30):
+        for i in range(50):
             self.write_wrapper(
                 bytes([int(x, 16) for x in 'ff:ff:ff:ff:ff:ff'.split(':')]),
                 self._communicator.get_src_mac(), pG, [])
@@ -1351,7 +1351,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if not self.send_sdk_cmd_JS():
             return self._raise_error('Send sdk JS command failed')
 
-        for i in range(30):
+        for i in range(50):
             self.write_wrapper(
                 bytes([int(x, 16) for x in 'ff:ff:ff:ff:ff:ff'.split(':')]),
                 self._communicator.get_src_mac(), pG, [])

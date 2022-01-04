@@ -3,6 +3,8 @@
 	"type": "openrtk",
     "description": "6-axis OpenRTK with INS application",
 	"userPacketsTypeList": ["s1", "gN", "iN", "s2", "o1", "hG", "gB", "uB", "sC"],
+	"logCmd": ["UNLOGALL\r\n", "LOG BESTVELA ONTIME 1\r\n", "LOG BESTPOSA ONTIME 1\r\n",
+	"LOG GNGGA ONTIME 1\r\n", "LOG HEADINGA ONTIME 1\r\n"],
     "initial":{
         "useDefaultUart": 0,
         "uart":[

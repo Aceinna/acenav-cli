@@ -289,6 +289,8 @@ class beidouProviderBase(OpenDeviceBase):
             self.save_device_info(result)
         else:
             self.save_device_info()
+
+        self.set_log_type()
         # start ntrip client
         if self.properties["initial"].__contains__("ntrip") and not self.ntrip_client and not self.is_in_bootloader:
             self.ntrip_rtcm_logf = open(os.path.join(self.beidou_log_file_name, 'ntrip_rtcm_{0}.bin'.format(
@@ -984,6 +986,16 @@ class beidouProviderBase(OpenDeviceBase):
                 'error': 0
             }
         }
+
+    #@with_device_message
+    def set_log_type(self):  # pylint: disable=unused-argument
+        log_cmd_list = self.properties['logCmd']
+        command_line = bytes(''.join(log_cmd_list),encoding='utf-8')
+        device_message = self._message_center.build(command=command_line)
+        '''
+        device_message.send()
+        '''
+        device_message._message_center._communicator.write(command_line)
 
     @with_device_message
     def set_param(self, params, *args):  # pylint: disable=unused-argument

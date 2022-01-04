@@ -290,7 +290,11 @@ class beidouProviderBase(OpenDeviceBase):
         else:
             self.save_device_info()
         # start ntrip client
-        if self.properties["initial"].__contains__("ntrip") and not self.ntrip_client and not self.is_in_bootloader:
+        if self.properties["initial"].__contains__("ntrip") \
+            and not self.ntrip_client \
+            and not self.is_in_bootloader \
+            and not self.cli_options.use_cli:
+            
             self.ntrip_rtcm_logf = open(os.path.join(self.beidou_log_file_name, 'ntrip_rtcm_{0}.bin'.format(
                 formatted_file_time)), "wb")
 

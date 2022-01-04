@@ -333,7 +333,10 @@ class Provider(OpenDeviceBase):
             if not self.is_upgrading and not self.with_upgrade_error:
                 # start ntrip client
                 if self.properties["initial"].__contains__("ntrip") \
-                        and not self.ntrip_client and not self.is_in_bootloader:
+                    and not self.ntrip_client \
+                    and not self.is_in_bootloader \
+                    and not self.cli_options.use_cli:
+
                     threading.Thread(target=self.ntrip_client_thread).start()
 
         except Exception as e:

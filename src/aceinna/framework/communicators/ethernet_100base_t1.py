@@ -96,12 +96,11 @@ class Ethernet(Communicator):
                 return None
         else:
             for i in range(50):
-                try:
-                    result = self.reshake_hand()
-                    if result:
-                        break
-                except:
-                    time.sleep(0.5)
+                result = self.reshake_hand()
+                if result:
+                    break
+                else:
+                    time.sleep(0.1)
 
         # confirm device
         time.sleep(1)
@@ -122,9 +121,14 @@ class Ethernet(Communicator):
             prn=self.handle_iface_confirm_packet,
             filter=filter)
         async_sniffer.start()
-        time.sleep(0.2)
+        time.sleep(0.1)
         sendp(command.actual_command, iface=iface, verbose=0)
-        time.sleep(0.5)
+        for i in range(70):
+            if self.iface_confirmed:
+                break
+            else:
+                time.sleep(0.01)
+
         async_sniffer.stop()
 
     def reshake_hand(self):

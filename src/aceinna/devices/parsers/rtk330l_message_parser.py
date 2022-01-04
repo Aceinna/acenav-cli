@@ -17,7 +17,7 @@ INPUT_PACKETS = ['pG', 'uC', 'uP', 'uA', 'uB',
                  'JI', 'JA', 'WA', 'CS', 'JS', 'JG'
                  'RE', 'WE', 'UE', 'LE', 'SR',
                  'SF', 'RF', 'WF', 'GF', 'RC', 'WC', 'PK', 'CH']
-OTHER_OUTPUT_PACKETS = ['s1', 's2', 'iN', 'd1', 'gN', 'd2', 'sT', 'o1']
+OTHER_OUTPUT_PACKETS = ['s1', 's2', 'iN', 'd1', 'gN', 'd2', 'sT', 'o1', 'DM']
 
 
 class ANALYSIS_STATUS:

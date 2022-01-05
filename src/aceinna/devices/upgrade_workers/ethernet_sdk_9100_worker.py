@@ -1283,7 +1283,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
             current += len(data_to_sdk)
             for i in range(3):
                 self.send_packet(list(data_to_sdk))
-                has_read = self.read_until(0xCC, 200)
+                has_read = self.read_until(0xCC, 1000)
                 if has_read:
                     break
 

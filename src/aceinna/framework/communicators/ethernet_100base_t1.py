@@ -102,8 +102,9 @@ class Ethernet(Communicator):
                 else:
                     time.sleep(0.1)
 
-        # confirm device
         time.sleep(1)
+        
+        # confirm device
         self.confirm_device(self)
         if self.device:
             # establish the packet sniff thread

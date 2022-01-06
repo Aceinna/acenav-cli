@@ -78,17 +78,30 @@ class Ethernet(Communicator):
         # find network connection
         if not self.iface_confirmed:
             ifaces_list = self.get_network_card()
-            for i in range(len(ifaces_list)):
-                self.confirm_iface(ifaces_list[i])
-                if self.iface_confirmed:
-                    self.start_listen_data()
+            find_flag = False
+            for j in range(50):
+                for i in range(len(ifaces_list)):
+                    self.confirm_iface(ifaces_list[i])
+                    if self.iface_confirmed:
+                        self.start_listen_data()
+                        find_flag = True
+                        break
+                    else:
+                        time.sleep(0.1)
+                if find_flag:
                     break
-                else:
-                    if i == len(ifaces_list) - 1:
-                        print_red('No available Ethernet card was found.')
-                        return None
+
+            if self.iface_confirmed is False:
+                print_red('No available Ethernet card was found.')
+                return None
         else:
-            self.reshake_hand()
+            for i in range(50):
+                try:
+                    result = self.reshake_hand()
+                    if result:
+                        break
+                except:
+                    time.sleep(0.5)
 
         # confirm device
         time.sleep(1)
@@ -147,7 +160,6 @@ class Ethernet(Communicator):
             self.start_listen_data()
             return True
         else:
-            raise Exception('Cannot finish shake hand.')
             return False
 
     def start_listen_data(self):

@@ -1,6 +1,13 @@
 # CHANGELOG
 
 ---
+## 2.6.3， 12/20/2021
+
+- [INS401] Support GPGGA and GNGGA message of NMEA format
+- [INS401] Add ethernet Ping message to automatically discover devices
+- [INS401] Distinguish between bootloader and app through SN
+- [INS401] IMU upgrade bug
+
 ## 2.6.2， 10/25/2021
 
 - [INS401] Support real time installation angle estimation

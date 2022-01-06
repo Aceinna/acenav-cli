@@ -29,7 +29,7 @@ from ..upgrade_workers import (
     UPGRADE_GROUP
 )
 
-GPZDA_DATA_LEN = 39
+GNZDA_DATA_LEN = 39
 
 class Provider(OpenDeviceBase):
     '''
@@ -358,15 +358,15 @@ class Provider(OpenDeviceBase):
         temp_str_nmea = data.decode('utf-8')
         if (temp_str_nmea.find("\r\n", len(temp_str_nmea)-2, len(temp_str_nmea)) != -1):
             str_nmea = temp_str_nmea            
-        elif(temp_str_nmea.find("\r\n", GPZDA_DATA_LEN-2, GPZDA_DATA_LEN) != -1):
-            str_nmea = temp_str_nmea[0:GPZDA_DATA_LEN]
+        elif(temp_str_nmea.find("\r\n", GNZDA_DATA_LEN-2, GNZDA_DATA_LEN) != -1):
+            str_nmea = temp_str_nmea[0:GNZDA_DATA_LEN]
         else:
             return
 
         try:
             cksum, calc_cksum = self.nmea_checksum(str_nmea)
             if cksum == calc_cksum:
-                if str_nmea.find("$GPGGA", 0, 6) != -1:
+                if str_nmea.find("$GPGGA", 0, 6) != -1 or str_nmea.find("$GNGGA", 0, 6) != -1:
                     if self.ntrip_client:
                         self.ntrip_client.send(str_nmea)
                 if self.user_logf:
@@ -589,14 +589,12 @@ class Provider(OpenDeviceBase):
         '''
             check if in application mode
         '''
-        for i in range(40):
-            try:
-                result = self.communicator.reshake_hand()
-                if result:
-                    break
-            except:
+        for i in range(100):
+            result = self.communicator.reshake_hand()
+            if result:
+                break
+            else:
                 time.sleep(0.5)
-                continue
 
     def before_write_content(self, core, content_len):
         command_CS = [0x04, 0xaa]
@@ -677,12 +675,17 @@ class Provider(OpenDeviceBase):
     def build_worker(self, rule, content):
         ''' Build upgarde worker by rule and content
         '''
+        if self.communicator.use_length_as_protocol:
+            packet_len = 960
+        else:
+            packet_len = 192
+
         if rule == 'rtk':
             rtk_upgrade_worker = FirmwareUpgradeWorker(
                 self.communicator,
                 lambda: helper.format_firmware_content(content),
                 self.ins_firmware_write_command_generator,
-                192)
+                packet_len)
             rtk_upgrade_worker.name = 'MAIN_RTK'
             rtk_upgrade_worker.on(
                 UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(15))
@@ -695,7 +698,7 @@ class Provider(OpenDeviceBase):
                 self.communicator,
                 lambda: helper.format_firmware_content(content),
                 self.ins_firmware_write_command_generator,
-                192)
+                packet_len)
             ins_upgrade_worker.name = 'MAIN_RTK'
             ins_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
             ins_upgrade_worker.on(
@@ -797,7 +800,7 @@ class Provider(OpenDeviceBase):
             self.communicator,
             command=self.imu_jump_bootloader_command_generator,
             listen_packet=[0x4a, 0x49],
-            wait_timeout_after_command=5)
+            wait_timeout_after_command=10)
         imu_jump_bootloader_worker.on(
             UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
         imu_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE

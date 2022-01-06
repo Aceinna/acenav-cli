@@ -17,6 +17,10 @@ def do_ping(communicator_type, device_access, filter_device_type):
                 device_access, filter_device_type)
             if ping_result:
                 return ping_result
+            ping_result = ping_beidou(
+                device_access, filter_device_type)
+            if ping_result:
+                return ping_result
 
 
     if communicator_type == INTERFACES.ETH_100BASE_T1:

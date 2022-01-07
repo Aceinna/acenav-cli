@@ -173,7 +173,7 @@ def ethernet_command_send_receive(device_provider:EhternetProvider):
 
 def set_product_serial_number(dest, src, command):
     message_bytes = []
-    serial_number = 0x56789123;
+    serial_number = 2179000181;
 
     serial_number_bytes = struct.pack('<I', serial_number)
     message_bytes.extend(serial_number_bytes)

@@ -1012,7 +1012,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
             self.write_wrapper(dst, src, send_method,
                                data[start: start+actual_size])
             start += actual_size
-            time.sleep(0.01)
+            time.sleep(0.001)
 
     def send_sdk_cmd_JS(self):
         result = False
@@ -1078,8 +1078,8 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         for i in range(3):
             self.send_packet(change_baud_cmd)
-            time.sleep(1)
-            result = self.read_until(0xCC, 200, 1)
+            time.sleep(0.2)
+            result = self.read_until(0xCC, 1000, 1)
             if result:
                 break
         return result
@@ -1093,7 +1093,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         for i in range(3):
             self.send_packet(baud_list)
-            result = self.read_until(0xCC, 200, 1)
+            result = self.read_until(0xCC, 1000, 1)
             if result:
                 break
 
@@ -1108,7 +1108,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         for i in range(3):
             self.send_packet(check_baud)
             time.sleep(0.5)
-            result = self.read_until(0xCC, 200, 1)
+            result = self.read_until(0xCC, 1000, 1)
             if result:
                 break
 
@@ -1122,7 +1122,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         
         for i in range(3):
             self.send_packet(host)
-            result = self.read_until(0xCC, 500, 1)
+            result = self.read_until(0xCC, 1000, 1)
             if result:
                 break
 
@@ -1174,7 +1174,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         for i in range(3):
             self.send_packet(write_cmd)
-            time.sleep(2)
+            time.sleep(0.2) # 2
             result = self.read_until(0xCC, 1000, 1)
             if result:
                 break
@@ -1187,8 +1187,8 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         for i in range(3):
             self.send_packet(bin_info_list, buffer_size=512)
-            time.sleep(8)
-            result = self.read_until(0xCC, 200)
+            time.sleep(0.2) # 8
+            result = self.read_until(0xCC, 1000)
             if result:
                 break
 
@@ -1248,18 +1248,18 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if self._is_stopped:
             return False
 
-        return self.read_until(0xCC, 500, 1)
+        return self.read_until(0xCC, 1000, 1)
 
     def erase_wait(self):
         if self._is_stopped:
             return False
 
-        return self.read_until(0xCC, 500, 1)
+        return self.read_until(0xCC, 1000, 1)
 
     def erase_nvm_wait(self):
         if self._is_stopped:
             return False
-        return self.read_until(0xCC, 500, 1)
+        return self.read_until(0xCC, 1000, 1)
 
     def flash_write_pre(self, bin_data):
         data_to_sdk = bin_data[0:BLOCK_SIZE]

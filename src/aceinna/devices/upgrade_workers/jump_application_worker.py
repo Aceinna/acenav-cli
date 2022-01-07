@@ -65,7 +65,7 @@ class JumpApplicationWorker(UpgradeWorkerBase):
             self._communicator.reset_buffer()
             for i in range(self._wait_timeout_after_command):
                 self._communicator.write(actual_command)
-                time.sleep(0.2)
+                time.sleep(0.5)
                 response = helper.read_untils_have_data(
                     self._communicator, self._listen_packet, 100, 1000, payload_length_format)
                 if response:

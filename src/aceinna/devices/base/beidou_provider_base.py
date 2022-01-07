@@ -9,6 +9,7 @@ import collections
 import serial
 import serial.tools.list_ports
 from ..widgets import NTRIPClient
+from ..widgets import BTServer
 from ...framework.utils import (
     helper, resource
 )
@@ -78,6 +79,7 @@ class beidouProviderBase(OpenDeviceBase):
             'rtcm': 1,
             'debug': 2,
         }
+        self.device_message = None
         self.crc32Table =\
         [
             0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419,0x706af48f,
@@ -276,6 +278,17 @@ class beidouProviderBase(OpenDeviceBase):
             })
         self.ntrip_client.run()
 
+    def bt_server_thread(self):
+        self.bt_server = BTServer(self.device_message)
+        self.bt_server.on('parsed', self.handle_rtcm_data_parsed)
+        if self.device_info.__contains__('sn') and self.device_info.__contains__('pn'):
+            self.bt_server.set_connect_headers({
+                'Ntrip-Sn': self.device_info['sn'],
+                'Ntrip-Pn': self.device_info['pn']
+            })
+        self.bt_server.run()
+
+
     def handle_rtcm_data_parsed(self, data):
         bytes_data = bytearray(data)
         if self.communicator.can_write() and not self.is_upgrading:
@@ -343,6 +356,8 @@ class beidouProviderBase(OpenDeviceBase):
 
             thead = threading.Thread(target=self.ntrip_client_thread)
             thead.start()
+            thread_bt = threading.Thread(target=self.bt_server_thread)
+            thread_bt.start()
 
         try:
             if (self.properties["initial"]["useDefaultUart"]):
@@ -449,17 +464,19 @@ class beidouProviderBase(OpenDeviceBase):
                                 cksum, calc_cksum = self.unico_checkcrc(
                                     str_nmea)
                             if cksum == calc_cksum:
-                                if self.cli_options.debug.lower() == 'true':
-                                    if str_nmea.find("#HEADINGA") != -1 or str_nmea.find("$GPGGA") != -1 or str_nmea.find("$GNGGA") != -1:
-                                        print(str_nmea)
                                 if str_nmea.find("$GPGGA") != -1 or str_nmea.find("$GNGGA") != -1:
                                     if self.ntrip_client:
                                         self.ntrip_client.send(str_nmea)
+                                    if self.bt_server:
+                                        self.bt_server.send(str_nmea.replace('GNGGA', 'GPGGA'))
                                     #self.add_output_packet('gga', str_nmea)
                                 # print(str_nmea, end='')
                                 APP_CONTEXT.get_print_logger().info(str_nmea.replace('\r\n', ''))
                                 # else:
                                 #     print("nmea checksum wrong {0} {1}".format(cksum, calc_cksum))
+                                if self.cli_options.debug.lower() == 'true':
+                                    if str_nmea.find("#HEADINGA") != -1 or str_nmea.find("$GPGGA") != -1 or str_nmea.find("$GNGGA") != -1:
+                                        print(str_nmea)
                         except Exception as e:
                             # print('NMEA fault:{0}'.format(e))
                             pass
@@ -838,7 +855,7 @@ class beidouProviderBase(OpenDeviceBase):
 
             session_info['parameters'] = parameters_configuration
             device_configuration.append(session_info)
-
+            self.device_message = json.dumps(parameters_configuration)
             with open(file_path, 'w') as outfile:
                 json.dump(device_configuration, outfile,
                           indent=4, ensure_ascii=False)

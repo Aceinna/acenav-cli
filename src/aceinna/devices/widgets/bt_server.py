@@ -19,6 +19,7 @@ class BTServer(EventBase):
         self.parser.on('parsed', self.handle_parsed_data)
         self.is_connected = 0
         self.is_close = False
+        self.bt_close = False
         self.append_header_string= None
         self.bt_server_socket = None
         self.device_message = device_message
@@ -39,23 +40,15 @@ class BTServer(EventBase):
                 if self.is_connected == 0:
                     time.sleep(3)
                 else:
+                    self.is_close = False
+                    self.bt_close = False
+                    print('BT connected..')
                     break
                 # else:
                 #    time.sleep(1)
-            while True:
+            while self.bt_close == False:
                 self.recv()
-            '''
-            recvData = self.recvResponse()
-            
-            if recvData != None and recvData.find(b'ICY 200 OK') != -1:
-                print_helper.print_on_console('BT:[request] ok', skip_modes=[APP_TYPE.CLI])
-                APP_CONTEXT.get_print_logger().info('BT:[request] ok')
-                self.recv()
-            else:
-                print_helper.print_on_console('BT:[request] fail', skip_modes=[APP_TYPE.CLI])
-                APP_CONTEXT.get_print_logger().info('BT:[request] fail')
-                self.bt_server_socket.close()
-            '''
+
     def set_connect_headers(self, headers:dict):
         self.append_header_string = ''
         for key in headers.keys():
@@ -102,6 +95,10 @@ class BTServer(EventBase):
                 print_helper.print_on_console('BT:[send] error occur {0}'.format(e), skip_modes=[APP_TYPE.CLI])
                 APP_CONTEXT.get_print_logger().info(
                     'BT:[send] {0}'.format(e))
+                self.bt_close = True
+                self.bt_server.close()
+                self.bt_server_socket.close()
+                self.is_connected = 0
 
     def recv(self):
         try:
@@ -110,7 +107,7 @@ class BTServer(EventBase):
         except Exception as e:
             print(e)
         while True:
-            if self.is_close:
+            if self.is_close or self.bt_close:
                 return
             try:
                 data = self.bt_server_socket.recv(1024)

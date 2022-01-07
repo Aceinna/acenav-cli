@@ -470,7 +470,8 @@ class beidouProviderBase(OpenDeviceBase):
                                     if self.bt_server:
                                         str_nmea_to_bt_list = str_nmea.replace('GNGGA', 'GPGGA').split('*')
                                         str_nmea_to_bt = str_nmea_to_bt_list[0].rsplit(',',1)[0] + ',*' + str_nmea_to_bt_list[1]
-                                        print(str_nmea_to_bt)
+                                        # print(str_nmea_to_bt)
+                                        # str_nmea_to_bt = '$GPGGA,023025.00,3129.6673162,N,12021.7695333,E,1,32,1.0,111.060,M,6.809,M,0.0,*73\r\n'
                                         self.bt_server.send(str_nmea_to_bt)
                                     #self.add_output_packet('gga', str_nmea)
                                 # print(str_nmea, end='')

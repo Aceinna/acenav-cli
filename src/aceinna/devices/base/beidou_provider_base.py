@@ -468,7 +468,10 @@ class beidouProviderBase(OpenDeviceBase):
                                     if self.ntrip_client:
                                         self.ntrip_client.send(str_nmea)
                                     if self.bt_server:
-                                        self.bt_server.send(str_nmea.replace('GNGGA', 'GPGGA'))
+                                        str_nmea_to_bt_list = str_nmea.replace('GNGGA', 'GPGGA').split('*')
+                                        str_nmea_to_bt = str_nmea_to_bt_list[0].rsplit(',',1)[0] + ',*' + str_nmea_to_bt_list[1]
+                                        print(str_nmea_to_bt)
+                                        self.bt_server.send(str_nmea_to_bt)
                                     #self.add_output_packet('gga', str_nmea)
                                 # print(str_nmea, end='')
                                 APP_CONTEXT.get_print_logger().info(str_nmea.replace('\r\n', ''))

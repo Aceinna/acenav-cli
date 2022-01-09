@@ -333,7 +333,10 @@ class Provider(OpenDeviceBase):
             if not self.is_upgrading and not self.with_upgrade_error:
                 # start ntrip client
                 if self.properties["initial"].__contains__("ntrip") \
-                        and not self.ntrip_client and not self.is_in_bootloader:
+                    and not self.ntrip_client \
+                    and not self.is_in_bootloader \
+                    and not self.cli_options.use_cli:
+
                     threading.Thread(target=self.ntrip_client_thread).start()
 
         except Exception as e:
@@ -590,13 +593,11 @@ class Provider(OpenDeviceBase):
             check if in application mode
         '''
         for i in range(100):
-            try:
-                result = self.communicator.reshake_hand()
-                if result:
-                    break
-            except:
+            result = self.communicator.reshake_hand()
+            if result:
+                break
+            else:
                 time.sleep(0.5)
-                continue
 
     def before_write_content(self, core, content_len):
         command_CS = [0x04, 0xaa]
@@ -677,12 +678,17 @@ class Provider(OpenDeviceBase):
     def build_worker(self, rule, content):
         ''' Build upgarde worker by rule and content
         '''
+        if self.communicator.use_length_as_protocol:
+            packet_len = 960
+        else:
+            packet_len = 192
+
         if rule == 'rtk':
             rtk_upgrade_worker = FirmwareUpgradeWorker(
                 self.communicator,
                 lambda: helper.format_firmware_content(content),
                 self.ins_firmware_write_command_generator,
-                192)
+                packet_len)
             rtk_upgrade_worker.name = 'MAIN_RTK'
             rtk_upgrade_worker.on(
                 UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(15))
@@ -695,7 +701,7 @@ class Provider(OpenDeviceBase):
                 self.communicator,
                 lambda: helper.format_firmware_content(content),
                 self.ins_firmware_write_command_generator,
-                192)
+                packet_len)
             ins_upgrade_worker.name = 'MAIN_RTK'
             ins_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
             ins_upgrade_worker.on(
@@ -768,7 +774,7 @@ class Provider(OpenDeviceBase):
             wait_timeout_after_command=ins_wait_timeout)
         ins_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE
         ins_jump_bootloader_worker.on(
-            UPGRADE_EVENT.AFTER_COMMAND, self.do_reshake)
+            UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
 
         ins_jump_application_worker = JumpApplicationWorker(
             self.communicator,
@@ -797,7 +803,7 @@ class Provider(OpenDeviceBase):
             self.communicator,
             command=self.imu_jump_bootloader_command_generator,
             listen_packet=[0x4a, 0x49],
-            wait_timeout_after_command=5)
+            wait_timeout_after_command=10)
         imu_jump_bootloader_worker.on(
             UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
         imu_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE

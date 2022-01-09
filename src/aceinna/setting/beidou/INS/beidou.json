@@ -2,104 +2,102 @@
 	"appVersion": "RTK330LA INS 24.00",
 	"type": "openrtk",
     "description": "6-axis OpenRTK with INS application",
+	"userPacketsTypeList": ["s1", "gN", "iN", "s2", "o1", "hG", "gB", "uB", "sC"],
+	"logCmd": ["UNLOGALL\r\n", "LOG BESTVELA ONTIME 1\r\n", "LOG BESTPOSA ONTIME 1\r\n",
+	"LOG GNGGA ONTIME 1\r\n", "LOG HEADINGA ONTIME 1\r\n"],
     "initial":{
-        "useDefaultUart": 1,
+        "useDefaultUart": 0,
         "uart":[
-            {
-                "name": "GNSS",
-                "value": "com10",
-                "enable": 0
-            },
-            {
-                "name": "DEBUG",
-                "value": "com11",
-                "enable": 0 
-            },
-            {
-                "name": "SDK",
-                "value": "com12",
-                "enable": 0 
-            }
         ],
         "userParameters": [
             {
                 "paramId": 2,
-                "name": "s1",
-                "value": 100
+                "name": "pri lever arm x",
+                "value": 1.5
             },
             {
                 "paramId": 3,
-                "name": "gN",
-                "value": 1
+                "name": "pri lever arm y",
+                "value": 0
             },
             {
                 "paramId": 4,
-                "name": "iN",
-                "value": 100
+                "name": "pri lever arm z",
+                "value": -1.3
             },
             {
                 "paramId": 5,
-                "name": "d1",
-                "value": 10
-            },
-                        {
-                "paramId": 6,
-                "name": "pri lever arm x",
-                "value": 1.19
-            },
-            {
-                "paramId": 7,
-                "name": "pri lever arm y",
-                "value": -0.24
-            },
-            {
-                "paramId": 8,
-                "name": "pri lever arm z",
-                "value": -0.9
-            },
-            {
-                "paramId": 9,
                 "name": "vrp lever arm x",
                 "value": 0.0
             },
             {
-                "paramId": 10,
+                "paramId": 6,
                 "name": "vrp lever arm y",
                 "value": 0.0
             },
             {
-                "paramId": 11,
+                "paramId": 7,
                 "name": "vrp lever arm z",
                 "value": 0.0
             },
             {
-                "paramId": 12,
+                "paramId": 8,
                 "name": "user lever arm x",
-                "value": 1.19
+                "value": 1.5
             },
             {
-                "paramId": 13,
+                "paramId": 9,
                 "name": "user lever arm y",
-                "value": -0.24
+                "value": 0
             },
             {
-                "paramId": 14,
+                "paramId": 10,
                 "name": "user lever arm z",
-                "value": -0.9
+                "value": -1.3
             },
             {
-                "paramId": 15,
+                "paramId": 11,
                 "name": "rotation rbvx",
                 "value": 0.0
             },
             {
-                "paramId": 16,
+                "paramId": 12,
                 "name": "rotation rbvy",
                 "value": 0.0
             },
             {
-                "paramId": 17,
+                "paramId": 13,
                 "name": "rotation rbvz",
+                "value": 0.0
+            },
+            {
+                "paramId": 14,
+                "name": "sec lever arm x",
+                "value": 0
+            },
+            {
+                "paramId": 15,
+                "name": "sec lever arm y",
+                "value": 0
+            },
+            {
+                "paramId": 16,
+                "name": "sec lever arm z",
+                "value": -1.3
+            },
+            {
+                "paramId": 17,
+                "name": "rotation alignx",
+                "value": 0
+            },
+            {
+                "paramId": 18,
+                "name": "rotation aligny",
+                "value": 0.0
+            },
+            {
+                "paramId": 19,
+                "name": "rotation alignz",
                 "value": 0.0
             }
 		],
@@ -141,40 +139,8 @@
 			"type": "uint16",
 			"name": "Data Size"
 		},
-        {
-			"paramId": 2,
-			"category": "General",
-			"paramType": "input",
-			"type": "uint8",
-			"name": "RAWIMU Packet Rate",
-			"argument": "s1"
-		},
-        {
-			"paramId": 3,
-			"category": "General",
-			"paramType": "input",
-			"type": "uint8",
-			"name": "BESTGNSS Packet Rate",
-			"argument": "gN"
-		},
-        {
-			"paramId": 4,
-			"category": "General",
-			"paramType": "input",
-			"type": "uint8",
-			"name": "INSPVA Packet Rate",
-			"argument": "iN"
-		},
-        {
-			"paramId": 5,
-			"category": "General",
-			"paramType": "input",
-			"type": "uint8",
-			"name": "INSSTD Packet Rate",
-			"argument": "d1"
-		},
 		{
-			"paramId": 6,
+			"paramId": 2,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -182,7 +148,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 7,
+			"paramId": 3,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -190,7 +156,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 8,
+			"paramId": 4,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -198,7 +164,7 @@
 			"value_accuracy": 4
 		},
         {
-			"paramId": 9,
+			"paramId": 5,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -206,7 +172,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 10,
+			"paramId": 6,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -214,7 +180,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 11,
+			"paramId": 7,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -222,7 +188,7 @@
 			"value_accuracy": 4
 		},
         {
-			"paramId": 12,
+			"paramId": 8,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -230,7 +196,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 13,
+			"paramId": 9,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -238,7 +204,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 14,
+			"paramId": 10,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -246,7 +212,7 @@
 			"value_accuracy": 4
 		},
         {
-			"paramId": 15,
+			"paramId": 11,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -254,7 +220,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 16,
+			"paramId": 12,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -262,11 +228,59 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 17,
+			"paramId": 13,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
 			"name": "rotation rbvz",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 14,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "sec lever arm x",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 15,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "sec lever arm y",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 16,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "sec lever arm z",
+			"value_accuracy": 4
+		},
+        {
+			"paramId": 17,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "rotation alignx",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 18,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "rotation aligny",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 19,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "rotation alignz",
 			"value_accuracy": 4
 		}
 	],

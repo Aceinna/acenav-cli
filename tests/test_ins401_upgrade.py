@@ -29,7 +29,7 @@ def handle_discovered(device_provider):
         if device_provider.is_upgrading == False:     
             loop_upgrade_cnt += 1
             print("loop_upgrade_cnt:", loop_upgrade_cnt)
-        device_provider.upgrade_framework("./INS401_28.01.09.bin")
+        device_provider.upgrade_framework("./INS401_28.02.bin")
 
         time.sleep(5)
 
@@ -45,7 +45,8 @@ def kill_app(signal_int, call_back):
 @handle_application_exception
 def simple_start():
     driver = Driver(WebserverArgs(
-        interface=INTERFACES.ETH_100BASE_T1
+        interface = INTERFACES.ETH_100BASE_T1,
+        use_cli = True
     ))
     driver.on(DriverEvents.Discovered, handle_discovered)
     driver.detect()

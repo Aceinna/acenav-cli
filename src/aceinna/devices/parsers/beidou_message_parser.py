@@ -17,7 +17,7 @@ INPUT_PACKETS = ['pG', 'uC', 'uP', 'uA', 'uB',
                  'JI', 'JA', 'WA', 'CS', 'JS', 'JG'
                  'RE', 'WE', 'UE', 'LE', 'SR',
                  'SF', 'RF', 'WF', 'GF', 'RC', 'WC', 'PK', 'CH']
-OTHER_OUTPUT_PACKETS = ['s1', 's2', 'iN', 'd1', 'gN', 'd2', 'sT', 'o1', 'DM']
+OTHER_OUTPUT_PACKETS = ['s1', 's2', 'iN', 'd1', 'gN', 'd2', 'sT', 'o1']
 
 
 class ANALYSIS_STATUS:
@@ -205,11 +205,12 @@ class UartMessageParser(MessageParserBase):
         super(UartMessageParser, self).__init__(configuration)
         self.frame = []
         self.payload_len_idx = 5
-        self.sync_pattern = collections.deque(2*[0], 2)
+        self.sync_pattern = collections.deque(2*[0], 4)
         self.find_header = False
         self.payload_len = 0
+        self.userPacketsTypeList = configuration['userPacketsTypeList']
         # command,continuous_message
-
+        self.sync_state = 0
     def set_run_command(self, command):
         pass
 
@@ -223,20 +224,70 @@ class UartMessageParser(MessageParserBase):
                 elif 5 + self.payload_len + 2 == len(self.frame):
                     packet_type = ''.join(
                         ["%c" % x for x in self.frame[PACKET_TYPE_INDEX:4]])
-                    self.find_header = False
+                    # self.find_header = False
+                    #print('len = ',self.payload_len,packet_type)
                     result = helper.calc_crc(self.frame[2:-2])
                     if result[0] == self.frame[-2] and result[1] == self.frame[-1]:
+                        # if packet_type == 'gB':
+                        #     print('parsed')
                         # find a whole frame
                         # self._parse_frame(self.frame, self.payload_len)
                         self._parse_message(
                             packet_type, self.payload_len, self.frame)
-
-                        self.find_header = False
-                        self.payload_len = 0
-                        self.sync_pattern = collections.deque(2*[0], 2)
                     else:
                         APP_CONTEXT.get_logger().logger.info(
                             "crc check error! packet_type:{0}".format(packet_type))
+                        # print('crc',packet_type,'calc',result,'expect',self.frame[-2:])
+                        #print(self.frame)
+                        self.emit('crc_failure', packet_type=packet_type,
+                                event_time=time.time())
+                        input_packet_config = next(
+                            (x for x in self.properties['userMessages']['inputPackets']
+                            if x['name'] == packet_type), None)
+                        if input_packet_config:
+                            self.emit('command',
+                                    packet_type=packet_type,
+                                    data=[],
+                                    error=True,
+                                    raw=self.frame)
+
+                    self.find_header = False
+                    self.payload_len = 0
+                    self.sync_pattern = collections.deque(2*[0], 4)
+                    self.frame=[]
+            else:
+                self.sync_pattern.append(data_block)
+                packet_type = None
+                if len(self.sync_pattern) == 4:
+                    packet_type = ''.join(
+                        ["%c" % x for x in list(self.sync_pattern)[2:4]])
+                if operator.eq(list(self.sync_pattern)[0:2], MSG_HEADER) and packet_type in self.userPacketsTypeList:
+                    self.frame = list(self.sync_pattern)[:]  # header_tp.copy()
+                    self.find_header = True
+                    #print(packet_type)
+        '''
+        for data_block in data:
+            if self.find_header:
+                self.frame.append(data_block)
+                if self.payload_len_idx == len(self.frame):
+                    self.payload_len = data_block
+
+                elif 5 + self.payload_len + 2 == len(self.frame):
+                    packet_type = ''.join(
+                        ["%c" % x for x in self.frame[PACKET_TYPE_INDEX:4]])
+                    # self.find_header = False
+                    result = helper.calc_crc(self.frame[2:-2])
+                    if result[0] == self.frame[-2] and result[1] == self.frame[-1]:
+                        if packet_type == 'gB':
+                            print('parsed')
+                        # find a whole frame
+                        # self._parse_frame(self.frame, self.payload_len)
+                        self._parse_message(
+                            packet_type, self.payload_len, self.frame)
+                    else:
+                        APP_CONTEXT.get_logger().logger.info(
+                            "crc check error! packet_type:{0}".format(packet_type))
+                        print('crc',packet_type,'calc',result,'expect',self.frame[-2:])
 
                         self.emit('crc_failure', packet_type=packet_type,
                                 event_time=time.time())
@@ -249,12 +300,17 @@ class UartMessageParser(MessageParserBase):
                                     data=[],
                                     error=True,
                                     raw=self.frame)
+
+                    self.find_header = False
+                    self.payload_len = 0
+                    self.sync_pattern = collections.deque(2*[0], 2)
+                    self.frame=[]
             else:
                 self.sync_pattern.append(data_block)
                 if operator.eq(list(self.sync_pattern), MSG_HEADER):
                     self.frame = MSG_HEADER[:]  # header_tp.copy()
                     self.find_header = True
-
+        '''
     def _parse_message(self, packet_type, payload_len, frame):
         payload = frame[5:payload_len+5]
         # parse interactive commands

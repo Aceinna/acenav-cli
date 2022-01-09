@@ -5,7 +5,8 @@ import os
 import sys
 import signal
 import time
-import numpy #fix:Executable missing Library
+if os.name == 'nt':
+    import numpy #fix:Executable missing Library
 from aceinna.bootstrap import Loader
 from aceinna.framework.decorator import (
     receive_args, handle_application_exception)

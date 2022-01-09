@@ -16,8 +16,8 @@ from ...framework.context import APP_CONTEXT
 from ...framework.utils.firmware_parser import parser as firmware_content_parser
 from ...framework.utils.print import (print_green, print_yellow, print_red)
 from ..base import OpenDeviceBase
-from ..configs.rtk_predefine import (
-    APP_STR, get_rtk_products, get_configuratin_file_mapping
+from ..configs.beidou_predefine import (
+    APP_STR, get_beidou_products, get_configuratin_file_mapping
 )
 from ..decorator import with_device_message
 from ...models import InternalCombineAppParseRule
@@ -31,17 +31,18 @@ from ..upgrade_workers import (
 from ..parsers.rtk330l_field_parser import encode_value
 from abc import ABCMeta, abstractmethod
 from ..ping.rtk330l import ping
+from ..ping.beidou import ping as beidou_ping
+import zlib
 
-
-class RTKProviderBase(OpenDeviceBase):
+class beidouProviderBase(OpenDeviceBase):
     '''
-    RTK Series UART provider
+    beidou Series UART provider
     '''
     __metaclass__ = ABCMeta
 
     def __init__(self, communicator, *args):
-        super(RTKProviderBase, self).__init__(communicator)
-        self.type = 'RTK'
+        super(beidouProviderBase, self).__init__(communicator)
+        self.type = 'beidou'
         self.server_update_rate = 100
         self.sky_data = []
         self.pS_data = []
@@ -67,17 +68,62 @@ class RTKProviderBase(OpenDeviceBase):
         self.nmea_buffer = []
         self.nmea_sync = 0
         self.config_file_name = 'openrtk.json'
-        self.device_category = 'RTK'
+        self.device_category = 'beidou'
         self.prepare_folders()
         self.ntrip_client = None
-        self.rtk_log_file_name = ''
+        self.beidou_log_file_name = ''
         self.connected = False
         self.port_index_define = {
             'user': 0,
             'rtcm': 1,
             'debug': 2,
         }
-
+        self.crc32Table =\
+        [
+            0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419,0x706af48f,
+            0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e,0x97d2d988,
+            0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064,0x6ab020f2,
+            0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551,0x83d385c7,
+            0x136c9856, 0x646ba8c0, 0xfd62f97a, 0x8a65c9ec, 0x14015c4f,0x63066cd9,
+            0xfa0f3d63, 0x8d080df5, 0x3b6e20c8, 0x4c69105e, 0xd56041e4,0xa2677172,
+            0x3c03e4d1, 0x4b04d447, 0xd20d85fd, 0xa50ab56b, 0x35b5a8fa,0x42b2986c,
+            0xdbbbc9d6, 0xacbcf940, 0x32d86ce3, 0x45df5c75, 0xdcd60dcf,0xabd13d59,
+            0x26d930ac, 0x51de003a, 0xc8d75180, 0xbfd06116, 0x21b4f4b5,0x56b3c423,
+            0xcfba9599, 0xb8bda50f, 0x2802b89e, 0x5f058808, 0xc60cd9b2,0xb10be924,
+            0x2f6f7c87, 0x58684c11, 0xc1611dab, 0xb6662d3d, 0x76dc4190,0x01db7106,
+            0x98d220bc, 0xefd5102a, 0x71b18589, 0x06b6b51f, 0x9fbfe4a5,0xe8b8d433,
+            0x7807c9a2, 0x0f00f934, 0x9609a88e, 0xe10e9818, 0x7f6a0dbb,0x086d3d2d,
+            0x91646c97, 0xe6635c01, 0x6b6b51f4, 0x1c6c6162, 0x856530d8,0xf262004e,
+            0x6c0695ed, 0x1b01a57b, 0x8208f4c1, 0xf50fc457, 0x65b0d9c6,0x12b7e950,
+            0x8bbeb8ea, 0xfcb9887c, 0x62dd1ddf, 0x15da2d49, 0x8cd37cf3,0xfbd44c65,
+            0x4db26158, 0x3ab551ce, 0xa3bc0074, 0xd4bb30e2, 0x4adfa541,0x3dd895d7,
+            0xa4d1c46d, 0xd3d6f4fb, 0x4369e96a, 0x346ed9fc, 0xad678846,0xda60b8d0,
+            0x44042d73, 0x33031de5, 0xaa0a4c5f, 0xdd0d7cc9, 0x5005713c,0x270241aa,
+            0xbe0b1010, 0xc90c2086, 0x5768b525, 0x206f85b3, 0xb966d409,0xce61e49f,
+            0x5edef90e, 0x29d9c998, 0xb0d09822, 0xc7d7a8b4, 0x59b33d17,0x2eb40d81,
+            0xb7bd5c3b, 0xc0ba6cad, 0xedb88320, 0x9abfb3b6, 0x03b6e20c,0x74b1d29a,
+            0xead54739, 0x9dd277af, 0x04db2615, 0x73dc1683, 0xe3630b12,0x94643b84,
+            0x0d6d6a3e, 0x7a6a5aa8, 0xe40ecf0b, 0x9309ff9d, 0x0a00ae27,0x7d079eb1,
+            0xf00f9344, 0x8708a3d2, 0x1e01f268, 0x6906c2fe, 0xf762575d,0x806567cb,
+            0x196c3671, 0x6e6b06e7, 0xfed41b76, 0x89d32be0, 0x10da7a5a,0x67dd4acc,
+            0xf9b9df6f, 0x8ebeeff9, 0x17b7be43, 0x60b08ed5, 0xd6d6a3e8,0xa1d1937e,
+            0x38d8c2c4, 0x4fdff252, 0xd1bb67f1, 0xa6bc5767, 0x3fb506dd,0x48b2364b,
+            0xd80d2bda, 0xaf0a1b4c, 0x36034af6, 0x41047a60, 0xdf60efc3,0xa867df55,
+            0x316e8eef, 0x4669be79, 0xcb61b38c, 0xbc66831a, 0x256fd2a0,0x5268e236,
+            0xcc0c7795, 0xbb0b4703, 0x220216b9, 0x5505262f, 0xc5ba3bbe,0xb2bd0b28,
+            0x2bb45a92, 0x5cb36a04, 0xc2d7ffa7, 0xb5d0cf31, 0x2cd99e8b,0x5bdeae1d,
+            0x9b64c2b0, 0xec63f226, 0x756aa39c, 0x026d930a, 0x9c0906a9,0xeb0e363f,
+            0x72076785, 0x05005713, 0x95bf4a82, 0xe2b87a14, 0x7bb12bae,0x0cb61b38,
+            0x92d28e9b, 0xe5d5be0d, 0x7cdcefb7, 0x0bdbdf21, 0x86d3d2d4,0xf1d4e242,
+            0x68ddb3f8, 0x1fda836e, 0x81be16cd, 0xf6b9265b, 0x6fb077e1,0x18b74777,
+            0x88085ae6, 0xff0f6a70, 0x66063bca, 0x11010b5c, 0x8f659eff,0xf862ae69,
+            0x616bffd3, 0x166ccf45, 0xa00ae278, 0xd70dd2ee, 0x4e048354,0x3903b3c2,
+            0xa7672661, 0xd06016f7, 0x4969474d, 0x3e6e77db, 0xaed16a4a,0xd9d65adc,
+            0x40df0b66, 0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f,0x30b5ffe9,
+            0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605,0xcdd70693,
+            0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02,0x2a6f2b94,
+            0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
+        ]
     def prepare_folders(self):
         '''
         Prepare folders for data storage and configuration
@@ -95,7 +141,7 @@ class RTKProviderBase(OpenDeviceBase):
         self.setting_folder_path = os.path.join(
             executor_path, setting_folder_name)
 
-        all_products = get_rtk_products()
+        all_products = get_beidou_products()
         config_file_mapping = get_configuratin_file_mapping()
 
         for product in all_products:
@@ -183,7 +229,7 @@ class RTKProviderBase(OpenDeviceBase):
             (item for item in APP_STR if item in split_text), None)
 
         if not app_name:
-            app_name = 'RTK_INS'
+            app_name = 'INS'
             self.is_app_matched = False
         else:
             self.is_app_matched = True
@@ -269,9 +315,9 @@ class RTKProviderBase(OpenDeviceBase):
                 'Data folder does not exists, please check if the application has create folder permission')
 
         try:
-            self.rtk_log_file_name = os.path.join(
+            self.beidou_log_file_name = os.path.join(
                 self.data_folder, '{0}_log_{1}'.format(self.device_category.lower(), formatted_dir_time))
-            os.mkdir(self.rtk_log_file_name)
+            os.mkdir(self.beidou_log_file_name)
         except:
             raise Exception(
                 'Cannot create log folder, please check if the application has create folder permission')
@@ -282,17 +328,21 @@ class RTKProviderBase(OpenDeviceBase):
                 self.properties["initial"]["userParameters"])
             if (result['packetType'] == 'success'):
                 self.save_config()
-
+            time.sleep(1)
             # check saved result
-            self.check_predefined_result()
+            result = self.check_predefined_result()
+            self.save_device_info(result)
+        else:
+            self.save_device_info()
 
+        self.set_log_type()
         # start ntrip client
         if self.properties["initial"].__contains__("ntrip") \
             and not self.ntrip_client \
             and not self.is_in_bootloader \
             and not self.cli_options.use_cli:
             
-            self.ntrip_rtcm_logf = open(os.path.join(self.rtk_log_file_name, 'ntrip_rtcm_{0}.bin'.format(
+            self.ntrip_rtcm_logf = open(os.path.join(self.beidou_log_file_name, 'ntrip_rtcm_{0}.bin'.format(
                 formatted_file_time)), "wb")
 
             thead = threading.Thread(target=self.ntrip_client_thread)
@@ -316,7 +366,7 @@ class RTKProviderBase(OpenDeviceBase):
                             rtcm_port = x["value"]
 
             self.user_logf = open(os.path.join(
-                self.rtk_log_file_name, 'user_{0}.bin'.format(formatted_file_time)), "wb")
+                self.beidou_log_file_name, 'user_{0}.bin'.format(formatted_file_time)), "wb")
 
             if rtcm_port != '':
                 print_green('{0} log GNSS UART {1}'.format(
@@ -325,10 +375,10 @@ class RTKProviderBase(OpenDeviceBase):
                     rtcm_port, '460800', timeout=0.1)
                 if self.rtcm_serial_port.isOpen():
                     self.rtcm_logf = open(
-                        os.path.join(self.rtk_log_file_name, 'rtcm_rover_{0}.bin'.format(
+                        os.path.join(self.beidou_log_file_name, 'rtcm_rover_{0}.bin'.format(
                             formatted_file_time)), "wb")
                     thead = threading.Thread(
-                        target=self.thread_rtcm_port_receiver, args=(self.rtk_log_file_name,))
+                        target=self.thread_rtcm_port_receiver, args=(self.beidou_log_file_name,))
                     thead.start()
 
             if debug_port != '':
@@ -338,13 +388,13 @@ class RTKProviderBase(OpenDeviceBase):
                     debug_port, '460800', timeout=0.1)
                 if self.debug_serial_port.isOpen():
                     self.debug_logf = open(
-                        os.path.join(self.rtk_log_file_name, 'rtcm_base_{0}.bin'.format(
+                        os.path.join(self.beidou_log_file_name, 'rtcm_base_{0}.bin'.format(
                             formatted_file_time)), "wb")
                     thead = threading.Thread(
-                        target=self.thread_debug_port_receiver, args=(self.rtk_log_file_name,))
+                        target=self.thread_debug_port_receiver, args=(self.beidou_log_file_name,))
                     thead.start()
 
-            self.save_device_info()
+            # self.save_device_info()
         except Exception as ex:
             if self.debug_serial_port is not None:
                 if self.debug_serial_port.isOpen():
@@ -367,9 +417,23 @@ class RTKProviderBase(OpenDeviceBase):
             calc_cksum ^= ord(s)
         return int(cksum, 16), calc_cksum
 
+    def CalcateCRC32(self, data):
+        iIndex = 0
+        crc32_value = 0
+        for iIndex in range(len(data)):
+            crc32_value = self.crc32Table[(crc32_value ^ ord(data[iIndex]) ) & 0xff] ^ (crc32_value >> 8)
+        return crc32_value
+
+
+    def unico_checkcrc(self, data):
+        data = data.replace("\r", "").replace("\n", "").replace("#", "")
+        nmeadata, crc32 = data.split('*')
+        calc_crc32 = self.CalcateCRC32(nmeadata)
+        return int(crc32, 16), calc_crc32
+
     def on_read_raw(self, data):
         for bytedata in data:
-            if bytedata == 0x24:
+            if bytedata == 0x24 or bytedata == 0x23:
                 self.nmea_buffer = []
                 self.nmea_sync = 0
                 self.nmea_buffer.append(chr(bytedata))
@@ -382,9 +446,16 @@ class RTKProviderBase(OpenDeviceBase):
                     if bytedata == 0x0A:
                         try:
                             str_nmea = ''.join(self.nmea_buffer)
-                            cksum, calc_cksum = self.nmea_checksum(
-                                str_nmea)
+                            if str_nmea[0] == '$':
+                                cksum, calc_cksum = self.nmea_checksum(
+                                    str_nmea)
+                            else:
+                                cksum, calc_cksum = self.unico_checkcrc(
+                                    str_nmea)
                             if cksum == calc_cksum:
+                                if self.cli_options.debug.lower() == 'true':
+                                    if str_nmea.find("#HEADINGA") != -1 or str_nmea.find("$GPGGA") != -1 or str_nmea.find("$GNGGA") != -1:
+                                        print(str_nmea)
                                 if str_nmea.find("$GPGGA") != -1 or str_nmea.find("$GNGGA") != -1:
                                     if self.ntrip_client:
                                         self.ntrip_client.send(str_nmea)
@@ -475,6 +546,7 @@ class RTKProviderBase(OpenDeviceBase):
                     str_checksum = str_checksum[2:]
                 gpgga = gpgga + '*' + str_checksum + '\r\n'
                 APP_CONTEXT.get_print_logger().info(gpgga)
+                print(gpgga)
                 self.ntrip_client.send(gpgga)
                 return
 
@@ -619,12 +691,14 @@ class RTKProviderBase(OpenDeviceBase):
 
 
     def after_jump_app_command(self):
-        # rtk330l ping device
+        # beidou ping device
+        self.communicator.serial_port.baudrate = self.original_baudrate
         can_ping = False
 
         while not can_ping:
             self.communicator.reset_buffer()  # clear input and output buffer
-            info = ping(self.communicator, None)
+            info = beidou_ping(self.communicator, None)
+            # print('JA ping', info)
             if info:
                 can_ping = True
             time.sleep(0.5)
@@ -633,9 +707,7 @@ class RTKProviderBase(OpenDeviceBase):
     def get_upgrade_workers(self, firmware_content):
         workers = []
         rules = [
-            InternalCombineAppParseRule('rtk', 'rtk_start:', 4),
             InternalCombineAppParseRule('ins', 'ins_start:', 4),
-            InternalCombineAppParseRule('sdk', 'sdk_start:', 4),
         ]
 
         parsed_content = firmware_content_parser(firmware_content, rules)
@@ -649,10 +721,7 @@ class RTKProviderBase(OpenDeviceBase):
             worker = self.build_worker(rule, content)
             if not worker:
                 continue
-            if (device_info['modelName'] == 'RTK330L') and (rule == 'sdk') and ((int(device_info['serialNumber']) <= 2178200080) and (int(device_info['serialNumber']) >= 2178200001)):
-                continue
-            else:
-                workers.append(worker)
+            workers.append(worker)
         # prepare jump bootloader worker and jump application workder
         # append jump bootloader worker before the first firmware upgrade workder
         # append jump application worker after the last firmware uprade worker
@@ -702,7 +771,7 @@ class RTKProviderBase(OpenDeviceBase):
         local_time = time.localtime()
         formatted_file_time = time.strftime("%Y_%m_%d_%H_%M_%S", local_time)
         file_path = os.path.join(
-            self.rtk_log_file_name,
+            self.beidou_log_file_name,
             'parameters_predefined_{0}.json'.format(formatted_file_time)
         )
         # save parameters to data log folder after predefined parameters setup
@@ -710,13 +779,12 @@ class RTKProviderBase(OpenDeviceBase):
         if result['packetType'] == 'inputParams':
             with open(file_path, 'w') as outfile:
                 json.dump(result['data'], outfile)
-
+        #print(result)
         # compare saved parameters with predefined parameters
         hashed_predefined_parameters = helper.collection_to_dict(
             self.properties["initial"]["userParameters"], key='paramId')
         hashed_current_parameters = helper.collection_to_dict(
             result['data'], key='paramId')
-
         success_count = 0
         fail_count = 0
         fail_parameters = []
@@ -737,19 +805,19 @@ class RTKProviderBase(OpenDeviceBase):
         if fail_count > 0:
             print_yellow(check_result)
             print_yellow('The failed parameters: {0}'.format(fail_parameters))
-
-    def save_device_info(self):
+        return result
+    def save_device_info(self, result=None):
         ''' Save device configuration
             File name: configuration.json
         '''
         if self.is_in_bootloader:
             return
-
-        result = self.get_params()
+        if result == None:
+            result = self.get_params()
 
         device_configuration = None
         file_path = os.path.join(
-            self.data_folder, self.rtk_log_file_name, 'configuration.json')
+            self.data_folder, self.beidou_log_file_name, 'configuration.json')
 
         if not os.path.exists(file_path):
             device_configuration = []
@@ -850,15 +918,15 @@ class RTKProviderBase(OpenDeviceBase):
         has_error = False
         parameter_values = []
 
-        if self.app_info['app_name'] == 'RTK_INS':
+        if self.app_info['app_name'] == 'INS':
             conf_parameters = self.properties['userConfiguration']
             conf_parameters_len = len(conf_parameters)-1
-            step = 10
-
+            step = 20
             for i in range(2, conf_parameters_len, step):
                 start_byte = i
                 end_byte = i+step-1 if i+step < conf_parameters_len else conf_parameters_len
-                time.sleep(0.2)
+                time.sleep(0.5)
+                #print('xxxxxxxxxxxxxxxxxxxx',start_byte, end_byte)
                 command_line = helper.build_packet(
                     'gB', [start_byte, end_byte])
                 result = yield self._message_center.build(command=command_line, timeout=10)
@@ -989,6 +1057,16 @@ class RTKProviderBase(OpenDeviceBase):
             }
         }
 
+    #@with_device_message
+    def set_log_type(self):  # pylint: disable=unused-argument
+        log_cmd_list = self.properties['logCmd']
+        command_line = bytes(''.join(log_cmd_list),encoding='utf-8')
+        device_message = self._message_center.build(command=command_line)
+        '''
+        device_message.send()
+        '''
+        device_message._message_center._communicator.write(command_line)
+
     @with_device_message
     def set_param(self, params, *args):  # pylint: disable=unused-argument
         '''
@@ -1083,7 +1161,7 @@ class RTKProviderBase(OpenDeviceBase):
                 self._logger.stop_user_log()
 
             self.thread_do_upgrade_framework(file)
-            print("Upgrade RTK330LA firmware started at:[{0}].".format(
+            print("Upgrade beidou firmware started at:[{0}].".format(
                 datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
         return {
             'packetType': 'success'

@@ -5,7 +5,7 @@ predefined params for openrtk
 
 def get_beidou_products():
     return {
-        'beidou': ['INS']
+        'beidou': ['ins']
     }
 
 
@@ -13,7 +13,7 @@ def get_app_names():
     '''
     define app type
     '''
-    app_names = ['INS']
+    app_names = ['BEIDOU']
     return app_names
 
 

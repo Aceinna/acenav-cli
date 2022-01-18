@@ -27,7 +27,7 @@ class Default:
     def __init__(self, **kwargs):
         self._build_options(**kwargs)
         APP_CONTEXT.mode = APP_TYPE.DEFAULT
-
+        APP_CONTEXT.para_path = kwargs['para_path']
     def listen(self):
         '''
         Prepare components, initialize the application
@@ -83,7 +83,7 @@ class Default:
         self._driver.on(DriverEvents.Continous,
                         self.handle_receive_continous_data)
 
-        self._driver.detect()
+        self._driver.detect()           #TODO: step1
 
     def _prepare_tunnel(self):
         pass

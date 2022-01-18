@@ -42,7 +42,8 @@ class WebserverArgs(KeyValuesArgumentBase):
         'ntrip_client': False,
         'force_bootloader': False,
         'set_mount_angle': False,
-        'use_cli':False
+        'use_cli':False,
+        'para_path': None
     }
 
 

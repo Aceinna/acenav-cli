@@ -252,9 +252,12 @@ class beidouProviderBase(OpenDeviceBase):
                 return
 
         # Load the openimu.json based on its app
-        app_file_path = os.path.join(
-            self.setting_folder_path, product_name, app_name, self.config_file_name)
-
+        if APP_CONTEXT.para_path == None:
+            app_file_path = os.path.join(
+                self.setting_folder_path, product_name, app_name, self.config_file_name)
+        else:
+            app_file_path = os.path.join(
+                self.setting_folder_path, product_name, app_name, APP_CONTEXT.para_path)            
         if not self.is_app_matched:
             print_yellow(
                 'Failed to extract app version information from unit.' +

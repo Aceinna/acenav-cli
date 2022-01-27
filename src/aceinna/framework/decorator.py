@@ -58,7 +58,7 @@ def _build_args():
     parse_log_action.add_argument(
         "-p", type=str, help="The folder path of logs", default='./data', metavar='', dest="path")
     parse_log_action.add_argument(
-        "-i", type=int, help="Ins kml rate(hz). Allowed one of values: {0}".format(KML_RATES), default=5, metavar='', dest="kml_rate", choices=KML_RATES)
+        "-i", type=int, help="Ins kml rate(hz). Allowed one of values: {0}".format(KML_RATES), default=1, metavar='', dest="kml_rate", choices=KML_RATES)
     parse_log_action.add_argument(
         "-d", type=str, help="", default='false', dest="powerdr", choices=['false', 'true'])
 

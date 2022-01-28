@@ -205,7 +205,7 @@ class beidouProviderBase(OpenDeviceBase):
         Build device info
         '''
         split_text = [x for x in text.split(' ') if x != '']
-        sn = split_text[4]
+        sn = split_text[5]
         # remove the prefix of SN
         if sn.find('SN:') == 0:
             sn = sn[3:]

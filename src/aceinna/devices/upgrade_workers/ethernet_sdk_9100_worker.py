@@ -981,6 +981,9 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
             if len(data_buffer) > 0:
                 is_match = self._match(data_buffer, check_data)
+                if is_match is False:
+                    print(data_buffer)
+
                 break
 
             time.sleep(0.01)
@@ -1012,7 +1015,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
             self.write_wrapper(dst, src, send_method,
                                data[start: start+actual_size])
             start += actual_size
-            time.sleep(0.01)
+            time.sleep(0.001)
 
     def send_sdk_cmd_JS(self):
         result = False
@@ -1276,11 +1279,8 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
                 data_to_sdk = bin_data[i*BLOCK_SIZE:(i+1)*BLOCK_SIZE]
 
             current += len(data_to_sdk)
-            for i in range(10):
-                self.send_packet(list(data_to_sdk))
-                has_read = self.read_until(0xCC, 500)
-                if has_read:
-                    break
+            self.send_packet(list(data_to_sdk))
+            has_read = self.read_until(0xCC, 2000)
 
             if has_read:
                 self.emit(UPGRADE_EVENT.PROGRESS,
@@ -1362,14 +1362,14 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         self.flash_write_pre(self._file_content)
         time.sleep(0.1)
 
-        if not self.send_change_baud_cmd():
-            return self._raise_error('Prepare baudrate change command failed')
+        # if not self.send_change_baud_cmd():
+        #     return self._raise_error('Prepare baudrate change command failed')
 
-        if not self.send_baud(230400):
-            return self._raise_error('Send baudrate command failed')
+        # if not self.send_baud(230400):
+        #     return self._raise_error('Send baudrate command failed')
 
-        if not self.baud_check():
-            return self._raise_error('Baudrate check failed')
+        # if not self.baud_check():
+        #     return self._raise_error('Baudrate check failed')
 
         if not self.is_host_ready():
             return self._raise_error('Host is not ready.')

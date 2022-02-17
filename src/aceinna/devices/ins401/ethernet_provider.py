@@ -71,6 +71,10 @@ class Provider(OpenDeviceBase):
         self.mountangle_thread = None
         self.mountangle= None
         self.f_process = None
+        self.rtk_upgrade_flag = False
+        self.ins_upgrade_flag = False
+        self.sdk_upgrade_flag = False
+        self.imu_upgrade_flag = False
     def prepare_folders(self):
         '''
         Prepare folders for data storage and configuration
@@ -683,7 +687,7 @@ class Provider(OpenDeviceBase):
         else:
             packet_len = 192
 
-        if rule == 'rtk':
+        if rule == 'rtk' and self.rtk_upgrade_flag:
             rtk_upgrade_worker = FirmwareUpgradeWorker(
                 self.communicator,
                 lambda: helper.format_firmware_content(content),
@@ -696,7 +700,7 @@ class Provider(OpenDeviceBase):
                                 lambda: self.before_write_content('0', len(content)))
             return rtk_upgrade_worker
 
-        if rule == 'ins':
+        if rule == 'ins' and self.ins_upgrade_flag:
             ins_upgrade_worker = FirmwareUpgradeWorker(
                 self.communicator,
                 lambda: helper.format_firmware_content(content),
@@ -710,14 +714,14 @@ class Provider(OpenDeviceBase):
                                   lambda: self.before_write_content('1', len(content)))
             return ins_upgrade_worker
 
-        if rule == 'sdk':
+        if rule == 'sdk' and self.sdk_upgrade_flag:
             sdk_upgrade_worker = EthernetSDK9100UpgradeWorker(
                 self.communicator,
                 lambda: helper.format_firmware_content(content))
             sdk_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
             return sdk_upgrade_worker
 
-        if rule == 'imu':
+        if rule == 'imu' and self.imu_upgrade_flag:
             imu_upgrade_worker = FirmwareUpgradeWorker(
                 self.communicator,
                 lambda: helper.format_firmware_content(content),
@@ -1172,11 +1176,34 @@ class Provider(OpenDeviceBase):
         Upgrade framework
         '''
         file = ''
-        if isinstance(params, str):
-            file = params
+        if isinstance(params[1], str):
+            file = params[1]
 
-        if isinstance(params, dict):
-            file = params['file']
+        if isinstance(params[1], dict):
+            file = params[1]['file']
+        
+        self.rtk_upgrade_flag = False
+        self.ins_upgrade_flag = False
+        self.sdk_upgrade_flag = False
+        self.imu_upgrade_flag = False
+
+        if len(params) > 2:    # rtk ins sdk imu  each upgrade
+            for param in params:
+                if param == 'rtk':
+                    self.rtk_upgrade_flag = True
+                if param == 'ins':
+                    self.ins_upgrade_flag = True
+                if param == 'sdk':
+                    self.sdk_upgrade_flag = True
+                if param == 'imu':
+                    self.imu_upgrade_flag = True            
+        elif len(params) == 2:    # rtk ins sdk imu  all upgrade
+            self.rtk_upgrade_flag = True
+            self.ins_upgrade_flag = True
+            self.sdk_upgrade_flag = True
+            self.imu_upgrade_flag = True
+        
+
 
         # start a thread to do upgrade
         if not self.is_upgrading:

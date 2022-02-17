@@ -215,9 +215,13 @@ class CommandLine:
             print("Usage:")
             print("upgrade file_name")
         else:
-            file_name = self.input_string[1]
+            if self.options and self.options.interface == '100base-t1':
+                params = self.input_string
+            else:
+                params = self.input_string[1]
+
             # TODO: check device is idel
-            self._driver.execute('upgrade_framework', file_name)
+            self._driver.execute('upgrade_framework', params)
         return True
 
     def record_handler(self):

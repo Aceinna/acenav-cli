@@ -722,20 +722,20 @@ class Provider(OpenDeviceBase):
             sdk_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
             return sdk_upgrade_worker
 
+        if self.imu_boot_upgrade_flag:
+            if rule == 'imu_boot':
+                imu_boot_upgrade_worker = FirmwareUpgradeWorker(
+                    self.communicator,
+                    lambda: helper.format_firmware_content(content),
+                    self.imu_firmware_write_command_generator,
+                    192)
+                imu_boot_upgrade_worker.name = 'SUB_IMU_BOOT'
+                imu_boot_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
+                imu_boot_upgrade_worker.on(
+                    UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(8))
+                return imu_boot_upgrade_worker
+                
         if self.imu_upgrade_flag:
-            if self.imu_boot_upgrade_flag:
-                if rule == 'imu_boot':
-                    imu_boot_upgrade_worker = FirmwareUpgradeWorker(
-                        self.communicator,
-                        lambda: helper.format_firmware_content(content),
-                        self.imu_firmware_write_command_generator,
-                        192)
-                    imu_boot_upgrade_worker.name = 'SUB_IMU_BOOT'
-                    imu_boot_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
-                    imu_boot_upgrade_worker.on(
-                        UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(8))
-                    return imu_boot_upgrade_worker
-
             if rule == 'imu':
                 imu_upgrade_worker = FirmwareUpgradeWorker(
                     self.communicator,
@@ -751,21 +751,14 @@ class Provider(OpenDeviceBase):
     def get_upgrade_workers(self, firmware_content):
         workers = []
 
-        if self.imu_boot_upgrade_flag:
-            rules = [
-                InternalCombineAppParseRule('rtk', 'rtk_start:', 4),
-                InternalCombineAppParseRule('ins', 'ins_start:', 4),
-                InternalCombineAppParseRule('sdk', 'sdk_start:', 4),
-                InternalCombineAppParseRule('imu_boot', 'imu_boot_start:', 4),
-                InternalCombineAppParseRule('imu', 'imu_start:', 4),
-            ]
-        else:
-            rules = [
-                InternalCombineAppParseRule('rtk', 'rtk_start:', 4),
-                InternalCombineAppParseRule('ins', 'ins_start:', 4),
-                InternalCombineAppParseRule('sdk', 'sdk_start:', 4),
-                InternalCombineAppParseRule('imu', 'imu_start:', 4),
-            ]
+        rules = [
+            InternalCombineAppParseRule('rtk', 'rtk_start:', 4),
+            InternalCombineAppParseRule('ins', 'ins_start:', 4),
+            InternalCombineAppParseRule('sdk', 'sdk_start:', 4),
+            InternalCombineAppParseRule('imu_boot', 'imu_boot_start:', 4),
+            InternalCombineAppParseRule('imu', 'imu_start:', 4),
+        ]
+
         if self.communicator:
             self.communicator.reset_buffer()
             self.communicator.upgrade()
@@ -1243,31 +1236,31 @@ class Provider(OpenDeviceBase):
         self.imu_boot_upgrade_flag = False
 
         if len(params) > 2: 
-            # rtk ins sdk imu_boot imu all upgrade   
-            if len(params) == 3 and params[2] == 'imu_boot':
-                self.rtk_upgrade_flag = True
-                self.ins_upgrade_flag = True
-                self.sdk_upgrade_flag = True
-                self.imu_upgrade_flag = True
-                self.imu_boot_upgrade_flag = True
-            else:
-                # rtk ins sdk imu  each upgrade
-                for param in params:   
-                    if param == 'rtk':
-                        self.rtk_upgrade_flag = True
-                    if param == 'ins':
-                        self.ins_upgrade_flag = True
-                    if param == 'sdk':
-                        self.sdk_upgrade_flag = True  
-                    if param == 'imu':
-                        self.imu_upgrade_flag = True
-                        self.imu_boot_upgrade_flag = True            
-        elif len(params) == 2:    # rtk ins sdk imu upgrade, without imu_boot
+            # rtk ins sdk imu  each upgrade
+            for param in params:   
+                if param == 'rtk':
+                    self.rtk_upgrade_flag = True
+
+                if param == 'ins':
+                    self.ins_upgrade_flag = True
+
+                if param == 'sdk':
+                    self.sdk_upgrade_flag = True 
+
+                if param == 'imu_boot':
+                    self.imu_boot_upgrade_flag = True 
+
+                if param == 'imu':
+                    self.imu_upgrade_flag = True
+
+        elif len(params) == 2:    
+            # rtk ins sdk imu upgrade, the imu boot upgrade depends on 
+            # whether the imu boot is merged into the firmware
             self.rtk_upgrade_flag = True
             self.ins_upgrade_flag = True
             self.sdk_upgrade_flag = True
             self.imu_upgrade_flag = True
-            self.imu_boot_upgrade_flag = False
+            self.imu_boot_upgrade_flag = True
 
         # start a thread to do upgrade
         if not self.is_upgrading:

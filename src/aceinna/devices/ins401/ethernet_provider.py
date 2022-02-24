@@ -827,7 +827,7 @@ class Provider(OpenDeviceBase):
             listen_packet=[0x4a, 0x49],
             wait_timeout_after_command=30)
         imu_boot_jump_bootloader_worker.on(
-            UPGRADE_EVENT.BEFORE_COMMAND, lambda: time.sleep(2))
+            UPGRADE_EVENT.BEFORE_COMMAND, lambda: time.sleep(1))
         imu_boot_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE
 
         imu_boot_jump_application_worker = JumpApplicationWorker(
@@ -856,7 +856,7 @@ class Provider(OpenDeviceBase):
             listen_packet=[0x4a, 0x49],
             wait_timeout_after_command=30)
         imu_jump_bootloader_worker.on(
-            UPGRADE_EVENT.BEFORE_COMMAND, lambda: time.sleep(2))
+            UPGRADE_EVENT.BEFORE_COMMAND, lambda: time.sleep(1))
         imu_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE
 
         imu_jump_application_worker = JumpApplicationWorker(

@@ -1,6 +1,14 @@
 # CHANGELOG
 
 ---
+## 2.6.3.1， 03/01/2022
+
+- [INS401] Add gnss solution interity packet is saved to log file
+- [INS401] STA9100 SDK upgrading default baud rate is 115200bps and upgrading steps are modified
+- [INS401] Add IMU bootloader upgrading function
+- [INS401] Support one or more modules of firmware(rtk, ins, sdk, imu_boot and imu) can be upgraded via ethernet
+
+
 ## 2.6.3， 12/20/2021
 
 - [INS401] Support GPGGA and GNGGA message of NMEA format

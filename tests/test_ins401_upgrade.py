@@ -25,11 +25,18 @@ except:  # pylint: disable=bare-except
 def handle_discovered(device_provider):
     loop_upgrade_cnt = 0
 
+    upgrade_log_file = open(r'.\upgrade_log.txt', 'w+')
+
     while True:
         if device_provider.is_upgrading == False:     
             loop_upgrade_cnt += 1
-            print("loop_upgrade_cnt:", loop_upgrade_cnt)
-        device_provider.upgrade_framework("./INS401_28.02.bin")
+            print('loop_upgrade_cnt: %d' % loop_upgrade_cnt)
+            print('loop_upgrade_cnt: %d' % loop_upgrade_cnt, file = upgrade_log_file, flush = True)
+
+        device_provider.upgrade_framework(['upgrade', './INS401_28.02.05.bin'])
+
+        if loop_upgrade_cnt == 300:
+            os._exit()
 
         time.sleep(5)
 

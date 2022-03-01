@@ -35,6 +35,8 @@ def _build_args():
                         help="COM Port")
     parser.add_argument("-s", "--set-user-para", dest='set_user_para', action='store_true',
                         help="Set user parameters", default=False)
+    parser.add_argument("--para-path", dest="para_path", type=str,
+                        metavar='')
     parser.add_argument("--cli", dest='use_cli', action='store_true',
                         help="start as cli mode", default=False)
     parser.add_argument("-a", "--set-mount-angle-enable", dest='set_mount_angle', action='store_true',
@@ -56,7 +58,7 @@ def _build_args():
     parse_log_action.add_argument(
         "-p", type=str, help="The folder path of logs", default='./data', metavar='', dest="path")
     parse_log_action.add_argument(
-        "-i", type=int, help="Ins kml rate(hz). Allowed one of values: {0}".format(KML_RATES), default=5, metavar='', dest="kml_rate", choices=KML_RATES)
+        "-i", type=int, help="Ins kml rate(hz). Allowed one of values: {0}".format(KML_RATES), default=1, metavar='', dest="kml_rate", choices=KML_RATES)
     parse_log_action.add_argument(
         "-d", type=str, help="", default='false', dest="powerdr", choices=['false', 'true'])
 

@@ -14,6 +14,7 @@ class AppContext:
     _device_context = None
     _statistics = None
     _mode = None
+    _para_path = None
 
     def __init__(self):
         pass
@@ -69,5 +70,12 @@ class AppContext:
     def mode(self, value):
         self._mode = value
 
+    @property
+    def para_path(self):
+        return self._para_path
+
+    @para_path.setter
+    def para_path(self, value):
+        self._para_path = value
 
 APP_CONTEXT = AppContext()

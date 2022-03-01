@@ -65,8 +65,8 @@ class JumpBootloaderWorker(UpgradeWorkerBase):
                 self._communicator.write(actual_command)
                 time.sleep(0.5)
                 response = helper.read_untils_have_data(
-                            self._communicator, self._listen_packet, 100, 1000, payload_length_format)
-                if response:
+                            self._communicator, self._listen_packet, 100, 2000, payload_length_format)
+                if response is not None:
                     break
             
             if(response is None):

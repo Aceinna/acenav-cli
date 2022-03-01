@@ -968,7 +968,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         while read_times > 0:
             packet_raw = self._communicator.read()
             if packet_raw is None:
-                time.sleep(0.001)
+                time.sleep(0.01)
                 read_times -= 1
                 continue
 
@@ -981,9 +981,12 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
             if len(data_buffer) > 0:
                 is_match = self._match(data_buffer, check_data)
+                if is_match is False:
+                    print(data_buffer)
+
                 break
 
-            time.sleep(0.001)
+            time.sleep(0.01)
             read_times -= 1
 
         return is_match
@@ -1025,11 +1028,9 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
             time.sleep(5)
             response = helper.read_untils_have_data(
                 self._communicator, JS, 20, 1000)
-            if response:
+            if response is not None:
+                result = True
                 break
-
-        if response is not None:
-            result = True
 
         return result
 
@@ -1047,10 +1048,9 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
             response = helper.read_untils_have_data(
                 self._communicator, JG, 10, 1000)
             if response is not None:
+                result = True
                 break
 
-        if response is not None:
-            result = True
         return result
 
     def send_sync(self):
@@ -1078,8 +1078,8 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         for i in range(3):
             self.send_packet(change_baud_cmd)
-            time.sleep(0.2)
-            result = self.read_until(0xCC, 1000, 1)
+            time.sleep(1)
+            result = self.read_until(0xCC, 500, 1)
             if result:
                 break
         return result
@@ -1091,9 +1091,9 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         baud_list = []
         baud_list = self.get_list_from_int(baud_int)
 
-        for i in range(3):
+        for i in range(5):
             self.send_packet(baud_list)
-            result = self.read_until(0xCC, 1000, 1)
+            result = self.read_until(0xCC, 500, 1)
             if result:
                 break
 
@@ -1104,11 +1104,9 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
             return False
 
         check_baud = [0x38]
-        time.sleep(0.01)
         for i in range(3):
             self.send_packet(check_baud)
-            time.sleep(0.5)
-            result = self.read_until(0xCC, 1000, 1)
+            result = self.read_until(0xCC, 500, 1)
             if result:
                 break
 
@@ -1120,7 +1118,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         host = [0x5a]
         
-        for i in range(3):
+        for i in range(5):
             self.send_packet(host)
             result = self.read_until(0xCC, 1000, 1)
             if result:
@@ -1159,8 +1157,8 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         self.send_packet(boot_part1)
         self.send_packet(boot_part2)
 
-        for _ in range(10):
-            is_match = self.read_until(0xCC, 200, 1)
+        for _ in range(3):
+            is_match = self.read_until(0xCC, 500, 1)
             if is_match:
                 return True
             time.sleep(1)
@@ -1174,8 +1172,8 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         for i in range(3):
             self.send_packet(write_cmd)
-            time.sleep(0.2) # 2
-            result = self.read_until(0xCC, 1000, 1)
+            time.sleep(2)
+            result = self.read_until(0xCC, 200, 1)
             if result:
                 break
 
@@ -1187,8 +1185,8 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         for i in range(3):
             self.send_packet(bin_info_list, buffer_size=512)
-            time.sleep(0.2) # 8
-            result = self.read_until(0xCC, 1000)
+            time.sleep(8)
+            result = self.read_until(0xCC, 200)
             if result:
                 break
 
@@ -1248,18 +1246,18 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if self._is_stopped:
             return False
 
-        return self.read_until(0xCC, 1000, 1)
+        return self.read_until(0xCC, 500, 1)
 
     def erase_wait(self):
         if self._is_stopped:
             return False
 
-        return self.read_until(0xCC, 1000, 1)
+        return self.read_until(0xCC, 500, 1)
 
     def erase_nvm_wait(self):
         if self._is_stopped:
             return False
-        return self.read_until(0xCC, 1000, 1)
+        return self.read_until(0xCC, 500, 1)
 
     def flash_write_pre(self, bin_data):
         data_to_sdk = bin_data[0:BLOCK_SIZE]
@@ -1281,11 +1279,8 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
                 data_to_sdk = bin_data[i*BLOCK_SIZE:(i+1)*BLOCK_SIZE]
 
             current += len(data_to_sdk)
-            for i in range(3):
-                self.send_packet(list(data_to_sdk))
-                has_read = self.read_until(0xCC, 1000)
-                if has_read:
-                    break
+            self.send_packet(list(data_to_sdk))
+            has_read = self.read_until(0xCC, 2000)
 
             if has_read:
                 self.emit(UPGRADE_EVENT.PROGRESS,
@@ -1367,14 +1362,14 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         self.flash_write_pre(self._file_content)
         time.sleep(0.1)
 
-        if not self.send_change_baud_cmd():
-            return self._raise_error('Prepare baudrate change command failed')
+        # if not self.send_change_baud_cmd():
+        #     return self._raise_error('Prepare baudrate change command failed')
 
-        if not self.send_baud(230400):
-            return self._raise_error('Send baudrate command failed')
+        # if not self.send_baud(230400):
+        #     return self._raise_error('Send baudrate command failed')
 
-        if not self.baud_check():
-            return self._raise_error('Baudrate check failed')
+        # if not self.baud_check():
+        #     return self._raise_error('Baudrate check failed')
 
         if not self.is_host_ready():
             return self._raise_error('Host is not ready.')
@@ -1397,7 +1392,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if not self.erase_nvm_wait():
             return self._raise_error('Wait nvm failed')
 
-        time.sleep(2)
+        time.sleep(5)
         if not self.flash_write(fs_len, self._file_content):
             return self._raise_error('Write flash failed') 
 

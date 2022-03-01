@@ -42,7 +42,8 @@ class WebserverArgs(KeyValuesArgumentBase):
         'ntrip_client': False,
         'force_bootloader': False,
         'set_mount_angle': False,
-        'use_cli':False
+        'use_cli':False,
+        'para_path': None
     }
 
 
@@ -64,6 +65,6 @@ class LogParserArgs(KeyValuesArgumentBase):
     default_values = {
         'log_type': 'openrtk',
         'path': '.',
-        'kml_rate': 5,
+        'kml_rate': 1,
         'powerdr': 'false'
     }

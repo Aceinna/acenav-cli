@@ -33,9 +33,8 @@ def handle_discovered(device_provider):
             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt)
             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt, file = upgrade_log_file, flush = True)
 
-        device_provider.upgrade_framework(['upgrade', './INS401_28.02.05.bin'])
-
-        if loop_upgrade_cnt == 300:
+        device_provider.upgrade_framework(['upgrade', './INS401_28.03a.bin'])
+        if loop_upgrade_cnt == 200:
             os._exit()
 
         time.sleep(5)

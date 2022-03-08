@@ -124,12 +124,7 @@ class Ethernet(Communicator):
         async_sniffer.start()
         time.sleep(0.1)
         sendp(command.actual_command, iface=iface, verbose=0)
-        for i in range(70):
-            if self.iface_confirmed:
-                break
-            else:
-                time.sleep(0.01)
-
+        time.sleep(0.1)
         async_sniffer.stop()
 
     def reshake_hand(self):

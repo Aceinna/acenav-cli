@@ -1347,8 +1347,12 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if len(text) > 7:
             version_str = text[7][1:]
             version = version_str.replace('.', '')
-            if int(version) <= 280202:
-                self.baud_change_enable = 1
+            if len(version) <= 4:
+                if int(version) < 2803:
+                    self.baud_change_enable = 1
+            else:
+                if int(version) <= 280202:
+                    self.baud_change_enable = 1
 
         return
 

@@ -990,6 +990,15 @@ class Provider(OpenDeviceBase):
                           ensure_ascii=False)
 
     def after_upgrade_completed(self):
+        self.do_reshake()
+        self.after_setup()
+
+        # start ntrip client
+        if self.properties["initial"].__contains__("ntrip") \
+            and not self.ntrip_client \
+            and not self.is_in_bootloader:
+            threading.Thread(target=self.ntrip_client_thread).start()
+        
         pass
 
     # command list

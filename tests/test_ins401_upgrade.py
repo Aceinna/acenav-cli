@@ -22,25 +22,61 @@ except:  # pylint: disable=bare-except
     from aceinna.devices.ins401.ethernet_provider import Provider as EhternetProvider
     from aceinna.framework.constants import INTERFACES
 
-def handle_discovered(device_provider):
-    loop_upgrade_cnt = 0
+# Only loop firmware upgrade 
+# def handle_discovered(device_provider):
+#     loop_upgrade_cnt = 0
 
+#     upgrade_log_file = open(r'.\upgrade_log.txt', 'w+')
+
+#     while True:
+#         if device_provider.is_upgrading == False:     
+#             loop_upgrade_cnt += 1
+#             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt)
+#             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt, file = upgrade_log_file, flush = True)
+
+#         device_provider.upgrade_framework(['upgrade', './INS401_28.03a.bin'])
+#         if loop_upgrade_cnt == 200:
+#             os._exit()
+
+#         time.sleep(5)
+
+# loop firmware upgrade and log
+def loop_upgrade(EhternetProvider):
+    loop_upgrade_cnt = 0
+    
     upgrade_log_file = open(r'.\upgrade_log.txt', 'w+')
 
     while True:
-        if device_provider.is_upgrading == False:     
+        if EhternetProvider.is_upgrading == False:
+            time.sleep(120)
             loop_upgrade_cnt += 1
             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt)
             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt, file = upgrade_log_file, flush = True)
+            
+        EhternetProvider.upgrade_framework(['upgrade', './INS401_28.03a.bin'])
 
-        device_provider.upgrade_framework(['upgrade', './INS401_28.03a.bin'])
-        if loop_upgrade_cnt == 200:
+        if loop_upgrade_cnt == 100:
             os._exit()
 
         time.sleep(5)
 
+def handle_discovered(EhternetProvider):
+    ntrip_client_thread = None
+    loop_upgrade_thread = None
 
-    pass
+    loop_upgrade_thread = threading.Thread(target=loop_upgrade, args = (EhternetProvider,))
+    ntrip_client_thread = threading.Thread(target=EhternetProvider.ntrip_client_thread)
+    loop_upgrade_thread.start()
+    ntrip_client_thread.start()
+
+    while True:
+        if EhternetProvider.is_upgrading == False:
+            if loop_upgrade_thread:
+                loop_upgrade_thread.join(1.0)
+        else:
+            if ntrip_client_thread:
+                ntrip_client_thread.join(1.0)
+    
 
 def kill_app(signal_int, call_back):
     '''Kill main thread
@@ -49,7 +85,7 @@ def kill_app(signal_int, call_back):
     sys.exit()
 
 @handle_application_exception
-def simple_start():
+def simple_start(): 
     driver = Driver(WebserverArgs(
         interface = INTERFACES.ETH_100BASE_T1,
         use_cli = True

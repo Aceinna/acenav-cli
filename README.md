@@ -18,15 +18,6 @@ Windows 10:
 
 ​      Lib: npcap, https://scapy.readthedocs.io/en/latest/installation.html#windows
 
- 
-
-Mac:
-
-​      Python 3.7
-
-​      Lib: libpcap, https://scapy.readthedocs.io/en/latest/installation.html#mac-os-x 
-
-
 
 ## GNSS/INS operation user settings
 

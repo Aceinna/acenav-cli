@@ -897,6 +897,8 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
             self._file_content = file_content
         else:
             self._file_content = file_content()
+        
+        self.baud_change_enable = 0
 
     def write_wrapper(self, dst, src, send_method, data):
         send_command = helper.build_ethernet_packet(
@@ -1321,6 +1323,39 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
     def get_upgrade_content_size(self):
         return len(self._file_content)
 
+    def format_string(slef, data_buffer):
+        parsed = bytearray(
+            data_buffer) if data_buffer and len(data_buffer) > 0 else None
+
+        formatted = ''
+        if parsed is not None:
+            try:
+                formatted = str(
+                    struct.pack('{0}B'.format(len(parsed)), *parsed), 'utf-8')
+            except UnicodeDecodeError:
+                print('Parse data as string failed')
+                formatted = ''
+
+        return formatted
+
+    def firmware_version_check(self, data_buffer):
+        info_text = self.format_string(data_buffer)
+        text = info_text.split(' ')
+
+        self.baud_change_enable = 0
+
+        if len(text) > 7:
+            version_str = text[7][1:]
+            version = version_str.replace('.', '')
+            if len(version) <= 4:
+                if int(version) < 2803:
+                    self.baud_change_enable = 1
+            else:
+                if int(version) <= 280202:
+                    self.baud_change_enable = 1
+
+        return
+
     def work(self):
         '''
         Start to do upgrade
@@ -1354,6 +1389,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
             response = helper.read_untils_have_data(
                 self._communicator, pG, 10, 1000)
             if response:
+                self.firmware_version_check(response)
                 break
 
         if not self.send_sync():
@@ -1362,14 +1398,15 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         self.flash_write_pre(self._file_content)
         time.sleep(0.1)
 
-        # if not self.send_change_baud_cmd():
-        #     return self._raise_error('Prepare baudrate change command failed')
+        if self.baud_change_enable:
+            if not self.send_change_baud_cmd():
+                return self._raise_error('Prepare baudrate change command failed')
 
-        # if not self.send_baud(230400):
-        #     return self._raise_error('Send baudrate command failed')
+            if not self.send_baud(230400):
+                return self._raise_error('Send baudrate command failed')
 
-        # if not self.baud_check():
-        #     return self._raise_error('Baudrate check failed')
+            if not self.baud_check():
+                return self._raise_error('Baudrate check failed')
 
         if not self.is_host_ready():
             return self._raise_error('Host is not ready.')

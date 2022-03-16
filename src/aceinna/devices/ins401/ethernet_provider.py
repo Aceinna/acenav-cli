@@ -654,6 +654,21 @@ class Provider(OpenDeviceBase):
         command.packet_type = [0x57, 0x41]
         return command
 
+    def imu_write_reset_command(self):
+        command_SR = [0x06, 0xcc]
+        message_bytes = []
+
+        command = helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(),
+            self.communicator.get_src_mac(),
+            command_SR, message_bytes)
+        command.packet_type = [0xcc, 0x06]
+        
+        for _ in range(3):
+            self.communicator.write(command.actual_command)
+            time.sleep(0.2)
+
+
     def ins_jump_bootloader_command_generator(self):
         return helper.build_ethernet_packet(
             self.communicator.get_dst_mac(),
@@ -863,6 +878,8 @@ class Provider(OpenDeviceBase):
             self.communicator,
             command=self.imu_jump_application_command_generator,
             listen_packet=[0x4a, 0x41])
+        imu_jump_application_worker.on(
+            UPGRADE_EVENT.AFTER_COMMAND, self.imu_write_reset_command)
         imu_jump_application_worker.group = UPGRADE_GROUP.FIRMWARE
 
         if start_index > -1 and end_index > -1:
@@ -973,6 +990,15 @@ class Provider(OpenDeviceBase):
                           ensure_ascii=False)
 
     def after_upgrade_completed(self):
+        self.do_reshake()
+        self.after_setup()
+
+        # start ntrip client
+        if self.properties["initial"].__contains__("ntrip") \
+            and not self.ntrip_client \
+            and not self.is_in_bootloader:
+            threading.Thread(target=self.ntrip_client_thread).start()
+        
         pass
 
     # command list

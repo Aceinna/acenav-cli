@@ -54,6 +54,8 @@ class DeviceManager:
                 'communicator_type': communicator.type,
                 'provider': provider
             })
+        else:
+            communicator.upgrading_flag = False
 
         format_device_info = provider.bind_device_info(
             device_access, device_info, app_info)

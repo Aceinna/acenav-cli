@@ -55,11 +55,11 @@ class NTRIPClient(EventBase):
             recvData = self.recvResponse()
 
             if recvData != None and recvData.find(b'ICY 200 OK') != -1:
-                print_helper.print_on_console('NTRIP:[request] ok', skip_modes=[APP_TYPE.CLI])
+                print_helper.print_on_console('NTRIP:[request] ok')
                 APP_CONTEXT.get_print_logger().info('NTRIP:[request] ok')
                 self.recv()
             else:
-                print_helper.print_on_console('NTRIP:[request] fail', skip_modes=[APP_TYPE.CLI])
+                print_helper.print_on_console('NTRIP:[request] fail')
                 APP_CONTEXT.get_print_logger().info('NTRIP:[request] fail')
                 self.tcp_client_socket.close()
 
@@ -77,17 +77,17 @@ class NTRIPClient(EventBase):
         self.tcp_client_socket = socket(AF_INET, SOCK_STREAM)
         try:
             print_helper.print_on_console('NTRIP:[connect] {0}:{1} start...'.format(
-                self.ip, self.port), skip_modes=[APP_TYPE.CLI])
+                self.ip, self.port))
             APP_CONTEXT.get_print_logger().info(
                 'NTRIP:[connect] {0}:{1} start...'.format(self.ip, self.port))
 
             self.tcp_client_socket.connect((self.ip, self.port))
-            print_helper.print_on_console('NTRIP:[connect] ok', skip_modes=[APP_TYPE.CLI])
+            print_helper.print_on_console('NTRIP:[connect] ok')
             APP_CONTEXT.get_print_logger().info('NTRIP:[connect] ok')
 
             self.is_connected = 1
         except Exception as e:
-            print_helper.print_on_console('NTRIP:[connect] {0}'.format(e), skip_modes=[APP_TYPE.CLI])
+            print_helper.print_on_console('NTRIP:[connect] {0}'.format(e))
             APP_CONTEXT.get_print_logger().info(
                 'NTRIP:[connect] {0}'.format(e))
 
@@ -116,7 +116,7 @@ class NTRIPClient(EventBase):
                 else:
                     self.tcp_client_socket.send(bytes(data))
             except Exception as e:
-                print_helper.print_on_console('NTRIP:[send] error occur {0}'.format(e), skip_modes=[APP_TYPE.CLI])
+                print_helper.print_on_console('NTRIP:[send] error occur {0}'.format(e))
                 APP_CONTEXT.get_print_logger().info(
                     'NTRIP:[send] {0}'.format(e))
 
@@ -133,14 +133,14 @@ class NTRIPClient(EventBase):
                     # print('NTRIP:[recv] rxdata {0}'.format(len(data)))
                     self.parser.receive(data)
                 else:
-                    print_helper.print_on_console('NTRIP:[recv] no data error', skip_modes=[APP_TYPE.CLI])
+                    print_helper.print_on_console('NTRIP:[recv] no data error')
                     APP_CONTEXT.get_print_logger().info(
                         'NTRIP:[recv] no data error')
                     self.tcp_client_socket.close()
                     return
 
             except Exception as e:
-                print_helper.print_on_console('NTRIP:[recv] error occur {0}'.format(e), skip_modes=[APP_TYPE.CLI])
+                print_helper.print_on_console('NTRIP:[recv] error occur {0}'.format(e))
                 APP_CONTEXT.get_print_logger().info(
                     'NTRIP:[recv] error occur {0}'.format(e))
                 self.tcp_client_socket.close()
@@ -152,7 +152,7 @@ class NTRIPClient(EventBase):
             try:
                 data = self.tcp_client_socket.recv(1024)
                 if not data or len(data) == 0:
-                    print_helper.print_on_console('NTRIP:[recvR] no data', skip_modes=[APP_TYPE.CLI])
+                    print_helper.print_on_console('NTRIP:[recvR] no data')
                     return None
 
                 return data

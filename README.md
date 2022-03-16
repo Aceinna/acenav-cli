@@ -81,3 +81,11 @@ or
 ```
 
 After successful FW upgrade, the INS401 system restarts and starts logging data automatically. 
+
+## canfd app  
+please run $Env:PYTHONPATH="./src/aceinna/devices/widgets;"+$Env:PYTHONPATH in powershell  
+to set env:PYTHONPATH then  
+```shell cmd
+./acenav -i canfd
+```
+or run acenav-cli whit run_with_bat.bat  

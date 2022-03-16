@@ -19,6 +19,7 @@ from ..framework.decorator import throttle
 
 from ..devices.widgets import(canfd, NTRIPClient, canfd_config)
 from ..framework.utils import print as print_helper
+from ..framework.utils import resource
 
 def mkdir(file_path):
     if not os.path.exists(file_path):
@@ -74,6 +75,7 @@ class canfd_app_driver:
                 return
 
     def listen(self):
+        self.prepare_driver()
         bustype= self.canfd_setting["can_config"]["bus_type"]
         channel= self.canfd_setting["can_config"]["channel"]
         bitrate= self.canfd_setting["can_config"]["bitrate"]
@@ -280,5 +282,32 @@ class canfd_app_driver:
     def _build_options(self, **kwargs):
         self.options = WebserverArgs(**kwargs)
 
-    def _prepare_driver(self):
-        pass
+    def prepare_driver(self):
+        self.prepare_lib_folder()
+
+    def prepare_lib_folder(self):
+        executor_path = resource.get_executor_path()
+        lib_folder_name = 'libs'
+
+        # copy contents of setting file under executor path
+        lib_folder_path = os.path.join(
+            executor_path, lib_folder_name)
+
+        if not os.path.isdir(lib_folder_path):
+            os.makedirs(lib_folder_path)
+
+        platform = sys.platform
+
+        if platform.startswith('win'):
+            lib_file = 'BMAPI64.dll'
+
+        lib_path = os.path.join(lib_folder_path, lib_file)
+
+        if not os.path.isfile(lib_path):
+            lib_content = resource.get_content_from_bundle(
+                lib_folder_name, lib_file)
+            if lib_content is None:
+                raise ValueError('Lib file content is empty')
+            with open(lib_path, "wb") as code:
+                code.write(lib_content)
+        return True

@@ -51,6 +51,7 @@ class canfd_app_driver:
         self.data_queue = Queue()
         self.id_name = {}
         self.log_files = {}
+        self.rawdata_file = ''
         self.all_base_len = 0
         self._build_options(**kwargs)
         APP_CONTEXT.mode = APP_TYPE.CANFD
@@ -63,7 +64,6 @@ class canfd_app_driver:
         self.base_id = 0x508
         args=[r"powershell",r"$Env:PYTHONPATH=\"./src/aceinna/devices/widgets;\"+$Env:PYTHONPATH"]
         p=subprocess.Popen(args, stdout=subprocess.PIPE)
-        #os.system('powershell $Env:PYTHONPATH="./src/aceinna/devices/widgets;"+$Env:PYTHONPATH')
 
     def load_properties(self):
         local_config_file_path = os.path.join(
@@ -206,6 +206,8 @@ class canfd_app_driver:
             pass
 
     def start_pasre(self):
+        fname_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime()) + '_'
+        self.rawdata_file = open(self.path + '/' + fname_time + '.txt', 'w')
         thread = threading.Thread(target=self.receive_parse_all)
         thread.start()
         thead = threading.Thread(target=self.ntrip_client_thread)
@@ -269,6 +271,10 @@ class canfd_app_driver:
                 '''
                 data = self.data_queue.get()
                 if data.arbitration_id in self.can_id_list:
+                    try:
+                        self.rawdata_file.write(str(data)+'\n')
+                    except Exception as e:
+                        print(e)
                     self.parse_output_packet_payload(data.arbitration_id, data.data)
 
     def _build_options(self, **kwargs):

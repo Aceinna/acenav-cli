@@ -132,6 +132,7 @@ class NTRIPClient(EventBase):
                         'NTRIP:[recv] rxdata {0}'.format(len(data)))
                     # print('NTRIP:[recv] rxdata {0}'.format(len(data)))
                     self.parser.receive(data)
+                    self.emit('canfd_base', data)
                 else:
                     print_helper.print_on_console('NTRIP:[recv] no data error')
                     APP_CONTEXT.get_print_logger().info(

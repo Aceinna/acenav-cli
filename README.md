@@ -89,3 +89,8 @@ to set env:PYTHONPATH then
 ./acenav -i canfd
 ```
 or run acenav-cli whit run_with_bat.bat  
++ run with canfd  
+set "canfd_type": "canfd",  
++ run with can  
+set "canfd_type": "can"  
+

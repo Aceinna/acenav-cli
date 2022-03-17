@@ -61,10 +61,18 @@ class canfd_app_driver:
         self.path = mkdir(mkpath)
         self.load_properties()
         self.canfd_setting = self.properties["canfd_settings"]
-        self.can_id_list = self.canfd_setting["canfd_id"]
+        self.can_type = self.canfd_setting["canfd_type"]
+        self.can_id_list = None
+        self.prepare_can_setting()
         self.base_id = 0x508
         args=[r"powershell",r"$Env:PYTHONPATH=\"./src/aceinna/devices/widgets;\"+$Env:PYTHONPATH"]
         p=subprocess.Popen(args, stdout=subprocess.PIPE)
+
+    def prepare_can_setting(self):
+        if self.can_type == 'canfd':
+            self.can_id_list = self.canfd_setting["canfd_id"]
+        else:
+            self.can_id_list = self.canfd_setting["can_id"]
 
     def load_properties(self):
         local_config_file_path = os.path.join(
@@ -111,7 +119,8 @@ class canfd_app_driver:
                 data_to_send[0:2] = [data_len_h, data_len_l]
                 data_to_send[2:] = base_data[index:index+62]
             try:
-                self.canfd_handle.write(self.base_id, data_to_send, False, True)
+                if self.can_type == 'canfd':
+                    self.canfd_handle.write(self.base_id, data_to_send, False, True)
             except Exception as e:
                 print("message cant sent: ", e)
             pass
@@ -183,7 +192,40 @@ class canfd_app_driver:
             buffer = buffer + format(data_trans[23], output['signals'][23]['format']) + ","
             buffer = buffer + format(data_trans[24], output['signals'][24]['format']) + ","
             buffer = buffer + format(data_trans[25], output['signals'][25]['format']) + "\n"              
-
+        elif output['name'] == 'INS_ACC':
+            buffer = buffer + format(data_trans[0]*9.7803267714, output['signals'][0]['format']) + ","
+            buffer = buffer + format(data_trans[1]*9.7803267714, output['signals'][1]['format']) + ","
+            buffer = buffer + format(data_trans[2]*9.7803267714, output['signals'][2]['format']) + "\n" 
+        elif output['name'] == 'INS_GYRO':
+            buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
+            buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + ","
+            buffer = buffer + format(data_trans[2], output['signals'][2]['format']) + "\n" 
+        elif output['name'] == 'INS_HeadingPitchRoll':
+            buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
+            buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + ","
+            buffer = buffer + format(data_trans[2], output['signals'][2]['format']) + "\n" 
+        elif output['name'] == 'INS_HeightAndTime':
+            buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
+            buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + "\n" 
+        elif output['name'] == 'INS_LatitudeLongitude':
+            buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
+            buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + "\n" 
+        elif output['name'] == 'INS_Speed':
+            buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
+            buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + ","
+            buffer = buffer + format(data_trans[2], output['signals'][2]['format']) + "\n" 
+        elif output['name'] == 'INS_DataInfo':
+            buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
+            buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + ","
+            buffer = buffer + format(data_trans[2], output['signals'][2]['format']) + ","
+            buffer = buffer + format(data_trans[3], output['signals'][3]['format']) + ","
+            buffer = buffer + format(data_trans[4], output['signals'][4]['format']) + ","
+            buffer = buffer + format(data_trans[5], output['signals'][5]['format']) + "\n" 
+        elif output['name'] == 'INS_Std':
+            buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
+            buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + ","
+            buffer = buffer + format(data_trans[2], output['signals'][2]['format']) + ","            
+            buffer = buffer + format(data_trans[3], output['signals'][3]['format']) + "\n" 
         self.log_files[output['name']].write(buffer)
 
     def openrtk_unpack_output_packet(self, output, payload):
@@ -198,7 +240,10 @@ class canfd_app_driver:
             print("error happened when decode the {0} {1}".format(output['name'], e))
 
     def parse_output_packet_payload(self, can_id, data):
-        output = next((x for x in self.canfd_setting['can_messages'] if x['id'] == can_id), None)
+        if self.can_type == 'canfd':
+            output = next((x for x in self.canfd_setting['canfd_messages'] if x['id'] == can_id), None)
+        elif self.can_type == 'can':
+            output = next((x for x in self.canfd_setting['can_messages'] if x['id'] == can_id), None)
         if output != None:
             valid_len = output["valid_len"]
             data_hex = [hex(ele) for ele in data]
@@ -214,53 +259,101 @@ class canfd_app_driver:
         thread.start()
         thead = threading.Thread(target=self.ntrip_client_thread)
         thead.start()
-        self.canfd_id = self.canfd_setting['canfd_id']
-        for inode in self.canfd_setting['can_messages']:
-            length = 0
-            pack_fmt = '>'
-            self.id_name[inode["id"]] = inode["name"]
-            for value in inode['signals']:
-                if value['type'] == 'float':
-                    pack_fmt += 'f'
-                    length += 4
-                elif value['type'] == 'uint32':
-                    pack_fmt += 'I'
-                    length += 4
-                elif value['type'] == 'int32':
-                    pack_fmt += 'i'
-                    length += 4
-                elif value['type'] == 'int16':
-                    pack_fmt += 'h'
-                    length += 2
-                elif value['type'] == 'uint16':
-                    pack_fmt += 'H'
-                    length += 2
-                elif value['type'] == 'double':
-                    pack_fmt += 'd'
-                    length += 8
-                elif value['type'] == 'int64':
-                    pack_fmt += 'q'
-                    length += 8
-                elif value['type'] == 'uint64':
-                    pack_fmt += 'Q'
-                    length += 8
-                elif value['type'] == 'char':
-                    pack_fmt += 'c'
-                    length += 1
-                elif value['type'] == 'uchar':
-                    pack_fmt += 'B'
-                    length += 1
-                elif value['type'] == 'uint8':
-                    pack_fmt += 'B'
-                    length += 1
-                else:
-                    pass
-            len_fmt = '{0}B'.format(length)
-            fmt_dic = collections.OrderedDict()
-            fmt_dic['len'] = length
-            fmt_dic['len_b'] = len_fmt
-            fmt_dic['pack'] = pack_fmt
-            self.pkfmt[inode['name']] = fmt_dic
+        # self.canfd_id = self.canfd_setting['canfd_id']
+        if self.can_type == 'canfd':
+            for inode in self.canfd_setting['canfd_messages']:
+                length = 0
+                pack_fmt = '>'
+                self.id_name[inode["id"]] = inode["name"]
+                for value in inode['signals']:
+                    if value['type'] == 'float':
+                        pack_fmt += 'f'
+                        length += 4
+                    elif value['type'] == 'uint32':
+                        pack_fmt += 'I'
+                        length += 4
+                    elif value['type'] == 'int32':
+                        pack_fmt += 'i'
+                        length += 4
+                    elif value['type'] == 'int16':
+                        pack_fmt += 'h'
+                        length += 2
+                    elif value['type'] == 'uint16':
+                        pack_fmt += 'H'
+                        length += 2
+                    elif value['type'] == 'double':
+                        pack_fmt += 'd'
+                        length += 8
+                    elif value['type'] == 'int64':
+                        pack_fmt += 'q'
+                        length += 8
+                    elif value['type'] == 'uint64':
+                        pack_fmt += 'Q'
+                        length += 8
+                    elif value['type'] == 'char':
+                        pack_fmt += 'c'
+                        length += 1
+                    elif value['type'] == 'uchar':
+                        pack_fmt += 'B'
+                        length += 1
+                    elif value['type'] == 'uint8':
+                        pack_fmt += 'B'
+                        length += 1
+                    else:
+                        pass
+                len_fmt = '{0}B'.format(length)
+                fmt_dic = collections.OrderedDict()
+                fmt_dic['len'] = length
+                fmt_dic['len_b'] = len_fmt
+                fmt_dic['pack'] = pack_fmt
+                self.pkfmt[inode['name']] = fmt_dic
+        elif self.can_type == 'can':
+            for inode in self.canfd_setting['can_messages']:
+                length = 0
+                pack_fmt = '>'
+                self.id_name[inode["id"]] = inode["name"]
+                for value in inode['signals']:
+                    if value['type'] == 'float':
+                        pack_fmt += 'f'
+                        length += 4
+                    elif value['type'] == 'uint32':
+                        pack_fmt += 'I'
+                        length += 4
+                    elif value['type'] == 'int32':
+                        pack_fmt += 'i'
+                        length += 4
+                    elif value['type'] == 'int16':
+                        pack_fmt += 'h'
+                        length += 2
+                    elif value['type'] == 'uint16':
+                        pack_fmt += 'H'
+                        length += 2
+                    elif value['type'] == 'double':
+                        pack_fmt += 'd'
+                        length += 8
+                    elif value['type'] == 'int64':
+                        pack_fmt += 'q'
+                        length += 8
+                    elif value['type'] == 'uint64':
+                        pack_fmt += 'Q'
+                        length += 8
+                    elif value['type'] == 'char':
+                        pack_fmt += 'c'
+                        length += 1
+                    elif value['type'] == 'uchar':
+                        pack_fmt += 'B'
+                        length += 1
+                    elif value['type'] == 'uint8':
+                        pack_fmt += 'B'
+                        length += 1
+                    else:
+                        pass
+                len_fmt = '{0}B'.format(length)
+                fmt_dic = collections.OrderedDict()
+                fmt_dic['len'] = length
+                fmt_dic['len_b'] = len_fmt
+                fmt_dic['pack'] = pack_fmt
+                self.pkfmt[inode['name']] = fmt_dic
         while True:
             if self.data_queue.empty():
                 time.sleep(0.001)

@@ -54,6 +54,7 @@ class canfd_app_driver:
         self.log_files = {}
         self.rawdata_file = ''
         self.all_base_len = 0
+        self.valid_base_len = 0
         self._build_options(**kwargs)
         APP_CONTEXT.mode = APP_TYPE.CANFD
         day = get_utc_day()
@@ -71,8 +72,11 @@ class canfd_app_driver:
     def prepare_can_setting(self):
         if self.can_type == 'canfd':
             self.can_id_list = self.canfd_setting["canfd_id"]
+            output = next((x for x in self.canfd_setting['canfd_messages'] if x['id'] == 1288), None)
         else:
             self.can_id_list = self.canfd_setting["can_id"]
+            output = next((x for x in self.canfd_setting['can_messages'] if x['id'] == 1288), None)
+        self.valid_base_len = output["valid_len"]        
 
     def load_properties(self):
         local_config_file_path = os.path.join(
@@ -106,26 +110,26 @@ class canfd_app_driver:
         index = 0
         data_to_send = [0 for i in range(64)]
         while all_data_len > 0:
-            if all_data_len < 62:
+            if all_data_len < self.valid_base_len:
                 data_len = len_base_data - index
                 data_len_l = data_len & 0xff
                 data_len_h = (data_len >> 8) & 0xff
                 data_to_send[0:2] = [data_len_h, data_len_l]
                 data_to_send[2:] = base_data[index:]
             else:
-                data_len = 62
+                data_len = self.valid_base_len
                 data_len_l = data_len & 0xff
                 data_len_h = (data_len >> 8) & 0xff
                 data_to_send[0:2] = [data_len_h, data_len_l]
-                data_to_send[2:] = base_data[index:index+62]
+                data_to_send[2:] = base_data[index:index+self.valid_base_len]
             try:
                 if self.can_type == 'canfd':
                     self.canfd_handle.write(self.base_id, data_to_send, False, True)
             except Exception as e:
                 print("message cant sent: ", e)
             pass
-            all_data_len-= 62
-            index+= 62
+            all_data_len-= self.valid_base_len
+            index+= self.valid_base_len
             self.all_base_len+= len_base_data
             sys.stdout.write("\rsend base data len {0}".format(self.all_base_len))
 

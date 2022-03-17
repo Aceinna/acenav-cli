@@ -1065,6 +1065,28 @@
                         "unit": "s"
                     }
                 ]
+            },
+            {
+                "id": 1288,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "BASE_RTCM",
+                "valid_len": 6,
+                "signals": [
+                    {
+                        "bit_length": 8,
+                        "factor": "0",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "BASE",
+                        "offset": "0",
+                        "start_bit": 0,
+                        "type": "",
+                        "format": "",
+                        "unit": "s"
+                    }
+                ]
             }
         ],
         "canfd_messages": [
@@ -1420,6 +1442,7 @@
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "BASE_RTCM",
+                "valid_len": 62,
                 "signals": [
                     {
                         "bit_length": 64,
@@ -1429,7 +1452,7 @@
                         "is_signed": false,
                         "name": "BASE",
                         "offset": "0",
-                        "start_bit": 121,
+                        "start_bit": 0,
                         "type": "",
                         "format": "",
                         "unit": "s"

@@ -81,6 +81,14 @@ class canfd_app_driver:
     def load_properties(self):
         local_config_file_path = os.path.join(
             os.getcwd(), 'setting/INS401/RTK_INS/ins401.json')
+        setting_folder_path = 'setting/INS401/RTK_INS'
+        if not os.path.isdir(setting_folder_path):
+            os.makedirs(setting_folder_path)
+        if not os.path.isfile(local_config_file_path):
+            app_config_content = resource.get_content_from_bundle(
+                'setting','INS401\\RTK_INS\\ins401.json')
+            with open(local_config_file_path, "wb") as code:
+                code.write(app_config_content)
         if os.path.isfile(local_config_file_path):
             with open(local_config_file_path) as json_data:
                 self.properties = json.load(json_data)
@@ -380,9 +388,9 @@ class canfd_app_driver:
         self.options = WebserverArgs(**kwargs)
 
     def prepare_driver(self):
-        self.prepare_lib_folder()
+        self.prepare_folder()
 
-    def prepare_lib_folder(self):
+    def prepare_folder(self):
         executor_path = resource.get_executor_path()
         lib_folder_name = 'libs'
 
@@ -408,3 +416,6 @@ class canfd_app_driver:
             with open(lib_path, "wb") as code:
                 code.write(lib_content)
         return True
+
+
+

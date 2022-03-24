@@ -647,8 +647,8 @@
     "canfd_settings":
     {
         "canfd_type": "canfd",
-        "canfd_id": [1280, 1281],
-        "can_id": [1280, 1281, 1282, 1283, 1284, 1285, 1286, 1287],
+        "canfd_id": [384, 640],
+        "can_id": [384, 385, 386, 387, 388, 389, 390, 391, 640],
         "can_config":{
             "bus_type": "bmcan",
             "channel": 0,
@@ -657,7 +657,7 @@
         },
         "can_messages": [
             {
-                "id": 1280,
+                "id": 384,
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "INS_ACC",
@@ -705,7 +705,7 @@
                 ]
             },
             {
-                "id": 1281,
+                "id": 385,
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "INS_GYRO",
@@ -753,7 +753,7 @@
                 ]
             },
             {
-                "id": 1282,
+                "id": 386,
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "INS_HeadingPitchRoll",
@@ -801,7 +801,7 @@
                 ]
             },
             {
-                "id": 1283,
+                "id": 387,
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "INS_HeightAndTime",
@@ -836,7 +836,7 @@
                 ]
             },
             {
-                "id": 1284,
+                "id": 388,
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "INS_LatitudeLongitude",
@@ -871,7 +871,7 @@
                 ]
             },
             {
-                "id": 1285,
+                "id": 389,
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "INS_Speed",
@@ -919,7 +919,7 @@
                 ]
             },
             {
-                "id": 1286,
+                "id": 390,
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "INS_DataInfo",
@@ -1006,7 +1006,7 @@
                 ]
             },
             {
-                "id": 1287,
+                "id": 391,
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "INS_Std",
@@ -1067,7 +1067,7 @@
                 ]
             },
             {
-                "id": 1288,
+                "id": 640,
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "BASE_RTCM",
@@ -1091,7 +1091,7 @@
         ],
         "canfd_messages": [
             {
-                "id": 1280,
+                "id": 384,
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "INSPVAX",
@@ -1438,7 +1438,7 @@
                 ]
             },
             {
-                "id": 1288,
+                "id": 640,
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "BASE_RTCM",

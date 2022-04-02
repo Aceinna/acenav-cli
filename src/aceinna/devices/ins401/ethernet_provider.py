@@ -812,6 +812,8 @@ class Provider(OpenDeviceBase):
         ins_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE
         ins_jump_bootloader_worker.on(
             UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
+        ins_jump_bootloader_worker.on(
+            UPGRADE_EVENT.AFTER_COMMAND, self.do_reshake)
 
         ins_jump_application_worker = JumpApplicationWorker(
             self.communicator,

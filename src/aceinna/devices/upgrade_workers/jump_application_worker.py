@@ -14,9 +14,10 @@ class JumpApplicationWorker(UpgradeWorkerBase):
     _wait_timeout_after_command = 3
     # bootloader_baudrate=115200
 
-    def __init__(self, communicator, *args, **kwargs):
+    def __init__(self, communicator, ack_enable, *args, **kwargs):
         super(JumpApplicationWorker, self).__init__()
         self._communicator = communicator
+        self.ack_enable = ack_enable
         self.current = 0
         self.total = 0
         #self._original_baudrate = communicator.serial_port.baudrate
@@ -63,13 +64,19 @@ class JumpApplicationWorker(UpgradeWorkerBase):
             self.emit(UPGRADE_EVENT.BEFORE_COMMAND)
 
             self._communicator.reset_buffer()
-            for i in range(self._wait_timeout_after_command):
-                self._communicator.write(actual_command)
-                time.sleep(0.5)
-                response = helper.read_untils_have_data(
-                    self._communicator, self._listen_packet, 100, 2000, payload_length_format)
-                if response is not None:
-                    break
+            if self.ack_enable:
+                for i in range(self._wait_timeout_after_command):
+                    self._communicator.write(actual_command)
+                    time.sleep(0.5)
+                    response = helper.read_untils_have_data(
+                        self._communicator, self._listen_packet, 100, 2000, payload_length_format)
+                    if response is not None:
+                        break
+            else:
+                for i in range(3):
+                    self._communicator.write(actual_command)
+                    time.sleep(0.05)
+                time.sleep(10)
 
             self.emit(UPGRADE_EVENT.AFTER_COMMAND)
 

@@ -15,9 +15,10 @@ class JumpBootloaderWorker(UpgradeWorkerBase):
     _listen_packet = None
     _wait_timeout_after_command = 3
 
-    def __init__(self, communicator, *args, **kwargs):
+    def __init__(self, communicator, ack_enable, *args, **kwargs):
         super(JumpBootloaderWorker, self).__init__()
         self._communicator = communicator
+        self.ack_enable = ack_enable
         self.current = 0
         self.total = 0
         self._group = UPGRADE_GROUP.FIRMWARE
@@ -61,19 +62,25 @@ class JumpBootloaderWorker(UpgradeWorkerBase):
             self.emit(UPGRADE_EVENT.BEFORE_COMMAND)
             self._communicator.reset_buffer()
             
-            for i in range(self._wait_timeout_after_command):
-                self._communicator.write(actual_command)
-                time.sleep(0.5)
-                response = helper.read_untils_have_data(
-                            self._communicator, self._listen_packet, 100, 2000, payload_length_format)
-                if response is not None:
-                    break
-            
-            if(response is None):
-                self.emit(UPGRADE_EVENT.ERROR, self._key,
-                    'jump bootloader fail')
-                print('jump bootloader fail, {0}'.format(self._key))
-                os._exit(1)
+            if self.ack_enable:
+                for i in range(self._wait_timeout_after_command):
+                    self._communicator.write(actual_command)
+                    time.sleep(0.5)
+                    response = helper.read_untils_have_data(
+                                self._communicator, self._listen_packet, 100, 2000, payload_length_format)
+                    if response is not None:
+                        break
+                
+                if(response is None):
+                    self.emit(UPGRADE_EVENT.ERROR, self._key,
+                        'jump bootloader fail')
+                    print('jump bootloader fail, {0}'.format(self._key))
+                    os._exit(1)
+            else:
+                for i in range(3):
+                    self._communicator.write(actual_command)
+                    time.sleep(0.05)
+                time.sleep(10)
 
             self.emit(UPGRADE_EVENT.AFTER_COMMAND)
 

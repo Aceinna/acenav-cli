@@ -76,6 +76,7 @@ class Provider(OpenDeviceBase):
         self.sdk_upgrade_flag = False
         self.imu_upgrade_flag = False
         self.imu_boot_upgrade_flag = False
+        self.unit_sn = None
     def prepare_folders(self):
         '''
         Prepare folders for data storage and configuration
@@ -187,6 +188,7 @@ class Provider(OpenDeviceBase):
         if text.__contains__('SN:'):
             split_text = text.split(' ')
             sn_split_text = text.split('SN:')
+            self.unit_sn = sn_split_text[1]
 
             self.device_info = {
                 'name': split_text[0],
@@ -195,6 +197,7 @@ class Provider(OpenDeviceBase):
             }
         else:
             split_text = text.split(' ')
+            self.unit_sn = split_text[2]
 
             self.device_info = {
                 'name': split_text[0],
@@ -591,7 +594,13 @@ class Provider(OpenDeviceBase):
 
 
     def after_jump_bootloader(self):
-        self.communicator.reshake_hand()
+        time.sleep(3)
+        for i in range(100):
+            result = self.communicator.reshake_hand()
+            if result:
+                break
+            else:
+                time.sleep(0.5)
 
     def do_reshake(self):
         '''
@@ -604,30 +613,40 @@ class Provider(OpenDeviceBase):
             else:
                 time.sleep(0.5)
 
-    def before_write_content(self, core, content_len):
+    def before_write_content(self, core, content_len, ack_enable):
         command_CS = [0x04, 0xaa]
 
         message_bytes = [ord('C'), ord(core)]
         message_bytes.extend(struct.pack('>I', content_len))
         
         self.communicator.reset_buffer()
-        for i in range(3):
+        if ack_enable:
+            for i in range(3):
+                command = helper.build_ethernet_packet(
+                    self.communicator.get_dst_mac(),
+                    self.communicator.get_src_mac(),
+                    command_CS, message_bytes,
+                    use_length_as_protocol=self.communicator.use_length_as_protocol)
+                time.sleep(1)
+                self.communicator.write(command.actual_command)
+                time.sleep(1)
+                result = helper.read_untils_have_data(
+                    self.communicator, command_CS, 100, 200)
+
+                if result:     
+                    break
+            if result is None:
+                print('send cs command failed, core:{0}'.format(ord(core)))
+                os._exit(1)
+        else:
             command = helper.build_ethernet_packet(
                 self.communicator.get_dst_mac(),
                 self.communicator.get_src_mac(),
                 command_CS, message_bytes,
                 use_length_as_protocol=self.communicator.use_length_as_protocol)
-            time.sleep(1)
-            self.communicator.write(command.actual_command)
-            time.sleep(1)
-            result = helper.read_untils_have_data(
-                self.communicator, command_CS, 100, 200)
-
-            if result:     
-                break
-        if result is None:
-            print('send cs command failed, core:{0}'.format(ord(core)))
-            os._exit(1)
+            for i in range(3):
+                self.communicator.write(command.actual_command)
+            time.sleep(0.5)
 
     def ins_firmware_write_command_generator(self, data_len, current, data):
         command_WA = [0x03, 0xaa]
@@ -695,6 +714,12 @@ class Provider(OpenDeviceBase):
             self.communicator.get_src_mac(),
             bytes([0x41, 0x4a]))
 
+    def get_unit_serial_number_flag(self):
+        if int(self.unit_sn, 10) <= 2209000531:
+            return False
+        else:
+            return True
+
     def build_worker(self, rule, content):
         ''' Build upgarde worker by rule and content
         '''
@@ -704,8 +729,11 @@ class Provider(OpenDeviceBase):
             packet_len = 192
 
         if rule == 'rtk' and self.rtk_upgrade_flag:
+            ethernet_ack_enable = self.get_unit_serial_number_flag()
+
             rtk_upgrade_worker = FirmwareUpgradeWorker(
                 self.communicator,
+                ethernet_ack_enable,
                 lambda: helper.format_firmware_content(content),
                 self.ins_firmware_write_command_generator,
                 packet_len)
@@ -713,12 +741,15 @@ class Provider(OpenDeviceBase):
             rtk_upgrade_worker.on(
                 UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(15))
             rtk_upgrade_worker.on(UPGRADE_EVENT.BEFORE_WRITE,
-                                lambda: self.before_write_content('0', len(content)))
+                                lambda: self.before_write_content('0', len(content), ethernet_ack_enable))
             return rtk_upgrade_worker
 
         if rule == 'ins' and self.ins_upgrade_flag:
+            ethernet_ack_enable = self.get_unit_serial_number_flag()
+
             ins_upgrade_worker = FirmwareUpgradeWorker(
                 self.communicator,
+                ethernet_ack_enable,
                 lambda: helper.format_firmware_content(content),
                 self.ins_firmware_write_command_generator,
                 packet_len)
@@ -727,7 +758,7 @@ class Provider(OpenDeviceBase):
             ins_upgrade_worker.on(
                 UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(15))
             ins_upgrade_worker.on(UPGRADE_EVENT.BEFORE_WRITE,
-                                  lambda: self.before_write_content('1', len(content)))
+                                  lambda: self.before_write_content('1', len(content), ethernet_ack_enable))
             return ins_upgrade_worker
 
         if rule == 'sdk' and self.sdk_upgrade_flag:
@@ -739,8 +770,11 @@ class Provider(OpenDeviceBase):
 
         if self.imu_boot_upgrade_flag:
             if rule == 'imu_boot':
+                ethernet_ack_enable = True
+
                 imu_boot_upgrade_worker = FirmwareUpgradeWorker(
                     self.communicator,
+                    ethernet_ack_enable,
                     lambda: helper.format_firmware_content(content),
                     self.imu_firmware_write_command_generator,
                     192)
@@ -752,8 +786,11 @@ class Provider(OpenDeviceBase):
                 
         if self.imu_upgrade_flag:
             if rule == 'imu':
+                ethernet_ack_enable = True
+
                 imu_upgrade_worker = FirmwareUpgradeWorker(
                     self.communicator,
+                    ethernet_ack_enable,
                     lambda: helper.format_firmware_content(content),
                     self.imu_firmware_write_command_generator,
                     192)
@@ -780,6 +817,9 @@ class Provider(OpenDeviceBase):
 
         parsed_content = firmware_content_parser(firmware_content, rules)
 
+        self.rtk_content = []
+        self.ins_content = []
+
         # foreach parsed content, if empty, skip register into upgrade center
         for _, rule in enumerate(parsed_content):
             content = parsed_content[rule]
@@ -804,17 +844,23 @@ class Provider(OpenDeviceBase):
         else:
             ins_wait_timeout = 3
 
+        ethernet_ack_enable = self.get_unit_serial_number_flag()
+
         ins_jump_bootloader_worker = JumpBootloaderWorker(
             self.communicator,
+            ethernet_ack_enable,
             command=self.ins_jump_bootloader_command_generator,
             listen_packet=[0x01, 0xaa],
             wait_timeout_after_command=ins_wait_timeout)
         ins_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE
         ins_jump_bootloader_worker.on(
             UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
+        ins_jump_bootloader_worker.on(
+            UPGRADE_EVENT.AFTER_COMMAND, self.after_jump_bootloader)
 
         ins_jump_application_worker = JumpApplicationWorker(
             self.communicator,
+            ethernet_ack_enable,
             command=self.ins_jump_application_command_generator,
             listen_packet=[0x02, 0xaa],
             wait_timeout_after_command=4)
@@ -836,8 +882,11 @@ class Provider(OpenDeviceBase):
                 start_index = i if start_index == -1 else start_index
                 end_index = i
 
+        ethernet_ack_enable = True
+
         imu_boot_jump_bootloader_worker = JumpBootloaderWorker(
             self.communicator,
+            ethernet_ack_enable,
             command=self.imu_jump_bootloader_command_generator,
             listen_packet=[0x4a, 0x49],
             wait_timeout_after_command=30)
@@ -847,6 +896,7 @@ class Provider(OpenDeviceBase):
 
         imu_boot_jump_application_worker = JumpApplicationWorker(
             self.communicator,
+            ethernet_ack_enable,
             command=self.imu_jump_application_command_generator,
             listen_packet=[0x4a, 0x41])
         imu_boot_jump_application_worker.group = UPGRADE_GROUP.FIRMWARE
@@ -867,6 +917,7 @@ class Provider(OpenDeviceBase):
 
         imu_jump_bootloader_worker = JumpBootloaderWorker(
             self.communicator,
+            ethernet_ack_enable,
             command=self.imu_jump_bootloader_command_generator,
             listen_packet=[0x4a, 0x49],
             wait_timeout_after_command=30)
@@ -876,6 +927,7 @@ class Provider(OpenDeviceBase):
 
         imu_jump_application_worker = JumpApplicationWorker(
             self.communicator,
+            ethernet_ack_enable,
             command=self.imu_jump_application_command_generator,
             listen_packet=[0x4a, 0x41])
         imu_jump_application_worker.on(

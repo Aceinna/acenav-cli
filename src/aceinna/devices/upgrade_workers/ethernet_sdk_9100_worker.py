@@ -1340,12 +1340,13 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
     def firmware_version_check(self, data_buffer):
         info_text = self.format_string(data_buffer)
-        text = info_text.split(' ')
+        text = info_text.split('App ')
 
         self.baud_change_enable = 0
-
-        if len(text) > 7:
-            version_str = text[7][1:]
+                
+        if len(text) == 2:
+            version_text = text[1].split(' ')
+            version_str = version_text[0][1:]
             version = version_str.replace('.', '')
             if len(version) <= 4:
                 if int(version) < 2803:

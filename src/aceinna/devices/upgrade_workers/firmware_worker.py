@@ -10,9 +10,10 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
     '''Firmware upgrade worker
     '''
 
-    def __init__(self, communicator, file_content, command_generator, block_size=240):
+    def __init__(self, communicator, ack_enable, file_content, command_generator, block_size=240):
         super(FirmwareUpgradeWorker, self).__init__()
         self._communicator = communicator
+        self.ack_enable = ack_enable
         self.current = 0
         #self._baudrate = baudrate
         self.max_data_len = block_size  # custom
@@ -73,11 +74,12 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
                 return False
             time.sleep(5)
 
-        response = helper.read_untils_have_data(
-            self._communicator, listen_packet, 12, 1000, payload_length_format)
+        if self.ack_enable:
+            response = helper.read_untils_have_data(
+                self._communicator, listen_packet, 12, 1000, payload_length_format)
+            if response is None:
+                return False
 
-        if response is None:
-            return False
         return True
 
     def work(self):
@@ -110,24 +112,32 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
                 self.total - self.current) > self.max_data_len else (self.total - self.current)
             data = self._file_content[self.current: (
                 self.current + packet_data_len)]
-            
-            if self.current == 0:
-                for i in range(10):
-                    write_result = self.write_block(packet_data_len, self.current, data)
-                    if write_result:
-                        break
+            if self.ack_enable:
+                if self.current == 0:
+                    for i in range(10):
+                        write_result = self.write_block(packet_data_len, self.current, data)
+                        if write_result:
+                            break
+                else:
+                    for i in range(3):
+                        write_result = self.write_block(packet_data_len, self.current, data)
+                        if write_result:
+                            break
+                if not write_result:
+                    self.emit(UPGRADE_EVENT.ERROR, self._key,
+                            'Write firmware operation failed,  offset length: {0}'.format(self.current))
+                    print('Write firmware operation failed, offset length: {0}'.format(self.current))
+                    os._exit(1)
+                    return
             else:
-                for i in range(3):
-                    write_result = self.write_block(packet_data_len, self.current, data)
-                    if write_result:
-                        break
-            if not write_result:
-                self.emit(UPGRADE_EVENT.ERROR, self._key,
-                          'Write firmware operation failed,  offset length: {0}'.format(self.current))
-                print('Write firmware operation failed, offset length: {0}'.format(self.current))
-                os._exit(1)
-                return
-
+                if self.current == 0:
+                    for i in range(2):
+                        self.write_block(packet_data_len, self.current, data)
+                    time.sleep(15)
+                else:
+                    for i in range(3):
+                        self.write_block(packet_data_len, self.current, data)
+                    time.sleep(0.05)
             self.current += packet_data_len
             self.emit(UPGRADE_EVENT.PROGRESS, self._key,
                       self.current, self.total)

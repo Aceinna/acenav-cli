@@ -72,10 +72,10 @@ class canfd_app_driver:
     def prepare_can_setting(self):
         if self.can_type == 'canfd':
             self.can_id_list = self.canfd_setting["canfd_id"]
-            output = next((x for x in self.canfd_setting['canfd_messages'] if x['id'] == 1288), None)
+            output = next((x for x in self.canfd_setting['canfd_messages'] if x['id'] == 640), None)
         else:
             self.can_id_list = self.canfd_setting["can_id"]
-            output = next((x for x in self.canfd_setting['can_messages'] if x['id'] == 1288), None)
+            output = next((x for x in self.canfd_setting['can_messages'] if x['id'] == 640), None)
         self.valid_base_len = output["valid_len"]        
 
     def load_properties(self):

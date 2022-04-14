@@ -646,14 +646,14 @@
 	],
     "canfd_settings":
     {
-        "canfd_type": "canfd",
+        "canfd_type": "can",
         "canfd_id": [384, 640],
         "can_id": [384, 385, 386, 387, 388, 389, 390, 391, 640],
         "can_config":{
             "bus_type": "bmcan",
             "channel": 0,
             "bitrate": 500000,
-            "data_bitrate": 1000000
+            "data_bitrate": 2000000
         },
         "can_messages": [
             {

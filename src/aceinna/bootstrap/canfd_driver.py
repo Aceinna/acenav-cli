@@ -20,6 +20,7 @@ from ..framework.decorator import throttle
 from ..devices.widgets import(canfd, NTRIPClient, canfd_config)
 from ..framework.utils import print as print_helper
 from ..framework.utils import resource
+from ..core.gnss import RTCMParser
 
 def mkdir(file_path):
     if not os.path.exists(file_path):
@@ -46,6 +47,8 @@ def get_utc_day():
 
 class canfd_app_driver:
     def __init__(self, **kwargs) -> None:
+        self.base_log = open('test.bin', 'wb')
+        self.base_log1 = open('test1.bin', 'wb')
         self.properties = None
         self.rawdata = []
         self.pkfmt = {}
@@ -64,8 +67,9 @@ class canfd_app_driver:
         self.canfd_setting = self.properties["canfd_settings"]
         self.can_type = self.canfd_setting["canfd_type"]
         self.can_id_list = None
+        self.base_id = 0
         self.prepare_can_setting()
-        self.base_id = 0x508
+
         args=[r"powershell",r"$Env:PYTHONPATH=\"./src/aceinna/devices/widgets;\"+$Env:PYTHONPATH"]
         p=subprocess.Popen(args, stdout=subprocess.PIPE)
 
@@ -76,7 +80,8 @@ class canfd_app_driver:
         else:
             self.can_id_list = self.canfd_setting["can_id"]
             output = next((x for x in self.canfd_setting['can_messages'] if x['id'] == 640), None)
-        self.valid_base_len = output["valid_len"]        
+        self.valid_base_len = output["valid_len"]
+        self.base_id = output["id"]
 
     def load_properties(self):
         local_config_file_path = os.path.join(
@@ -117,6 +122,7 @@ class canfd_app_driver:
         len_base_data = all_data_len
         index = 0
         data_to_send = [0 for i in range(64)]
+        self.base_log1.write(bytes(base_data))
         while all_data_len > 0:
             if all_data_len < self.valid_base_len:
                 data_len = len_base_data - index
@@ -124,6 +130,7 @@ class canfd_app_driver:
                 data_len_h = (data_len >> 8) & 0xff
                 data_to_send[0:2] = [data_len_h, data_len_l]
                 data_to_send[2:] = base_data[index:]
+                #print('xxxxxxxxxxxxxxx', all_data_len, data_to_send)
             else:
                 data_len = self.valid_base_len
                 data_len_l = data_len & 0xff
@@ -133,9 +140,11 @@ class canfd_app_driver:
             try:
                 if self.can_type == 'canfd':
                     self.canfd_handle.write(self.base_id, data_to_send, False, True)
+                elif self.can_type == 'can':
+                    self.canfd_handle.write(self.base_id, data_to_send, False, False)
+                    sys.stdout.write("\rsend base data len {0}".format(self.all_base_len))
             except Exception as e:
                 print("message cant sent: ", e)
-            pass
             all_data_len-= self.valid_base_len
             index+= self.valid_base_len
             self.all_base_len+= len_base_data

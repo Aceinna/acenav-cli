@@ -47,8 +47,7 @@ def get_utc_day():
 
 class canfd_app_driver:
     def __init__(self, **kwargs) -> None:
-        self.base_log = open('test.bin', 'wb')
-        self.base_log1 = open('test1.bin', 'wb')
+        self.base_count = 0
         self.properties = None
         self.rawdata = []
         self.pkfmt = {}
@@ -117,12 +116,11 @@ class canfd_app_driver:
         self.ntrip_client.run()
 
     def send_base_data(self, data):
-        base_data = list(data)
+        base_data = data
         all_data_len = len(base_data)
         len_base_data = all_data_len
         index = 0
         data_to_send = [0 for i in range(64)]
-        self.base_log1.write(bytes(base_data))
         while all_data_len > 0:
             if all_data_len < self.valid_base_len:
                 data_len = len_base_data - index

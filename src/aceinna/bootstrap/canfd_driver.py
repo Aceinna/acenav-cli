@@ -104,7 +104,14 @@ class canfd_app_driver:
         channel= self.canfd_setting["can_config"]["channel"]
         bitrate= self.canfd_setting["can_config"]["bitrate"]
         data_bitrate= self.canfd_setting["can_config"]["data_bitrate"]
-        self.canfd_handle = canfd(canfd_config(bustype, channel, bitrate, data_bitrate))
+        while True:
+            try:
+                self.canfd_handle = canfd(canfd_config(bustype, channel, bitrate, data_bitrate))
+                break
+            except Exception as e:
+                print_helper.print_on_console('CANFD:[open] open failed because: {0}'.format(e))
+                time.sleep(5)
+        
         print_helper.print_on_console('CANFD:[open] open BUSMUST CAN channel {0} using {1}&{2}kbps baudrate ...'.format(channel, bitrate, data_bitrate))
         print_helper.print_on_console('CANFD:[connect] waiting for receive CANFD messages ...')
         self.canfd_handle.canfd_bus_active()

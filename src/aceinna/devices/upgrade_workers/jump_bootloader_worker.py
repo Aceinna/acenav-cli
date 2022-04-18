@@ -77,9 +77,7 @@ class JumpBootloaderWorker(UpgradeWorkerBase):
                     print('jump bootloader fail, {0}'.format(self._key))
                     os._exit(1)
             else:
-                for i in range(3):
-                    self._communicator.write(actual_command)
-                    time.sleep(0.05)
+                self._communicator.write(actual_command)
                 time.sleep(10)
 
             self.emit(UPGRADE_EVENT.AFTER_COMMAND)

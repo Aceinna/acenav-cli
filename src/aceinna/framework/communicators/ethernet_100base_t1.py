@@ -79,7 +79,7 @@ class Ethernet(Communicator):
         if not self.iface_confirmed:
             ifaces_list = self.get_network_card()
             find_flag = False
-            for j in range(50):
+            for j in range(100):
                 for i in range(len(ifaces_list)):
                     self.confirm_iface(ifaces_list[i])
                     if self.iface_confirmed:
@@ -95,7 +95,7 @@ class Ethernet(Communicator):
                 print_red('No available Ethernet card was found.')
                 return None
         else:
-            for i in range(50):
+            for i in range(100):
                 result = self.reshake_hand()
                 if result:
                     break

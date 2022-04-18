@@ -53,7 +53,7 @@ def loop_upgrade(EhternetProvider):
             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt)
             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt, file = upgrade_log_file, flush = True)
             
-        EhternetProvider.upgrade_framework(['upgrade', './INS401_28.03a.bin'])
+        EhternetProvider.upgrade_framework(['upgrade', './INS401_28.04a.bin'])
 
         if loop_upgrade_cnt == 100:
             os._exit()

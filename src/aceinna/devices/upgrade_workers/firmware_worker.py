@@ -131,8 +131,7 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
                     return
             else:
                 if self.current == 0:
-                    for i in range(2):
-                        self.write_block(packet_data_len, self.current, data)
+                    self.write_block(packet_data_len, self.current, data)
                     time.sleep(15)
                 else:
                     for i in range(3):

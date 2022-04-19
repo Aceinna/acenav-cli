@@ -73,9 +73,7 @@ class JumpApplicationWorker(UpgradeWorkerBase):
                     if response is not None:
                         break
             else:
-                for i in range(3):
-                    self._communicator.write(actual_command)
-                    time.sleep(0.05)
+                self._communicator.write(actual_command)
                 time.sleep(10)
 
             self.emit(UPGRADE_EVENT.AFTER_COMMAND)

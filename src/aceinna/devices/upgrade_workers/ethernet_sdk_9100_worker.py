@@ -1323,23 +1323,8 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
     def get_upgrade_content_size(self):
         return len(self._file_content)
 
-    def format_string(slef, data_buffer):
-        parsed = bytearray(
-            data_buffer) if data_buffer and len(data_buffer) > 0 else None
-
-        formatted = ''
-        if parsed is not None:
-            try:
-                formatted = str(
-                    struct.pack('{0}B'.format(len(parsed)), *parsed), 'utf-8')
-            except UnicodeDecodeError:
-                print('Parse data as string failed')
-                formatted = ''
-
-        return formatted
-
     def firmware_version_check(self, data_buffer):
-        info_text = self.format_string(data_buffer)
+        info_text = helper.format_string(data_buffer)
         text = info_text.split('App ')
 
         self.baud_change_enable = 0
@@ -1347,15 +1332,10 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if len(text) == 2:
             version_text = text[1].split(' ')
             version_str = version_text[0][1:]
-            version = version_str.replace('.', '')
-            if len(version) <= 4:
-                if int(version) < 2803:
-                    self.baud_change_enable = 1
+            if version_str <= '28.02.02':
+                self.baud_change_enable = 1
             else:
-                if int(version) <= 280202:
-                    self.baud_change_enable = 1
-
-        return
+                self.baud_change_enable = 0
 
     def work(self):
         '''

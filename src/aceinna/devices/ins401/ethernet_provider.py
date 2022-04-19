@@ -77,6 +77,9 @@ class Provider(OpenDeviceBase):
         self.imu_upgrade_flag = False
         self.imu_boot_upgrade_flag = False
         self.unit_sn = None
+        self.bootloader_version = None
+        self.rtk_crc = []
+        self.ins_crc = []
     def prepare_folders(self):
         '''
         Prepare folders for data storage and configuration
@@ -210,15 +213,15 @@ class Provider(OpenDeviceBase):
         '''
         Build app info
         '''
-
         if text.__contains__('SN:'):
             self.app_info = {
                 'version': 'bootloader'
             }
+            
             return
 
         app_version = text
-
+        
         split_text = app_version.split(' ')
         app_name = next((item for item in APP_STR if item in split_text), None)
 
@@ -601,6 +604,29 @@ class Provider(OpenDeviceBase):
                 break
             else:
                 time.sleep(0.5)
+        time.sleep(3)
+        for i in range(3):
+            send_command = helper.build_ethernet_packet(
+                            dest=bytes([int(x, 16) for x in 'ff:ff:ff:ff:ff:ff'.split(':')]),
+                            src=self.communicator.get_src_mac(),
+                            message_type=[0x01, 0xcc],
+                            message_bytes=[])
+
+            self.communicator.write(send_command.actual_command)
+
+            time.sleep(0.2)
+            response = helper.read_untils_have_data(
+                self.communicator, [0x01, 0xcc], 10, 1000)
+            if response:           
+                break
+        if response:
+            text = helper.format_string(response)
+            if text.__contains__('SN:'):
+                    split_text = text.split(' ')
+                    self.bootloader_version = split_text[2][1:]
+        else:
+            os._exit(1)
+           
 
     def do_reshake(self):
         '''
@@ -618,6 +644,12 @@ class Provider(OpenDeviceBase):
 
         message_bytes = [ord('C'), ord(core)]
         message_bytes.extend(struct.pack('>I', content_len))
+
+        if self.bootloader_version >= '01.01':
+            if core == '0':
+                message_bytes.extend([ord('r'), ord('t'), ord('k')])
+            elif core == '1':
+                message_bytes.extend([ord('i'), ord('n'), ord('s')])
         
         self.communicator.reset_buffer()
         if ack_enable:
@@ -696,10 +728,16 @@ class Provider(OpenDeviceBase):
             use_length_as_protocol=self.communicator.use_length_as_protocol)
 
     def ins_jump_application_command_generator(self):
+        if self.bootloader_version >= '01.01':
+            message = self.rtk_crc + self.ins_crc
+        else:
+            message = []
+
         return helper.build_ethernet_packet(
             self.communicator.get_dst_mac(),
             self.communicator.get_src_mac(),
             bytes([0x02, 0xaa]),
+            message,
             use_length_as_protocol=self.communicator.use_length_as_protocol)
 
     def imu_jump_bootloader_command_generator(self):
@@ -714,11 +752,20 @@ class Provider(OpenDeviceBase):
             self.communicator.get_src_mac(),
             bytes([0x41, 0x4a]))
 
-    def get_unit_serial_number_flag(self):
+    def get_unit_ethernet_ack_flag(self):
+        result = False
         if int(self.unit_sn, 10) <= 2209000531:
-            return False
+            if self.bootloader_version:
+                if self.bootloader_version >= '01.02':
+                    result = True
+                else:                     
+                    result = False
+            else:
+                result = False
         else:
-            return True
+            result = True
+                            
+        return result
 
     def build_worker(self, rule, content):
         ''' Build upgarde worker by rule and content
@@ -728,9 +775,8 @@ class Provider(OpenDeviceBase):
         else:
             packet_len = 192
 
+        ethernet_ack_enable = self.get_unit_ethernet_ack_flag()
         if rule == 'rtk' and self.rtk_upgrade_flag:
-            ethernet_ack_enable = self.get_unit_serial_number_flag()
-
             rtk_upgrade_worker = FirmwareUpgradeWorker(
                 self.communicator,
                 ethernet_ack_enable,
@@ -745,8 +791,6 @@ class Provider(OpenDeviceBase):
             return rtk_upgrade_worker
 
         if rule == 'ins' and self.ins_upgrade_flag:
-            ethernet_ack_enable = self.get_unit_serial_number_flag()
-
             ins_upgrade_worker = FirmwareUpgradeWorker(
                 self.communicator,
                 ethernet_ack_enable,
@@ -817,14 +861,22 @@ class Provider(OpenDeviceBase):
 
         parsed_content = firmware_content_parser(firmware_content, rules)
 
-        self.rtk_content = []
-        self.ins_content = []
+        self.rtk_crc = []
+        self.ins_crc = []
 
         # foreach parsed content, if empty, skip register into upgrade center
         for _, rule in enumerate(parsed_content):
             content = parsed_content[rule]
             if len(content) == 0:
                 continue
+
+            if rule == 'rtk':
+                rtk_len = len(content) & 0xFFFF
+                self.rtk_crc = helper.calc_crc(content[0:rtk_len])
+            
+            if rule == 'ins':
+                ins_len = len(content) & 0xFFFF
+                self.ins_crc = helper.calc_crc(content[0:ins_len])
 
             worker = self.build_worker(rule, content)
             if not worker:
@@ -844,7 +896,7 @@ class Provider(OpenDeviceBase):
         else:
             ins_wait_timeout = 3
 
-        ethernet_ack_enable = self.get_unit_serial_number_flag()
+        ethernet_ack_enable = self.get_unit_ethernet_ack_flag()
 
         ins_jump_bootloader_worker = JumpBootloaderWorker(
             self.communicator,

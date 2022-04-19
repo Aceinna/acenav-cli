@@ -65,6 +65,8 @@ class canfd_app_driver:
         self.load_properties()
         self.canfd_setting = self.properties["canfd_settings"]
         self.can_type = self.canfd_setting["canfd_type"]
+        self.canfd_parse = self.canfd_setting['is_parse']
+
         self.can_id_list = None
         self.base_id = 0
         self.prepare_can_setting()
@@ -280,7 +282,7 @@ class canfd_app_driver:
 
     def start_pasre(self):
         fname_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime()) + '_'
-        self.rawdata_file = open(self.path + '/' + fname_time + '.txt', 'w')
+        self.rawdata_file = open(self.path + '/' + fname_time + 'canfd.txt', 'w')
         thread = threading.Thread(target=self.receive_parse_all)
         thread.start()
         thead = threading.Thread(target=self.ntrip_client_thread)
@@ -396,7 +398,8 @@ class canfd_app_driver:
                         self.rawdata_file.write(str(data)+'\n')
                     except Exception as e:
                         print(e)
-                    self.parse_output_packet_payload(data.arbitration_id, data.data)
+                    if self.canfd_parse == True:
+                        self.parse_output_packet_payload(data.arbitration_id, data.data)
 
     def _build_options(self, **kwargs):
         self.options = WebserverArgs(**kwargs)

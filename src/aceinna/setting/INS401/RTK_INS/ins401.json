@@ -647,6 +647,7 @@
     "canfd_settings":
     {
         "canfd_type": "can",
+        "is_parse": false,
         "canfd_id": [384, 640],
         "can_id": [384, 385, 386, 387, 388, 389, 390, 391, 640],
         "can_config":{

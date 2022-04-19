@@ -132,6 +132,7 @@ class NTRIPClient(EventBase):
                         'NTRIP:[recv] rxdata {0}'.format(len(data)))
                     # print('NTRIP:[recv] rxdata {0}'.format(len(data)))
                     self.parser.receive(data)
+                    # self.emit('canfd_base', data)
                 else:
                     print_helper.print_on_console('NTRIP:[recv] no data error')
                     APP_CONTEXT.get_print_logger().info(
@@ -170,4 +171,5 @@ class NTRIPClient(EventBase):
         combined_data = []
         for item in data:
             combined_data += item
+        self.emit('canfd_base', combined_data)
         self.emit('parsed', combined_data)

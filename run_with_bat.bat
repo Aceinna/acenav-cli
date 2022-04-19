@@ -1,0 +1,3 @@
+set PYTHONPATH=.;./src/aceinna/devices/widgets;%PYTHONPATH%
+python main.py -i canfd
+@echo kill python driver...

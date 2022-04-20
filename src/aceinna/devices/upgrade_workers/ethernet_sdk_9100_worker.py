@@ -1361,15 +1361,22 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         if not self.send_sdk_cmd_JS():
             return self._raise_error('Send sdk JS command failed')
-
+        
         for i in range(50):
+            result = self._communicator.reshake_hand()
+            if result:
+                break
+            else:
+                time.sleep(0.5)
+
+        for i in range(10):
             self.write_wrapper(
                 bytes([int(x, 16) for x in 'ff:ff:ff:ff:ff:ff'.split(':')]),
                 self._communicator.get_src_mac(), pG, [])
             time.sleep(0.2)
             response = helper.read_untils_have_data(
                 self._communicator, pG, 10, 1000)
-            if response:
+            if response is not None:
                 self.firmware_version_check(response)
                 break
 

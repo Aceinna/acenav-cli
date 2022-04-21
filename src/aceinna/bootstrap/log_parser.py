@@ -46,7 +46,6 @@ def do_parse(log_type, folder_path, kml_rate, dr_parse):
         for fname in file_name:
             if (fname.startswith('user') and fname.endswith('.bin')) or (fname.startswith('ins_save') and fname.endswith('.bin')) or ('canfd' in fname and fname.endswith('.txt')):
                 file_path = os.path.join(folder_path, fname)
-
                 if log_type == 'rtkl':
                     lib.decode_openrtk_inceptio(bytes(file_path, encoding='utf8'))
                 elif log_type == 'beidou':

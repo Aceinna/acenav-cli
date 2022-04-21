@@ -73,6 +73,9 @@ class canfd_app_driver:
         self.base_id = 0
         self.imu_log_title = None
         self.ins_log_title = None
+        self.can_message_flag = 0
+        self.can_imu_dict = {}
+        self.can_ins_dict = {}
         self.prepare_can_setting()
         self.prepare_log_config()
         args=[r"powershell",r"$Env:PYTHONPATH=\"./src/aceinna/devices/widgets;\"+$Env:PYTHONPATH"]
@@ -262,28 +265,76 @@ class canfd_app_driver:
             ins_buffer = ins_buffer + format(data_trans[24], output['signals'][24]['format']) + "\n"
 
         elif output['name'] == 'INS_ACC':
+            if self.can_message_flag == 0:
+                self.can_message_flag|= 0x01
+                self.can_imu_dict['ACC_X'] = format(data_trans[0]*9.7803267714, output['signals'][0]['format'])
+                self.can_imu_dict['ACC_Y'] = format(data_trans[1]*9.7803267714, output['signals'][1]['format'])
+                self.can_imu_dict['ACC_Z'] = format(data_trans[2]*9.7803267714, output['signals'][2]['format'])
             buffer = buffer + format(data_trans[0]*9.7803267714, output['signals'][0]['format']) + ","
             buffer = buffer + format(data_trans[1]*9.7803267714, output['signals'][1]['format']) + ","
             buffer = buffer + format(data_trans[2]*9.7803267714, output['signals'][2]['format']) + "\n" 
         elif output['name'] == 'INS_GYRO':
+            if self.can_message_flag == 0x01:
+                self.can_message_flag|= 0x02
+                self.can_imu_dict['GYRO_X'] = format(data_trans[0], output['signals'][0]['format'])
+                self.can_imu_dict['GYRO_Y'] = format(data_trans[1], output['signals'][1]['format'])
+                self.can_imu_dict['GYRO_Z'] = format(data_trans[2], output['signals'][2]['format'])
+            else:
+                self.can_message_flag = 0
             buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
             buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + ","
             buffer = buffer + format(data_trans[2], output['signals'][2]['format']) + "\n" 
         elif output['name'] == 'INS_HeadingPitchRoll':
+            if self.can_message_flag == 0x03:
+                self.can_message_flag|= 0x04
+                self.can_imu_dict['INS_PitchAngle'] = format(data_trans[0], output['signals'][0]['format'])
+                self.can_imu_dict['INS_RollAngle'] = format(data_trans[1], output['signals'][1]['format'])
+                self.can_imu_dict['INS_HeadingAngle'] = format(data_trans[2], output['signals'][2]['format'])
+            else:
+                self.can_message_flag = 0
             buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
             buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + ","
             buffer = buffer + format(data_trans[2], output['signals'][2]['format']) + "\n" 
-        elif output['name'] == 'INS_HeightAndTime':
+        elif output['name'] == 'INS_HeightAndIMUStatus':
+            if self.can_message_flag == 0x07:
+                self.can_message_flag|= 0x08
+                self.can_imu_dict['INS_LocatHeight'] = format(data_trans[0], output['signals'][0]['format'])
+                self.can_imu_dict['IMU_Status'] = format(data_trans[1], output['signals'][1]['format'])
+            else:
+                self.can_message_flag = 0
             buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
             buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + "\n" 
         elif output['name'] == 'INS_LatitudeLongitude':
+            if self.can_message_flag == 0x0f:
+                self.can_message_flag|= 0x10
+                self.can_imu_dict['INS_Latitude'] = format(data_trans[0], output['signals'][0]['format'])
+                self.can_imu_dict['INS_Longitude'] = format(data_trans[1], output['signals'][1]['format'])
+            else:
+                self.can_message_flag = 0
             buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
             buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + "\n" 
         elif output['name'] == 'INS_Speed':
+            if self.can_message_flag == 0x1f:
+                self.can_message_flag|= 0x20
+                self.can_imu_dict['INS_NorthSpd'] = format(data_trans[0], output['signals'][0]['format'])
+                self.can_imu_dict['INS_EastSpd'] = format(data_trans[1], output['signals'][1]['format'])
+                self.can_imu_dict['INS_ToGroundSpd'] = format(data_trans[2], output['signals'][2]['format'])                
+            else:
+                self.can_message_flag = 0
             buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
             buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + ","
             buffer = buffer + format(data_trans[2], output['signals'][2]['format']) + "\n" 
         elif output['name'] == 'INS_DataInfo':
+            if self.can_message_flag == 0x3f:
+                self.can_message_flag|= 0x40
+                self.can_imu_dict['INS_GpsFlag_Pos'] = format(data_trans[0], output['signals'][0]['format'])
+                self.can_imu_dict['INS_NumSV'] = format(data_trans[1], output['signals'][1]['format'])
+                self.can_imu_dict['INS_GpsFlag_Heading'] = format(data_trans[2], output['signals'][2]['format'])
+                self.can_imu_dict['INS_Gps_Age'] = format(data_trans[3], output['signals'][3]['format'])
+                self.can_imu_dict['INS_Car_Status'] = format(data_trans[4], output['signals'][4]['format'])
+                self.can_imu_dict['INS_Status'] = format(data_trans[5], output['signals'][5]['format']) 
+            else:
+                self.can_message_flag = 0
             buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
             buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + ","
             buffer = buffer + format(data_trans[2], output['signals'][2]['format']) + ","
@@ -291,13 +342,62 @@ class canfd_app_driver:
             buffer = buffer + format(data_trans[4], output['signals'][4]['format']) + ","
             buffer = buffer + format(data_trans[5], output['signals'][5]['format']) + "\n" 
         elif output['name'] == 'INS_Std':
+            if self.can_message_flag == 0x7f:
+                self.can_message_flag|= 0x80
+                self.can_imu_dict['INS_Std_Lat'] = format(data_trans[0], output['signals'][0]['format'])
+                self.can_imu_dict['INS_Std_Lon'] = format(data_trans[1], output['signals'][1]['format'])
+                self.can_imu_dict['INS_Std_LocatHeight'] = format(data_trans[2], output['signals'][2]['format'])
+                self.can_imu_dict['INS_Std_Heading'] = format(data_trans[3], output['signals'][3]['format'])
+            else:
+                self.can_message_flag = 0
             buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
             buffer = buffer + format(data_trans[1], output['signals'][1]['format']) + ","
             buffer = buffer + format(data_trans[2], output['signals'][2]['format']) + ","            
             buffer = buffer + format(data_trans[3], output['signals'][3]['format']) + "\n" 
+        elif output['name'] == 'INS_Time':
+            if self.can_message_flag == 0xff:
+                self.can_message_flag|= 0x100
+                self.can_imu_dict['Week'] = format(data_trans[0], output['signals'][0]['format'])
+                self.can_imu_dict['TimeOfWeek'] = format(float(data_trans[1])/1000, output['signals'][1]['format'])
+                self.can_ins_dict['Week'] = format(data_trans[0], output['signals'][0]['format'])
+                self.can_ins_dict['TimeOfWeek'] = format(float(data_trans[1])/1000, output['signals'][1]['format'])
+            else:
+                self.can_message_flag = 0
+            buffer = buffer + format(data_trans[0], output['signals'][0]['format']) + ","
+            buffer = buffer + format(float(data_trans[1])/1000, output['signals'][1]['format']) + "\n"
+        if self.can_message_flag == 0x1ff:
+            self.can_message_flag = 0
+            imu_buffer = imu_buffer + self.can_imu_dict['Week'] + ','
+            imu_buffer = imu_buffer + self.can_imu_dict['TimeOfWeek'] + ','
+            imu_buffer = imu_buffer + self.can_imu_dict['ACC_X'] + ','
+            imu_buffer = imu_buffer + self.can_imu_dict['ACC_Y'] + ','
+            imu_buffer = imu_buffer + self.can_imu_dict['ACC_Z'] + ','
+            imu_buffer = imu_buffer + self.can_imu_dict['GYRO_X'] + ','
+            imu_buffer = imu_buffer + self.can_imu_dict['GYRO_Y'] + ','
+            imu_buffer = imu_buffer + self.can_imu_dict['GYRO_Z'] + '\n'
+            ins_buffer = ins_buffer + self.can_imu_dict['Week'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['TimeOfWeek'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_Car_Status'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_Status'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_Latitude'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_Longitude'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_LocatHeight'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_NorthSpd'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_EastSpd'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_ToGroundSpd'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_RollAngle'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_PitchAngle'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_HeadingAngle'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_Std_Lat'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_Std_Lon'] + ','
+            ins_buffer = ins_buffer + self.can_imu_dict['INS_Std_LocatHeight'] + '\n'
+            self.can_imu_dict = {}
+            self.can_ins_dict = {}
         self.log_files[output['name']].write(buffer)
-        self.imu_log.write(imu_buffer)
-        self.ins_log.write(ins_buffer)
+        if(len(imu_buffer) > 0):
+            self.imu_log.write(imu_buffer)
+        if(len(ins_buffer) > 0):
+            self.ins_log.write(ins_buffer)
 
     def openrtk_unpack_output_packet(self, output, payload):
         fmt = self.pkfmt[output['name']]
@@ -311,6 +411,8 @@ class canfd_app_driver:
             print("error happened when decode the {0} {1}".format(output['name'], e))
 
     def parse_output_packet_payload(self, can_id, data):
+        # if can_id == 392:
+        #     print(data)
         if self.can_type == 'canfd':
             output = next((x for x in self.canfd_setting['canfd_messages'] if x['id'] == can_id), None)
         elif self.can_type == 'can':

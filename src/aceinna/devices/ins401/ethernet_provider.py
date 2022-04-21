@@ -30,6 +30,7 @@ from ..upgrade_workers import (
 )
 
 GNZDA_DATA_LEN = 39
+MOSAIC_GNZDA_DATA_LEN = 34
 
 class Provider(OpenDeviceBase):
     '''
@@ -358,7 +359,7 @@ class Provider(OpenDeviceBase):
     def nmea_checksum(self, data):
         nmea_str = data[1:len(data) - 2]
         nmeadata = nmea_str[0:len(nmea_str)-3]
-        cksum = nmea_str[len(nmea_str)-2:len(nmea_str)]   
+        cksum = nmea_str[len(nmea_str)-2:len(nmea_str)]
 
         calc_cksum = 0
         for s in nmeadata:
@@ -374,6 +375,8 @@ class Provider(OpenDeviceBase):
             str_nmea = temp_str_nmea            
         elif(temp_str_nmea.find("\r\n", GNZDA_DATA_LEN-2, GNZDA_DATA_LEN) != -1):
             str_nmea = temp_str_nmea[0:GNZDA_DATA_LEN]
+        elif(temp_str_nmea.find("\r\n", MOSAIC_GNZDA_DATA_LEN-2, MOSAIC_GNZDA_DATA_LEN) != -1):
+            str_nmea = temp_str_nmea[0:MOSAIC_GNZDA_DATA_LEN]
         else:
             return
 

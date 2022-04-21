@@ -656,6 +656,17 @@
             "bitrate": 500000,
             "data_bitrate": 2000000
         },
+        "imu_log_config":
+        {
+            "title": "GPS_Week(),GPS_TimeofWeek(s),x_accel(m/s^2),y_accel(m/s^2),z_accel(m/s^2),x_rate(deg/s),y_rate(deg/s),z_rate(deg/s)\n",
+            "index":0
+
+        },
+        "ins_log_config":
+        {
+            "title": "GPS_Week(),GPS_TimeofWeek(s),insStatus(),insPositionType(),latitude(deg),longitude(deg),height(m),velocityNorth(m/s),velocityEast(m/s),velocityUp(m/s),roll(deg),pitch(deg),heading(deg),latitude_std(m),longitude_std(m),height_std(m)\n",
+            "index":0
+        },
         "can_messages": [
             {
                 "id": 384,
@@ -1096,7 +1107,7 @@
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "INSPVAX",
-                "valid_len": 54,
+                "valid_len": 60,
                 "signals": [
                     {
                         "bit_length": 16,
@@ -1234,7 +1245,7 @@
                         "is_big_endian": true,
                         "is_float": false,
                         "is_signed": false,
-                        "name": "INS_Time",
+                        "name": "IMU_Status",
                         "offset": "0",
                         "start_bit": 200,
                         "type": "uint32",
@@ -1433,6 +1444,32 @@
                         "offset": "0",
                         "start_bit": 424,
                         "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "Week",
+                        "offset": "0",
+                        "start_bit": 440,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "TimeOfWeek",
+                        "offset": "0",
+                        "start_bit": 456,
+                        "type": "uint32",
                         "format": "11.4f",
                         "unit": "s"
                     }

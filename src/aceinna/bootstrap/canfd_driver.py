@@ -55,6 +55,8 @@ class canfd_app_driver:
         self.id_name = {}
         self.log_files = {}
         self.rawdata_file = ''
+        self.imu_log = {}
+        self.ins_log = {}
         self.all_base_len = 0
         self.valid_base_len = 0
         self._build_options(**kwargs)
@@ -69,10 +71,16 @@ class canfd_app_driver:
 
         self.can_id_list = None
         self.base_id = 0
+        self.imu_log_title = None
+        self.ins_log_title = None
         self.prepare_can_setting()
-
+        self.prepare_log_config()
         args=[r"powershell",r"$Env:PYTHONPATH=\"./src/aceinna/devices/widgets;\"+$Env:PYTHONPATH"]
         p=subprocess.Popen(args, stdout=subprocess.PIPE)
+
+    def prepare_log_config(self):
+        self.imu_log_title = self.canfd_setting["imu_log_config"]["title"]
+        self.ins_log_title = self.canfd_setting["ins_log_config"]["title"]
 
     def prepare_can_setting(self):
         if self.can_type == 'canfd':
@@ -168,7 +176,6 @@ class canfd_app_driver:
 
     def write_titlebar(self, file, output):
         for value in output['signals']:
-            #print(value['name']+'('+value['unit']+')')
             file.write(value['name']+'('+value['unit']+')')
             file.write(",")
         file.write("\n")
@@ -178,6 +185,10 @@ class canfd_app_driver:
             fname_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime()) + '_'
             self.log_files[output['name']] = open(self.path + '/' + fname_time + output['name'] + '.csv', 'w')
             self.write_titlebar(self.log_files[output['name']], output)
+            self.imu_log = open(self.path + '/' + fname_time + 'imu' + '.csv', 'w')
+            self.ins_log = open(self.path + '/' + fname_time + 'ins' + '.csv', 'w')
+            self.imu_log.write(self.imu_log_title)
+            self.ins_log.write(self.ins_log_title)
         data_trans = []
         for i in range(len(data)):
             try:
@@ -190,9 +201,9 @@ class canfd_app_driver:
             except Exception as e:
                 print(e, output['is_float'], type(output['is_float']))
             data_trans.append(data[i]*factor + offset)
-
-        #print(len(output['signals']), len(data_trans), len(data))
         buffer = ''
+        imu_buffer = ''
+        ins_buffer = ''
         if output['name'] == 'INSPVAX':
             buffer = buffer + format(data_trans[0]*9.7803267714, output['signals'][0]['format']) + ","
             buffer = buffer + format(data_trans[1]*9.7803267714, output['signals'][1]['format']) + ","
@@ -219,7 +230,37 @@ class canfd_app_driver:
             buffer = buffer + format(data_trans[22], output['signals'][22]['format']) + ","
             buffer = buffer + format(data_trans[23], output['signals'][23]['format']) + ","
             buffer = buffer + format(data_trans[24], output['signals'][24]['format']) + ","
-            buffer = buffer + format(data_trans[25], output['signals'][25]['format']) + "\n"              
+            buffer = buffer + format(data_trans[25], output['signals'][25]['format']) + ","
+            buffer = buffer + format(data_trans[26], output['signals'][26]['format']) + ","
+            buffer = buffer + format(data_trans[27] / 1000, output['signals'][27]['format']) + "\n"
+
+            imu_buffer = imu_buffer + format(data_trans[26], output['signals'][26]['format']) + ","
+            imu_buffer = imu_buffer + format(data_trans[27] / 1000, output['signals'][27]['format']) + ","
+            imu_buffer = imu_buffer + format(data_trans[0]*9.7803267714, output['signals'][0]['format']) + ","
+            imu_buffer = imu_buffer + format(data_trans[1]*9.7803267714, output['signals'][1]['format']) + ","
+            imu_buffer = imu_buffer + format(data_trans[2]*9.7803267714, output['signals'][2]['format']) + ","
+            imu_buffer = imu_buffer + format(data_trans[3], output['signals'][3]['format']) + ","
+            imu_buffer = imu_buffer + format(data_trans[4], output['signals'][4]['format']) + ","
+            imu_buffer = imu_buffer + format(data_trans[5], output['signals'][5]['format']) + ","
+            imu_buffer = imu_buffer + format(data_trans[10], output['signals'][10]['format']) + "\n"
+
+            ins_buffer = ins_buffer + format(data_trans[26], output['signals'][26]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[27] / 1000, output['signals'][27]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[20], output['signals'][20]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[21], output['signals'][21]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[11], output['signals'][11]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[12], output['signals'][12]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[9], output['signals'][9]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[13], output['signals'][13]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[14], output['signals'][14]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[15], output['signals'][15]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[7], output['signals'][7]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[6], output['signals'][6]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[8], output['signals'][8]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[22], output['signals'][22]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[23], output['signals'][23]['format']) + ","
+            ins_buffer = ins_buffer + format(data_trans[24], output['signals'][24]['format']) + "\n"
+
         elif output['name'] == 'INS_ACC':
             buffer = buffer + format(data_trans[0]*9.7803267714, output['signals'][0]['format']) + ","
             buffer = buffer + format(data_trans[1]*9.7803267714, output['signals'][1]['format']) + ","
@@ -255,6 +296,8 @@ class canfd_app_driver:
             buffer = buffer + format(data_trans[2], output['signals'][2]['format']) + ","            
             buffer = buffer + format(data_trans[3], output['signals'][3]['format']) + "\n" 
         self.log_files[output['name']].write(buffer)
+        self.imu_log.write(imu_buffer)
+        self.ins_log.write(ins_buffer)
 
     def openrtk_unpack_output_packet(self, output, payload):
         fmt = self.pkfmt[output['name']]

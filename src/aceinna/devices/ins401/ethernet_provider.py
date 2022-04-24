@@ -30,7 +30,6 @@ from ..upgrade_workers import (
 )
 
 GNZDA_DATA_LEN = 39
-MOSAIC_GNZDA_DATA_LEN = 34
 
 class Provider(OpenDeviceBase):
     '''
@@ -372,13 +371,13 @@ class Provider(OpenDeviceBase):
         
         temp_str_nmea = data.decode('utf-8')
         if (temp_str_nmea.find("\r\n", len(temp_str_nmea)-2, len(temp_str_nmea)) != -1):
-            str_nmea = temp_str_nmea            
-        elif(temp_str_nmea.find("\r\n", GNZDA_DATA_LEN-2, GNZDA_DATA_LEN) != -1):
-            str_nmea = temp_str_nmea[0:GNZDA_DATA_LEN]
-        elif(temp_str_nmea.find("\r\n", MOSAIC_GNZDA_DATA_LEN-2, MOSAIC_GNZDA_DATA_LEN) != -1):
-            str_nmea = temp_str_nmea[0:MOSAIC_GNZDA_DATA_LEN]
+            str_nmea = temp_str_nmea 
         else:
-            return
+            result = temp_str_nmea.find("\r\n", GNZDA_DATA_LEN-10, GNZDA_DATA_LEN)
+            if result != -1:
+                str_nmea = temp_str_nmea[0:result + 2]
+            else:
+                return
 
         try:
             cksum, calc_cksum = self.nmea_checksum(str_nmea)
@@ -392,7 +391,6 @@ class Provider(OpenDeviceBase):
             APP_CONTEXT.get_print_logger().info(str_nmea[0:len(str_nmea) - 2])
         except Exception as e:
             print('NMEA fault:{0}'.format(e))
-            pass
 
 
     def thread_data_log(self, *args, **kwargs):

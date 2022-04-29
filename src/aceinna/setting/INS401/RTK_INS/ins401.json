@@ -646,9 +646,9 @@
 	],
     "canfd_settings":
     {
-        "canfd_type": "can",
+        "canfd_type": "canfd",
         "is_parse": false,
-        "canfd_id": [384, 640],
+        "canfd_id": [384, 640, 641],
         "can_id": [384, 385, 386, 387, 388, 389, 390, 391, 392, 640],
         "can_config":{
             "bus_type": "bmcan",
@@ -1518,7 +1518,29 @@
                 "valid_len": 62,
                 "signals": [
                     {
-                        "bit_length": 64,
+                        "bit_length": 512,
+                        "factor": "0",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "BASE",
+                        "offset": "0",
+                        "start_bit": 0,
+                        "type": "",
+                        "format": "",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 641,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "ROVER_RTCM",
+                "valid_len": 63,
+                "signals": [
+                    {
+                        "bit_length": 512,
                         "factor": "0",
                         "is_big_endian": true,
                         "is_float": false,

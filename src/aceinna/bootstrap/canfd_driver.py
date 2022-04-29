@@ -55,6 +55,7 @@ class canfd_app_driver:
         self.id_name = {}
         self.log_files = {}
         self.rawdata_file = ''
+        self.rover_file = ''
         self.imu_log = {}
         self.ins_log = {}
         self.all_base_len = 0
@@ -148,7 +149,6 @@ class canfd_app_driver:
                 data_len_h = (data_len >> 8) & 0xff
                 data_to_send[0:2] = [data_len_h, data_len_l]
                 data_to_send[2:] = base_data[index:]
-                #print('xxxxxxxxxxxxxxx', all_data_len, data_to_send)
             else:
                 data_len = self.valid_base_len
                 data_len_l = data_len & 0xff
@@ -171,7 +171,7 @@ class canfd_app_driver:
     def receive_parse_all(self):
         try:
             while True:
-                msg = self.canfd_handle.read(timeout=0.1)
+                msg = self.canfd_handle.read(timeout=0.01)
                 if msg is not None:
                     self.data_queue.put(msg)
         except KeyboardInterrupt:
@@ -420,14 +420,18 @@ class canfd_app_driver:
         if output != None:
             valid_len = output["valid_len"]
             data_hex = [hex(ele) for ele in data]
-            
-            self.openrtk_unpack_output_packet(output, data[0:valid_len])
+            if output["name"] != 'ROVER_RTCM':
+                if self.canfd_parse == True:
+                    self.openrtk_unpack_output_packet(output, data[0:valid_len])
+            else:
+                self.rover_file.write(data[1:valid_len+1])
         else:
             pass
 
     def start_pasre(self):
         fname_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime()) + '_'
         self.rawdata_file = open(self.path + '/' + fname_time + 'canfd.txt', 'w')
+        self.rover_file = open(self.path + '/' + fname_time + 'rover.bin', 'wb')
         thread = threading.Thread(target=self.receive_parse_all)
         thread.start()
         thead = threading.Thread(target=self.ntrip_client_thread)
@@ -543,8 +547,7 @@ class canfd_app_driver:
                         self.rawdata_file.write(str(data)+'\n')
                     except Exception as e:
                         print(e)
-                    if self.canfd_parse == True:
-                        self.parse_output_packet_payload(data.arbitration_id, data.data)
+                    self.parse_output_packet_payload(data.arbitration_id, data.data)
 
     def _build_options(self, **kwargs):
         self.options = WebserverArgs(**kwargs)

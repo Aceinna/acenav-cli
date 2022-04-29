@@ -58,7 +58,7 @@ class canfd(EventBase):
                             is_extended_id=is_extended_id,
                             is_fd=is_fd)
         try:
-            self.bus.send(msg, timeout=2)
+            self.bus.send(msg, timeout=0.1)
         except Exception as e:
             print(e)
     def read(self, timeout=None):

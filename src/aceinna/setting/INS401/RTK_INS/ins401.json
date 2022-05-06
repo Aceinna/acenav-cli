@@ -647,8 +647,9 @@
     "canfd_settings":
     {
         "canfd_type": "canfd",
-        "is_parse": false,
-        "canfd_id": [384, 640, 641],
+        "is_parse": true,
+        "canfd_id": [384, 640, 641, 1412],
+        "canfd_remote_id":[1408, 1409, 1410, 1411],
         "can_id": [384, 385, 386, 387, 388, 389, 390, 391, 392, 640],
         "can_config":{
             "bus_type": "bmcan",
@@ -1140,7 +1141,7 @@
             {
                 "id": 384,
                 "is_extended_frame": false,
-                "is_fd": false,
+                "is_fd": true,
                 "name": "INSPVAX",
                 "valid_len": 60,
                 "signals": [
@@ -1553,7 +1554,375 @@
                         "unit": "s"
                     }
                 ]
+            },
+            {
+                "id": 1412,
+                "is_extended_frame": false,
+                "is_fd": true,
+                "name": "LEVER_ARM_SET",
+                "valid_len": 48,
+                "signals": [
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GNSS_LEVER_ARM_X",
+                        "offset": "0",
+                        "start_bit": 24,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GNSS_LEVER_ARM_Y",
+                        "offset": "0",
+                        "start_bit": 56,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GNSS_LEVER_ARM_Z",
+                        "offset": "0",
+                        "start_bit": 88,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "VRP_LEVER_ARM_X",
+                        "offset": "0",
+                        "start_bit": 120,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "VRP_LEVER_ARM_Y",
+                        "offset": "0",
+                        "start_bit": 152,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "VRP_LEVER_ARM_Z",
+                        "offset": "0",
+                        "start_bit": 184,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "USER_LEVER_ARM_X",
+                        "offset": "0",
+                        "start_bit": 216,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "USER_LEVER_ARM_Y",
+                        "offset": "0",
+                        "start_bit": 248,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "USER_LEVER_ARM_Z",
+                        "offset": "0",
+                        "start_bit": 280,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ROTATION_RBVX",
+                        "offset": "0",
+                        "start_bit": 312,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ROTATION_RBVY",
+                        "offset": "0",
+                        "start_bit": 332,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ROTATION_RBVZ",
+                        "offset": "0",
+                        "start_bit": 364,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    }
+                ]
             }
+        ],
+        "canfd_remote_messages": [
+            {
+                "id": 1408,
+                "is_extended_frame": false,
+                "is_fd": true,
+                "name": "INS_VERSION",
+                "valid_len": 0,
+                "signals": [
+                    {
+                        "name": "INS_VERSION"
+                    }
+                ]
+            },
+            {
+                "id": 1409,
+                "is_extended_frame": false,
+                "is_fd": true,
+                "name": "SDK_VERSION",
+                "valid_len": 0,
+                "signals": [
+                    {
+                        "name": "SDK_VERSION"
+                    }
+                ]
+            },
+            {
+                "id": 1410,
+                "is_extended_frame": false,
+                "is_fd": true,
+                "name": "IMU_VERSION",
+                "valid_len": 0,
+                "signals": [
+                    {
+                        "name": "IMU_VERSION"
+                    }
+                ]
+            },
+            {
+                "id": 1411,
+                "is_extended_frame": false,
+                "is_fd": true,
+                "name": "LEVER_ARM_GET",
+                "valid_len": 48,
+                "signals": [
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GNSS_LEVER_ARM_X",
+                        "offset": "0",
+                        "start_bit": 24,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GNSS_LEVER_ARM_Y",
+                        "offset": "0",
+                        "start_bit": 56,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GNSS_LEVER_ARM_Z",
+                        "offset": "0",
+                        "start_bit": 88,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "VRP_LEVER_ARM_X",
+                        "offset": "0",
+                        "start_bit": 120,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "VRP_LEVER_ARM_Y",
+                        "offset": "0",
+                        "start_bit": 152,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "VRP_LEVER_ARM_Z",
+                        "offset": "0",
+                        "start_bit": 184,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "USER_LEVER_ARM_X",
+                        "offset": "0",
+                        "start_bit": 216,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "USER_LEVER_ARM_Y",
+                        "offset": "0",
+                        "start_bit": 248,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "USER_LEVER_ARM_Z",
+                        "offset": "0",
+                        "start_bit": 280,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ROTATION_RBVX",
+                        "offset": "0",
+                        "start_bit": 312,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ROTATION_RBVY",
+                        "offset": "0",
+                        "start_bit": 332,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ROTATION_RBVZ",
+                        "offset": "0",
+                        "start_bit": 364,
+                        "type": "float",
+                        "format": "",
+                        "unit": "s"
+                    }
+                ]
+            }            
         ]
     }
 }

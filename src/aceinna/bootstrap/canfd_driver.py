@@ -76,6 +76,7 @@ class canfd_app_driver:
         self.properties = None
         self.rawdata = []
         self.pkfmt = {}
+        self.remote_pkfmt = {}
         self.data_queue = Queue()
         self.id_name = {}
         self.log_files = {}
@@ -102,11 +103,11 @@ class canfd_app_driver:
         self.can_message_flag = 0
         self.can_imu_dict = {}
         self.can_ins_dict = {}
-        self.ins_version_id = 0x580
-        self.sta_version_id = 0x581
-        self.imu_version_id = 0x582
-        self.get_lever_arm_id = 0x583
-        self.set_lever_arm_id = 0x584
+        self.ins_version_id = 0
+        self.sta_version_id = 0
+        self.imu_version_id = 0
+        self.get_lever_arm_id = 0
+        self.set_lever_arm_id = 0
         self.prepare_can_setting()
         self.prepare_log_config()
         args=[r"powershell",r"$Env:PYTHONPATH=\"./src/aceinna/devices/widgets;\"+$Env:PYTHONPATH"]
@@ -125,11 +126,164 @@ class canfd_app_driver:
         if self.can_type == 'canfd':
             self.can_id_list = self.canfd_setting["canfd_id"]
             output = next((x for x in self.canfd_setting['canfd_messages'] if x['id'] == 640), None)
+            self.set_lever_arm_id = next((x['id'] for x in self.canfd_setting['canfd_messages'] if x['name'] == 'LEVER_ARM_SET'), None)
         else:
             self.can_id_list = self.canfd_setting["can_id"]
             output = next((x for x in self.canfd_setting['can_messages'] if x['id'] == 640), None)
         self.valid_base_len = output["valid_len"]
         self.base_id = output["id"]
+        for x in self.canfd_setting['canfd_remote_messages']:
+            if x['name'] == 'INS_VERSION':
+                self.ins_version_id = x['id']
+            elif x['name'] == 'SDK_VERSION':
+                self.sta_version_id = x['id']
+            elif x['name'] == 'IMU_VERSION':
+                self.imu_version_id = x['id']
+            elif x['name'] == 'LEVER_ARM_GET':
+                self.get_lever_arm_id = x['id']
+        if self.can_type == 'canfd':
+            for inode in self.canfd_setting['canfd_messages']:
+                length = 0
+                pack_fmt = '>'
+                self.id_name[inode["id"]] = inode["name"]
+                for value in inode['signals']:
+                    if value['type'] == 'float':
+                        pack_fmt += 'f'
+                        length += 4
+                    elif value['type'] == 'uint32':
+                        pack_fmt += 'I'
+                        length += 4
+                    elif value['type'] == 'int32':
+                        pack_fmt += 'i'
+                        length += 4
+                    elif value['type'] == 'int16':
+                        pack_fmt += 'h'
+                        length += 2
+                    elif value['type'] == 'uint16':
+                        pack_fmt += 'H'
+                        length += 2
+                    elif value['type'] == 'double':
+                        pack_fmt += 'd'
+                        length += 8
+                    elif value['type'] == 'int64':
+                        pack_fmt += 'q'
+                        length += 8
+                    elif value['type'] == 'uint64':
+                        pack_fmt += 'Q'
+                        length += 8
+                    elif value['type'] == 'char':
+                        pack_fmt += 'c'
+                        length += 1
+                    elif value['type'] == 'uchar':
+                        pack_fmt += 'B'
+                        length += 1
+                    elif value['type'] == 'uint8':
+                        pack_fmt += 'B'
+                        length += 1
+                    else:
+                        pass
+                len_fmt = '{0}B'.format(length)
+                fmt_dic = collections.OrderedDict()
+                fmt_dic['len'] = length
+                fmt_dic['len_b'] = len_fmt
+                fmt_dic['pack'] = pack_fmt
+                self.pkfmt[inode['name']] = fmt_dic
+            for inode in self.canfd_setting['canfd_remote_messages']:
+                if(inode['valid_len'] > 0):
+                    length = 0
+                    pack_fmt = '<'
+                    self.id_name[inode["id"]] = inode["name"]
+                    for value in inode['signals']:
+                        if value['type'] == 'float':
+                            pack_fmt += 'f'
+                            length += 4
+                        elif value['type'] == 'uint32':
+                            pack_fmt += 'I'
+                            length += 4
+                        elif value['type'] == 'int32':
+                            pack_fmt += 'i'
+                            length += 4
+                        elif value['type'] == 'int16':
+                            pack_fmt += 'h'
+                            length += 2
+                        elif value['type'] == 'uint16':
+                            pack_fmt += 'H'
+                            length += 2
+                        elif value['type'] == 'double':
+                            pack_fmt += 'd'
+                            length += 8
+                        elif value['type'] == 'int64':
+                            pack_fmt += 'q'
+                            length += 8
+                        elif value['type'] == 'uint64':
+                            pack_fmt += 'Q'
+                            length += 8
+                        elif value['type'] == 'char':
+                            pack_fmt += 'c'
+                            length += 1
+                        elif value['type'] == 'uchar':
+                            pack_fmt += 'B'
+                            length += 1
+                        elif value['type'] == 'uint8':
+                            pack_fmt += 'B'
+                            length += 1
+                        else:
+                            pass
+                    len_fmt = '{0}B'.format(length)
+                    fmt_dic = collections.OrderedDict()
+                    fmt_dic['len'] = length
+                    fmt_dic['len_b'] = len_fmt
+                    fmt_dic['pack'] = pack_fmt
+                    self.remote_pkfmt[inode['name']] = fmt_dic
+                
+        elif self.can_type == 'can':
+            for inode in self.canfd_setting['can_messages']:
+                length = 0
+                pack_fmt = '>'
+                self.id_name[inode["id"]] = inode["name"]
+                for value in inode['signals']:
+                    if value['type'] == 'float':
+                        pack_fmt += 'f'
+                        length += 4
+                    elif value['type'] == 'uint32':
+                        pack_fmt += 'I'
+                        length += 4
+                    elif value['type'] == 'int32':
+                        pack_fmt += 'i'
+                        length += 4
+                    elif value['type'] == 'int16':
+                        pack_fmt += 'h'
+                        length += 2
+                    elif value['type'] == 'uint16':
+                        pack_fmt += 'H'
+                        length += 2
+                    elif value['type'] == 'double':
+                        pack_fmt += 'd'
+                        length += 8
+                    elif value['type'] == 'int64':
+                        pack_fmt += 'q'
+                        length += 8
+                    elif value['type'] == 'uint64':
+                        pack_fmt += 'Q'
+                        length += 8
+                    elif value['type'] == 'char':
+                        pack_fmt += 'c'
+                        length += 1
+                    elif value['type'] == 'uchar':
+                        pack_fmt += 'B'
+                        length += 1
+                    elif value['type'] == 'uint8':
+                        pack_fmt += 'B'
+                        length += 1
+                    else:
+                        pass
+                len_fmt = '{0}B'.format(length)
+                fmt_dic = collections.OrderedDict()
+                fmt_dic['len'] = length
+                fmt_dic['len_b'] = len_fmt
+                fmt_dic['pack'] = pack_fmt
+                self.pkfmt[inode['name']] = fmt_dic
+
 
     def load_properties(self):
         local_config_file_path = os.path.join(
@@ -232,8 +386,8 @@ class canfd_app_driver:
         imu_result = self.get_imu_message()
         time.sleep(0.1)
         lever_arm_result = self.get_lever_arm_message()
-        data = struct.pack('48B', *lever_arm_result['data'])
-        lever_arm_packet = struct.unpack('<' + 'f'*12, data)
+        data = struct.pack(self.remote_pkfmt['LEVER_ARM_GET']['len_b'], *lever_arm_result['data'])
+        lever_arm_packet = struct.unpack(self.remote_pkfmt['LEVER_ARM_GET']['pack'], data)
         device_configuration = None
         fname_time = self.fname_time + '_configuration.json'
         file_path = os.path.join(
@@ -353,7 +507,8 @@ class canfd_app_driver:
         data_list = []
         for item in data:
             data_list.append(item["value"])
-        data_bytes = struct.pack('12f', *data_list)
+        para_len = self.pkfmt['LEVER_ARM_SET']['len'] / 4
+        data_bytes = struct.pack('{0}f'.format(int(para_len)), *data_list)
         self.canfd_handle.write(self.set_lever_arm_id, list(data_bytes), False, False, True)
 
     def check_predefined_result(self):
@@ -362,8 +517,8 @@ class canfd_app_driver:
         file_path = os.path.join(self.path, fname_time)
         # save parameters to data log folder after predefined parameters setup
         lever_arm_result = self.get_lever_arm_message()
-        data = struct.pack('48B', *lever_arm_result['data'])
-        lever_arm_packet = struct.unpack('<' + 'f'*12, data)
+        data = struct.pack(self.remote_pkfmt['LEVER_ARM_GET']['len_b'], *lever_arm_result['data'])
+        lever_arm_packet = struct.unpack(self.remote_pkfmt['LEVER_ARM_GET']['pack'], data)
         parameters_configuration = self.get_lever_arm_dict(lever_arm_packet)
         with open(file_path, 'w') as outfile:
             json.dump(parameters_configuration, outfile)
@@ -732,100 +887,7 @@ class canfd_app_driver:
         thead = threading.Thread(target=self.ntrip_client_thread)
         thead.start()
         # self.canfd_id = self.canfd_setting['canfd_id']
-        if self.can_type == 'canfd':
-            for inode in self.canfd_setting['canfd_messages']:
-                length = 0
-                pack_fmt = '>'
-                self.id_name[inode["id"]] = inode["name"]
-                for value in inode['signals']:
-                    if value['type'] == 'float':
-                        pack_fmt += 'f'
-                        length += 4
-                    elif value['type'] == 'uint32':
-                        pack_fmt += 'I'
-                        length += 4
-                    elif value['type'] == 'int32':
-                        pack_fmt += 'i'
-                        length += 4
-                    elif value['type'] == 'int16':
-                        pack_fmt += 'h'
-                        length += 2
-                    elif value['type'] == 'uint16':
-                        pack_fmt += 'H'
-                        length += 2
-                    elif value['type'] == 'double':
-                        pack_fmt += 'd'
-                        length += 8
-                    elif value['type'] == 'int64':
-                        pack_fmt += 'q'
-                        length += 8
-                    elif value['type'] == 'uint64':
-                        pack_fmt += 'Q'
-                        length += 8
-                    elif value['type'] == 'char':
-                        pack_fmt += 'c'
-                        length += 1
-                    elif value['type'] == 'uchar':
-                        pack_fmt += 'B'
-                        length += 1
-                    elif value['type'] == 'uint8':
-                        pack_fmt += 'B'
-                        length += 1
-                    else:
-                        pass
-                len_fmt = '{0}B'.format(length)
-                fmt_dic = collections.OrderedDict()
-                fmt_dic['len'] = length
-                fmt_dic['len_b'] = len_fmt
-                fmt_dic['pack'] = pack_fmt
-                self.pkfmt[inode['name']] = fmt_dic
-        elif self.can_type == 'can':
-            for inode in self.canfd_setting['can_messages']:
-                length = 0
-                pack_fmt = '>'
-                self.id_name[inode["id"]] = inode["name"]
-                for value in inode['signals']:
-                    if value['type'] == 'float':
-                        pack_fmt += 'f'
-                        length += 4
-                    elif value['type'] == 'uint32':
-                        pack_fmt += 'I'
-                        length += 4
-                    elif value['type'] == 'int32':
-                        pack_fmt += 'i'
-                        length += 4
-                    elif value['type'] == 'int16':
-                        pack_fmt += 'h'
-                        length += 2
-                    elif value['type'] == 'uint16':
-                        pack_fmt += 'H'
-                        length += 2
-                    elif value['type'] == 'double':
-                        pack_fmt += 'd'
-                        length += 8
-                    elif value['type'] == 'int64':
-                        pack_fmt += 'q'
-                        length += 8
-                    elif value['type'] == 'uint64':
-                        pack_fmt += 'Q'
-                        length += 8
-                    elif value['type'] == 'char':
-                        pack_fmt += 'c'
-                        length += 1
-                    elif value['type'] == 'uchar':
-                        pack_fmt += 'B'
-                        length += 1
-                    elif value['type'] == 'uint8':
-                        pack_fmt += 'B'
-                        length += 1
-                    else:
-                        pass
-                len_fmt = '{0}B'.format(length)
-                fmt_dic = collections.OrderedDict()
-                fmt_dic['len'] = length
-                fmt_dic['len_b'] = len_fmt
-                fmt_dic['pack'] = pack_fmt
-                self.pkfmt[inode['name']] = fmt_dic
+
         while True:
             if self.data_queue.empty():
                 time.sleep(0.001)

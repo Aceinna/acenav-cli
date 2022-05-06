@@ -21,6 +21,27 @@ from ..devices.widgets import(canfd, NTRIPClient, canfd_config)
 from ..framework.utils import print as print_helper
 from ..framework.utils import resource
 from ..core.gnss import RTCMParser
+import functools
+import struct
+from ..framework.utils.print import (print_green, print_yellow, print_red)
+
+def with_device_message(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        generator_func = func(*args, **kwargs)
+        global generator_result
+        generator_result = None
+
+        def check_result(message):
+            message_version = list(message['data'])
+            if(len(message) > 0):
+                return message
+        try:
+            device_message = generator_func.send(None)
+            return check_result(device_message)
+        except Exception as e:
+            print(e)
+    return wrapper
 
 def mkdir(file_path):
     if not os.path.exists(file_path):
@@ -47,6 +68,10 @@ def get_utc_day():
 
 class canfd_app_driver:
     def __init__(self, **kwargs) -> None:
+        self.cli_options = None
+        self.fname_time = None
+        self.device_info = None
+        self.app_info = None
         self.base_count = 0
         self.properties = None
         self.rawdata = []
@@ -77,12 +102,22 @@ class canfd_app_driver:
         self.can_message_flag = 0
         self.can_imu_dict = {}
         self.can_ins_dict = {}
+        self.ins_version_id = 0x580
+        self.sta_version_id = 0x581
+        self.imu_version_id = 0x582
+        self.get_lever_arm_id = 0x583
+        self.set_lever_arm_id = 0x584
         self.prepare_can_setting()
         self.prepare_log_config()
         args=[r"powershell",r"$Env:PYTHONPATH=\"./src/aceinna/devices/widgets;\"+$Env:PYTHONPATH"]
         p=subprocess.Popen(args, stdout=subprocess.PIPE)
 
+    def setup(self, options):
+        self.cli_options = options
+
+
     def prepare_log_config(self):
+        self.fname_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
         self.imu_log_title = self.canfd_setting["imu_log_config"]["title"]
         self.ins_log_title = self.canfd_setting["ins_log_config"]["title"]
 
@@ -111,7 +146,253 @@ class canfd_app_driver:
             with open(local_config_file_path) as json_data:
                 self.properties = json.load(json_data)
                 return
+    def build_device_info(self, text):
+        split_text = [x for x in text.split(' ') if x != '']
+        sn = split_text[5]
+        # remove the prefix of SN
+        if sn.find('SN:') == 0:
+            sn = sn[3:]
 
+        self.device_info = {
+            'name': split_text[0],
+            'imu': split_text[1],
+            'pn': split_text[2],
+            'firmware_version': split_text[3],
+            'sn': sn
+        }
+
+    def build_app_info(self, text):
+        '''
+        Build app info
+        '''
+        app_version = text
+
+        split_text = app_version.split(' ')
+
+        if not app_name:
+            app_name = 'INS'
+            self.is_app_matched = False
+        else:
+            self.is_app_matched = True
+
+        self.app_info = {
+            'app_name': app_name,
+            'version': text
+        }
+
+    def _build_device_info(self, ins_text, sta_text, imu_text):
+        ins_split_text = [x for x in ins_text.split(' ') if x != '']
+        sta_split_text = [x for x in sta_text.split(' ') if x != '']
+        imu_split_text = [x for x in imu_text.split(' ') if x != '']
+        sn = ins_split_text[0]
+        if sn.find('SN:') == 0:
+            sn = sn[3:]
+        pn = ins_split_text[2]
+        firmware_version = ins_split_text[3]
+        boot = ins_split_text[5]
+        imu = imu_split_text[2]
+        sta = sta_split_text[2]
+
+        self.device_info = {
+            'name': 'INS401c',
+            'sta': sta,
+            'imu': imu,
+            'pn': pn,
+            'firmware_version': firmware_version,
+            'sn': sn
+        }
+        version = 'RTK_INS App {0} Bootloader {1} IMU330ZA FW {2} STA9100 FW {3}'.format(
+            firmware_version, boot, imu, sta
+        )
+        self.app_info = {
+            'app_name': 'INS401c',
+            "version": version
+        }
+    def get_lever_arm_dict(self, lever_arm_packet):
+        parameters_configuration = dict()
+        parameters_configuration['gnss lever arm x'] = lever_arm_packet[0]
+        parameters_configuration['gnss lever arm y'] = lever_arm_packet[1]
+        parameters_configuration['gnss lever arm z'] = lever_arm_packet[2]
+        parameters_configuration['vrp lever arm x']  = lever_arm_packet[3]
+        parameters_configuration['vrp lever arm y']  = lever_arm_packet[4]
+        parameters_configuration['vrp lever arm z']  = lever_arm_packet[5]
+        parameters_configuration['user lever arm x'] = lever_arm_packet[6]
+        parameters_configuration['user lever arm y'] = lever_arm_packet[7]
+        parameters_configuration['user lever arm z'] = lever_arm_packet[8]
+        parameters_configuration['rotation rbvx']    = lever_arm_packet[9]
+        parameters_configuration['rotation rbvy']    = lever_arm_packet[10]
+        parameters_configuration['rotation rbvz']    = lever_arm_packet[11]
+        return parameters_configuration
+
+    def save_device_info(self):
+        ins_result = (self.get_ins401c_message())
+        time.sleep(0.1)
+        sta_result = (self.get_sta_message())
+        time.sleep(0.1)
+        imu_result = self.get_imu_message()
+        time.sleep(0.1)
+        lever_arm_result = self.get_lever_arm_message()
+        data = struct.pack('48B', *lever_arm_result['data'])
+        lever_arm_packet = struct.unpack('<' + 'f'*12, data)
+        device_configuration = None
+        fname_time = self.fname_time + '_configuration.json'
+        file_path = os.path.join(
+            self.path, fname_time)
+
+        if not os.path.exists(file_path):
+            device_configuration = []
+        else:
+            with open(file_path) as json_data:
+                device_configuration = (list)(json.load(json_data))
+
+        if ins_result['id'] == self.ins_version_id:
+            self._build_device_info(ins_result['data'].decode('utf-8').rstrip('\x00'),sta_result['data'].decode('utf-8').rstrip('\x00'), imu_result['data'].decode('utf-8').rstrip('\x00'))
+            session_info = dict()
+            session_info['time'] = time.strftime(
+                "%Y-%m-%d %H:%M:%S", time.localtime())
+            session_info['device'] = self.device_info
+            session_info['app'] = self.app_info
+            print_green(self.app_info['version'])
+            session_info['interface'] = 'canfd'
+            parameters_configuration = self.get_lever_arm_dict(lever_arm_packet)
+            session_info['parameters'] = parameters_configuration
+            device_configuration.append(session_info)
+
+            with open(file_path, 'w') as outfile:
+                json.dump(device_configuration, outfile,
+                          indent=4, ensure_ascii=False)
+
+
+    def send_and_request(self, id, data, is_extended_id, is_fd, is_remote, time_out):
+        self.canfd_handle.write(id, data, is_extended_id, is_fd, is_remote)
+        time_over = float(time_out)/100 + time.time()
+        result = {}
+        result['id'] = id
+        while True:
+            msg = self.canfd_handle.read(timeout=0)
+            if (msg is not None) and (msg.arbitration_id == id):
+                result['data'] = msg.data
+                result['error'] = None
+                return result
+            if(time.time() > time_over):
+                result['error'] = 'time_out'
+                return result
+            
+
+    @with_device_message
+    def get_ins401c_message(self):
+        result = yield self.send_and_request(self.ins_version_id, [0x00], False, False, True, 1000)
+        data = result['data']
+        error = result['error']
+        if error == 'time_out':
+            yield {
+                'id': self.ins_version_id,
+                'data': 'No Response'
+            }
+
+        if data:
+            yield {
+                'id': self.ins_version_id,
+                'data': data
+            }
+    @with_device_message
+    def get_sta_message(self):
+        result = yield self.send_and_request(self.sta_version_id, [0x00], False, False, True, 1000)
+        data = result['data']
+        error = result['error']
+        if error == 'time_out':
+            yield {
+                'id': 'error',
+                'data': 'No Response'
+            }
+
+        if data:
+            self.parameters = data
+            yield {
+                'id': 'None',
+                'data': data
+            }
+    @with_device_message
+    def get_imu_message(self):
+        result = yield self.send_and_request(self.imu_version_id, [0x00], False, False, True, 1000)
+        data = result['data']
+        error = result['error']
+        if error == 'time_out':
+            yield {
+                'id': 'error',
+                'data': 'No Response'
+            }
+
+        if data:
+            self.parameters = data
+            yield {
+                'id': 'None',
+                'data': data
+            }
+
+    @with_device_message
+    def get_lever_arm_message(self):
+        result = yield self.send_and_request(self.get_lever_arm_id, [0x00], False, False, True, 1000)
+        data = result['data']
+        error = result['error']
+        if error == 'time_out':
+            yield {
+                'id': 'error',
+                'data': 'No Response'
+            }
+
+        if data:
+            self.parameters = data
+            yield {
+                'id': 'None',
+                'data': data
+            }
+
+
+    def set_ins401c_lever_arm(self, data):
+        data_list = []
+        for item in data:
+            data_list.append(item["value"])
+        data_bytes = struct.pack('12f', *data_list)
+        self.canfd_handle.write(self.set_lever_arm_id, list(data_bytes), False, False, True)
+
+    def check_predefined_result(self):
+        local_time = time.localtime()
+        fname_time = self.fname_time + '_parameters_predefined.json'
+        file_path = os.path.join(self.path, fname_time)
+        # save parameters to data log folder after predefined parameters setup
+        lever_arm_result = self.get_lever_arm_message()
+        data = struct.pack('48B', *lever_arm_result['data'])
+        lever_arm_packet = struct.unpack('<' + 'f'*12, data)
+        parameters_configuration = self.get_lever_arm_dict(lever_arm_packet)
+        with open(file_path, 'w') as outfile:
+            json.dump(parameters_configuration, outfile)
+        # compare saved parameters with predefined parameters
+        hashed_predefined_parameters = helper.collection_to_dict(
+            self.properties["initial"]["userParameters"], key='name')
+        success_count = 0
+        fail_count = 0
+        fail_parameters = []
+        for key in hashed_predefined_parameters:
+            # if parameters_configuration[key] == \
+            #         hashed_predefined_parameters[key]['value']:
+            if abs(parameters_configuration[key] - hashed_predefined_parameters[key]['value'] < 0.1e5):
+                success_count += 1
+            else:
+                fail_count += 1
+                fail_parameters.append(
+                    hashed_predefined_parameters[key]['name'])
+
+        check_result = 'Predefined Parameters are saved. Success ({0}), Fail ({1})'.format(
+            success_count, fail_count)
+        if success_count == len(hashed_predefined_parameters.keys()):
+            print_green(check_result)
+
+        if fail_count > 0:
+            print_yellow(check_result)
+            print_yellow('The failed parameters: {0}'.format(fail_parameters))
+        return parameters_configuration
+    
     def listen(self):
         self.prepare_driver()
         bustype= self.canfd_setting["can_config"]["bus_type"]
@@ -129,6 +410,22 @@ class canfd_app_driver:
         print_helper.print_on_console('CANFD:[open] open BUSMUST CAN channel {0} using {1}&{2}kbps baudrate ...'.format(channel, bitrate, data_bitrate))
         print_helper.print_on_console('CANFD:[connect] waiting for receive CANFD messages ...')
         self.canfd_handle.canfd_bus_active()
+        try_count = 5
+        while try_count > 0:
+            try:
+                set_user_para = self.options.set_user_para
+                if set_user_para:
+                    result = self.set_ins401c_lever_arm(
+                        self.properties["initial"]["userParameters"])
+                    time.sleep(1)
+                    result = self.check_predefined_result()
+                    self.save_device_info()
+                else:
+                    self.save_device_info()
+                try_count = 0
+            except Exception as e:
+                try_count-= 1
+                time.sleep(1)
         self.start_pasre()
 
     def ntrip_client_thread(self):
@@ -157,9 +454,9 @@ class canfd_app_driver:
                 data_to_send[2:] = base_data[index:index+self.valid_base_len]
             try:
                 if self.can_type == 'canfd':
-                    self.canfd_handle.write(self.base_id, data_to_send, False, True)
+                    self.canfd_handle.write(self.base_id, data_to_send, False, False, True)
                 elif self.can_type == 'can':
-                    self.canfd_handle.write(self.base_id, data_to_send, False, False)
+                    self.canfd_handle.write(self.base_id, data_to_send, False, False, False)
                     sys.stdout.write("\rsend base data len {0}".format(self.all_base_len))
             except Exception as e:
                 print("message cant sent: ", e)
@@ -185,7 +482,7 @@ class canfd_app_driver:
 
     def log(self, output, data):
         if output['name'] not in self.log_files.keys():
-            fname_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime()) + '_'
+            fname_time = self.fname_time + '_'
             self.log_files[output['name']] = open(self.path + '/' + fname_time + output['name'] + '.csv', 'w')
             self.write_titlebar(self.log_files[output['name']], output)
             self.imu_log = open(self.path + '/' + fname_time + 'imu' + '.csv', 'w')
@@ -411,8 +708,6 @@ class canfd_app_driver:
             print("error happened when decode the {0} {1}".format(output['name'], e))
 
     def parse_output_packet_payload(self, can_id, data):
-        # if can_id == 392:
-        #     print(data)
         if self.can_type == 'canfd':
             output = next((x for x in self.canfd_setting['canfd_messages'] if x['id'] == can_id), None)
         elif self.can_type == 'can':
@@ -429,7 +724,7 @@ class canfd_app_driver:
             pass
 
     def start_pasre(self):
-        fname_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime()) + '_'
+        fname_time = self.fname_time + '_'
         self.rawdata_file = open(self.path + '/' + fname_time + 'canfd.txt', 'w')
         self.rover_file = open(self.path + '/' + fname_time + 'rover.bin', 'wb')
         thread = threading.Thread(target=self.receive_parse_all)

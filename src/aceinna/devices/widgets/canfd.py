@@ -52,10 +52,11 @@ class canfd(EventBase):
 
     def canfd_bus_active(self):
         self.bus.state = BusState.ACTIVE
-    def write(self, id, data, is_extended_id=False, is_fd=True):
+    def write(self, id, data, is_extended_id=False, is_remote_frame=False, is_fd=True):
         msg = can.Message(  arbitration_id=id,
                             data=data,
                             is_extended_id=is_extended_id,
+                            is_remote_frame=False,
                             is_fd=is_fd)
         try:
             self.bus.send(msg, timeout=0.1)

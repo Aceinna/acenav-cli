@@ -1332,7 +1332,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if len(text) == 2:
             version_text = text[1].split(' ')
             version_str = version_text[0][1:]
-            if version_str <= '28.02.02':
+            if (version_str <= '28.02.02') and ('CANFD' not in text[0].upper()):
                 self.baud_change_enable = 1
             else:
                 self.baud_change_enable = 0

@@ -581,7 +581,7 @@ class canfd_app_driver:
             except Exception as e:
                 try_count-= 1
                 time.sleep(1)
-        self.start_pasre()
+        self.start_parse()
 
     def ntrip_client_thread(self):
         self.ntrip_client = NTRIPClient(self.properties)
@@ -878,7 +878,7 @@ class canfd_app_driver:
         else:
             pass
 
-    def start_pasre(self):
+    def start_parse(self):
         fname_time = self.fname_time + '_'
         self.rawdata_file = open(self.path + '/' + fname_time + 'canfd.txt', 'w')
         self.rover_file = open(self.path + '/' + fname_time + 'rover.bin', 'wb')

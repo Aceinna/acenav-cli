@@ -105,13 +105,18 @@ class Ethernet(Communicator):
         time.sleep(1)
         
         # confirm device
-        self.confirm_device(self)
-        if self.device:
-            # establish the packet sniff thread
-            callback(self.device)
-        else:
-            print_red(
-                'Cannot confirm the device in ethernet 100base-t1 connection')
+        for i in range(3):
+            self.confirm_device(self)
+            if self.device:
+                # establish the packet sniff thread
+                callback(self.device)
+                break
+            else:
+                if i == 2:
+                    print_red(
+                        'Cannot confirm the device in ethernet 100base-t1 connection')
+                else:
+                    time.sleep(0.1)
 
     def send_async_shake_hand(self, iface, dst_mac, src_mac, filter, use_length_as_protocol):
         pG = [0x01, 0xcc]

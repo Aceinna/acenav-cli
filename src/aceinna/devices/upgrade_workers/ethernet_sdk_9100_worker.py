@@ -1175,7 +1175,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         for i in range(3):
             self.send_packet(write_cmd)
             time.sleep(2)
-            result = self.read_until(0xCC, 200, 1)
+            result = self.read_until(0xCC, 500, 1)
             if result:
                 break
 

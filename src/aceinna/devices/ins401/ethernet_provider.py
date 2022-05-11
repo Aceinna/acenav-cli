@@ -623,8 +623,11 @@ class Provider(OpenDeviceBase):
         if response:
             text = helper.format_string(response)
             if text.__contains__('SN:'):
-                    split_text = text.split(' ')
-                    self.bootloader_version = split_text[2][1:]
+                    split_text = text.split('Bootloader ')
+                    if len(split_text) > 1:
+                        split_text = split_text[1].split(' ')
+
+                        self.bootloader_version = split_text[0][1:]
         else:
             os._exit(1)
            
@@ -942,10 +945,11 @@ class Provider(OpenDeviceBase):
             ethernet_ack_enable,
             command=self.imu_jump_bootloader_command_generator,
             listen_packet=[0x4a, 0x49],
-            wait_timeout_after_command=30)
+            wait_timeout_after_command=15)
         imu_boot_jump_bootloader_worker.on(
-            UPGRADE_EVENT.BEFORE_COMMAND, lambda: time.sleep(1))
-        imu_boot_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE
+            UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
+        imu_boot_jump_bootloader_worker.on(
+            UPGRADE_EVENT.AFTER_COMMAND, self.do_reshake)
 
         imu_boot_jump_application_worker = JumpApplicationWorker(
             self.communicator,
@@ -973,10 +977,11 @@ class Provider(OpenDeviceBase):
             ethernet_ack_enable,
             command=self.imu_jump_bootloader_command_generator,
             listen_packet=[0x4a, 0x49],
-            wait_timeout_after_command=30)
+            wait_timeout_after_command=15)
         imu_jump_bootloader_worker.on(
-            UPGRADE_EVENT.BEFORE_COMMAND, lambda: time.sleep(1))
-        imu_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE
+            UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
+        imu_jump_bootloader_worker.on(
+            UPGRADE_EVENT.AFTER_COMMAND, self.do_reshake)
 
         imu_jump_application_worker = JumpApplicationWorker(
             self.communicator,

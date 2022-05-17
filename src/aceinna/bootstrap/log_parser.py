@@ -44,15 +44,16 @@ def do_parse(log_type, folder_path, kml_rate, dr_parse):
     lib = CDLL(lib_path)
     for root, _, file_name in os.walk(folder_path):
         for fname in file_name:
-            if (fname.startswith('user') and fname.endswith('.bin')) or (fname.startswith('ins_save') and fname.endswith('.bin')):
+            if (fname.startswith('user') and fname.endswith('.bin')) or (fname.startswith('ins_save') and fname.endswith('.bin')) or ('canfd' in fname and fname.endswith('.txt')):
                 file_path = os.path.join(folder_path, fname)
-
                 if log_type == 'rtkl':
                     lib.decode_openrtk_inceptio(bytes(file_path, encoding='utf8'))
                 elif log_type == 'beidou':
                     lib.decode_beidou(bytes(file_path, encoding='utf8'), kml_rate)
                 elif log_type == 'ins401':
                     lib.decode_ins401(bytes(file_path, encoding='utf8'), bytes(dr_parse, encoding='utf8'), kml_rate)
+                elif log_type == 'ins401c':
+                    lib.decode_ins401c(bytes(file_path, encoding='utf8'))                   
 
 
 class LogParser:

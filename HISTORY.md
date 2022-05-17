@@ -1,6 +1,11 @@
 # CHANGELOG
 
 ---
+## 2.6.6， 05/17/2022
+- [INS401] The reply message 0xcc01 can't be received after the "JS" command is executed.
+- [INS401] GPZDA messages are saved to log, compatible with Sta9100 and Mosaic.
+- [INS401] optimized the firmware upgradation function and ethernet connection
+
 ## 2.6.5， 04/11/2022
 - [INS401] Support firmware upgrade after completion, automatically connect and log
 - [INS401] After the IMU firmware is upgraded, the IMU is displayed in the bootloader, the solution is system (including IMU) reset of ins401 Unit

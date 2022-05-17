@@ -9,11 +9,13 @@ class APP_TYPE:
     CLI = 'cli'
     RECEIVER = 'receiver'
     LOG_PARSER = 'log-parser'
+    CANFD = 'canfd'
 
 
 class INTERFACES(object):
     UART = 'uart'
     ETH_100BASE_T1 = '100base-t1'
     BOARD = 'beidou'
+    CANFD = 'canfd'
     def list():
-        return [INTERFACES.UART, INTERFACES.ETH_100BASE_T1]
+        return [INTERFACES.UART, INTERFACES.ETH_100BASE_T1, INTERFACES.CANFD]

@@ -10,6 +10,8 @@ if os.name == 'nt':
 from aceinna.bootstrap import Loader
 from aceinna.framework.decorator import (
     receive_args, handle_application_exception)
+sys.path.append("./framework")
+from aceinna.framework.constants import INTERFACES
 
 IS_WINDOWS = sys.platform.__contains__(
     'win32') or sys.platform.__contains__('win64')
@@ -49,6 +51,9 @@ def start_app(**kwargs):
 
     if kwargs['options'].use_cli:
         option_mode = 'cli'
+    if kwargs['options'].interface == INTERFACES.CANFD:
+        option_mode = 'canfd'
+
 
     if sub_command == 'parse':
         option_mode = 'log-parser'

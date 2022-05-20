@@ -82,6 +82,7 @@ class canfd_app_driver:
         self.log_files = {}
         self.rawdata_file = ''
         self.rover_file = ''
+        self.base_file = None
         self.imu_log = {}
         self.ins_log = {}
         self.all_base_len = 0
@@ -590,6 +591,8 @@ class canfd_app_driver:
 
     def send_base_data(self, data):
         base_data = data
+        if self.base_file != None:
+            self.base_file.write(bytes(base_data))
         all_data_len = len(base_data)
         len_base_data = all_data_len
         index = 0
@@ -882,6 +885,7 @@ class canfd_app_driver:
         fname_time = self.fname_time + '_'
         self.rawdata_file = open(self.path + '/' + fname_time + 'canfd.txt', 'w')
         self.rover_file = open(self.path + '/' + fname_time + 'rover.bin', 'wb')
+        self.base_file = open(self.path + '/' + fname_time + 'base.bin', 'wb')
         thread = threading.Thread(target=self.receive_parse_all)
         thread.start()
         thead = threading.Thread(target=self.ntrip_client_thread)

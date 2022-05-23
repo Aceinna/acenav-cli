@@ -36,7 +36,7 @@ except:  # pylint: disable=bare-except
 
 #         device_provider.upgrade_framework(['upgrade', './INS401_28.03a.bin'])
 #         if loop_upgrade_cnt == 200:
-#             os._exit()
+#             os._exit(1)
 
 #         time.sleep(5)
 
@@ -48,15 +48,15 @@ def loop_upgrade(EhternetProvider):
 
     while True:
         if EhternetProvider.is_upgrading == False:
-            time.sleep(120)
+            time.sleep(10)
             loop_upgrade_cnt += 1
             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt)
             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt, file = upgrade_log_file, flush = True)
             
-        EhternetProvider.upgrade_framework(['upgrade', './INS401_28.04a.bin'])
+        EhternetProvider.upgrade_framework(['upgrade', './INS401_v28.04.10_RTK_INSAID_INS_sta9100_eval_5_10_18_1_RC_RTCM3-5HzCPVT-10HzPVT_scn5_25db_maxchannel_E2EOFF_SISOFF_BOOT_IMU330ZA_27.01.01.bin'])
 
-        if loop_upgrade_cnt == 100:
-            os._exit()
+        if loop_upgrade_cnt == 200:
+            os._exit(1)
 
         time.sleep(5)
 

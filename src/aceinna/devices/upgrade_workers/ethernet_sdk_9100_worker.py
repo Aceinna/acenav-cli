@@ -1160,7 +1160,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         self.send_packet(boot_part2)
 
         for _ in range(3):
-            is_match = self.read_until(0xCC, 1000, 1)
+            is_match = self.read_until(0xCC, 500, 1)
             if is_match:
                 return True
             time.sleep(1)
@@ -1174,8 +1174,8 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         for i in range(3):
             self.send_packet(write_cmd)
-            time.sleep(3)
-            result = self.read_until(0xCC, 1000, 1)
+            time.sleep(2)
+            result = self.read_until(0xCC, 500, 1)
             if result:
                 break
 
@@ -1254,7 +1254,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if self._is_stopped:
             return False
 
-        return self.read_until(0xCC, 1000, 1)
+        return self.read_until(0xCC, 500, 1)
 
     def erase_nvm_wait(self):
         if self._is_stopped:
@@ -1414,10 +1414,10 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if not self.erase_wait():
             return self._raise_error('Wait erase failed')
 
-        # if not self.erase_nvm_wait():
-        #     return self._raise_error('Wait nvm failed')
+        if not self.erase_nvm_wait():
+            return self._raise_error('Wait nvm failed')
 
-        time.sleep(6)
+        time.sleep(5)
         if not self.flash_write(fs_len, self._file_content):
             return self._raise_error('Write flash failed') 
 

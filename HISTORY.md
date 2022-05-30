@@ -5,6 +5,7 @@
 - [INS401] The reply message 0xcc01 can't be received after the "JS" command is executed.
 - [INS401] GPZDA messages are saved to log, compatible with Sta9100 and Mosaic.
 - [INS401] optimized the firmware upgradation function and ethernet connection
+- [INS401] Support Sta9100 upgradation of the new bootloader and is compatible with the old bootloader.
 
 ## 2.6.5， 04/11/2022
 - [INS401] Support firmware upgrade after completion, automatically connect and log

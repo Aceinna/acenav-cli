@@ -307,7 +307,7 @@ class Provider(OpenDeviceBase):
                     file_name + '/' + 'rtcm_rover_' + file_time + '.bin', "wb")
                 self.ins_save_logf = open(
                     file_name + '/' + 'ins_save_' + file_time + '.bin', "wb")
-            if set_user_para:
+            if set_user_para and not self.is_upgrading:
                 result = self.set_params(
                     self.properties["initial"]["userParameters"])
                 ##print('set user para {0}'.format(result))

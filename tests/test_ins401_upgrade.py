@@ -36,7 +36,7 @@ except:  # pylint: disable=bare-except
 
 #         device_provider.upgrade_framework(['upgrade', './INS401_28.03a.bin'])
 #         if loop_upgrade_cnt == 200:
-#             os._exit()
+#             os._exit(1)
 
 #         time.sleep(5)
 
@@ -56,7 +56,7 @@ def loop_upgrade(EhternetProvider):
         EhternetProvider.upgrade_framework(['upgrade', './INS401_28.04a.bin'])
 
         if loop_upgrade_cnt == 100:
-            os._exit()
+            os._exit(1)
 
         time.sleep(5)
 

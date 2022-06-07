@@ -7,7 +7,7 @@ from ..utils import helper
 from ..communicator import Communicator
 
 UPGRADE_PACKETS = [b'\x01\xcc', b'\x01\xaa', b'\x02\xaa', b'\x03\xaa', b'\x04\xaa',
-                   b'\x05\xaa', b'\x06\xaa', b'\x07\xaa', b'\x08\xaa', b'\x4a\x49', b'\x4a\x41', b'\x57\x41']
+                   b'\x05\xaa', b'\x06\xaa', b'\x07\xaa', b'\x08\xaa', b'\x4a\x49', b'\x4a\x41', b'\x57\x41', b'\x0a\xaa']
 
 
 class Ethernet(Communicator):

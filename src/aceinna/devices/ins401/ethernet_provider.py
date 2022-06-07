@@ -75,6 +75,7 @@ class Provider(OpenDeviceBase):
         self.rtk_upgrade_flag = False
         self.ins_upgrade_flag = False
         self.sdk_upgrade_flag = False
+        self.sdk_upgrade_chip_type = 1
         self.imu_upgrade_flag = False
         self.imu_boot_upgrade_flag = False
         self.unit_sn = None
@@ -819,7 +820,9 @@ class Provider(OpenDeviceBase):
         if rule == 'sdk' and self.sdk_upgrade_flag:
             sdk_upgrade_worker = EthernetSDK9100UpgradeWorker(
                 self.communicator,
-                lambda: helper.format_firmware_content(content))
+                lambda: helper.format_firmware_content(content),
+                self.sdk_upgrade_chip_type
+            )
             sdk_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
             return sdk_upgrade_worker
 
@@ -1389,6 +1392,9 @@ class Provider(OpenDeviceBase):
 
                 if param == 'sdk':
                     self.sdk_upgrade_flag = True 
+                if param == 'sdk_2':
+                    self.sdk_upgrade_flag = True
+                    self.sdk_upgrade_chip_type = 2
 
                 if param == 'imu_boot':
                     self.imu_boot_upgrade_flag = True 

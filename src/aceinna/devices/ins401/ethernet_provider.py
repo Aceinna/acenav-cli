@@ -65,6 +65,7 @@ class Provider(OpenDeviceBase):
         self.connected = True
         self.rtk_log_file_name = ''
         self.rtcm_rover_logf = None
+        self.rtcm_rover2_logf = None
         self.big_mountangle_rvb = [0, 0, 0]
         self.ins_save_logf = None
         self.ins401_log_file_path = None
@@ -305,6 +306,8 @@ class Provider(OpenDeviceBase):
                     file_name + '/' + 'rtcm_base_' + file_time + '.bin', "wb")
                 self.rtcm_rover_logf = open(
                     file_name + '/' + 'rtcm_rover_' + file_time + '.bin', "wb")
+                self.rtcm_rover2_logf = open(
+                    file_name + '/' + 'rtcm_rover2_' + file_time + '.bin', "wb")
                 self.ins_save_logf = open(
                     file_name + '/' + 'ins_save_' + file_time + '.bin', "wb")
             if set_user_para:
@@ -525,7 +528,8 @@ class Provider(OpenDeviceBase):
 
         elif type == b'\x06\n': # rover rtcm
             pass
-
+        elif type == b'\x08\n': # rover2 rtcm
+            pass
         elif type == b'\x07\n': # corr imu
             pass
 
@@ -574,6 +578,9 @@ class Provider(OpenDeviceBase):
         if packet_type == b'\x06\n':
             if self.rtcm_rover_logf:
                 self.rtcm_rover_logf.write(bytes(data))
+        elif packet_type == b'\x08\n':
+            if self.rtcm_rover2_logf:
+                self.rtcm_rover2_logf.write(bytes(data))
         else:
             raw_data = kwargs.get('raw')
             if self.user_logf and raw_data:

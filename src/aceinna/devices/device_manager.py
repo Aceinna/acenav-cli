@@ -2,6 +2,7 @@ from .ping import ping_tool
 from .rtkl.uart_provider import Provider as RTKLUartProvider
 from .rtkl.uart_provider import beidouProvider as beidouUartProvider
 from .ins401.ethernet_provider import Provider as INS401EthernetProvider
+from .ins402.ethernet_provider import Provider as INS402EthernetProvider
 from ..framework.context import APP_CONTEXT
 from ..framework.utils.print import print_green
 from ..framework.constants import INTERFACES
@@ -15,6 +16,8 @@ def create_provider(device_type, communicator):
     if communicator.type==INTERFACES.ETH_100BASE_T1:
         if device_type == 'INS401':
             return INS401EthernetProvider(communicator)
+        elif device_type == 'INS402':
+            return INS402EthernetProvider(communicator)
 
     return None
 

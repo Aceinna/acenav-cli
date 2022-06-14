@@ -38,7 +38,7 @@ class Ethernet(Communicator):
     def handle_iface_confirm_packet(self, packet):
         self.iface_confirmed = True
         self.dst_mac = packet.src
-
+    #TODO:
     def confirm_iface(self, iface):
         dst_mac_str = 'FF:FF:FF:FF:FF:FF'
 

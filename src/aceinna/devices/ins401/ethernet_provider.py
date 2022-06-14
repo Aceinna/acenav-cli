@@ -65,7 +65,6 @@ class Provider(OpenDeviceBase):
         self.connected = True
         self.rtk_log_file_name = ''
         self.rtcm_rover_logf = None
-        self.rtcm_rover2_logf = None
         self.big_mountangle_rvb = [0, 0, 0]
         self.ins_save_logf = None
         self.ins401_log_file_path = None
@@ -75,7 +74,6 @@ class Provider(OpenDeviceBase):
         self.rtk_upgrade_flag = False
         self.ins_upgrade_flag = False
         self.sdk_upgrade_flag = False
-        self.sdk_upgrade_chip_type = 1
         self.imu_upgrade_flag = False
         self.imu_boot_upgrade_flag = False
         self.unit_sn = None
@@ -307,8 +305,6 @@ class Provider(OpenDeviceBase):
                     file_name + '/' + 'rtcm_base_' + file_time + '.bin', "wb")
                 self.rtcm_rover_logf = open(
                     file_name + '/' + 'rtcm_rover_' + file_time + '.bin', "wb")
-                self.rtcm_rover2_logf = open(
-                    file_name + '/' + 'rtcm_rover2_' + file_time + '.bin', "wb")
                 self.ins_save_logf = open(
                     file_name + '/' + 'ins_save_' + file_time + '.bin', "wb")
             if set_user_para and not self.is_upgrading:
@@ -529,8 +525,7 @@ class Provider(OpenDeviceBase):
 
         elif type == b'\x06\n': # rover rtcm
             pass
-        elif type == b'\x08\n': # rover2 rtcm
-            pass
+        
         elif type == b'\x07\n': # corr imu
             pass
 
@@ -579,9 +574,6 @@ class Provider(OpenDeviceBase):
         if packet_type == b'\x06\n':
             if self.rtcm_rover_logf:
                 self.rtcm_rover_logf.write(bytes(data))
-        elif packet_type == b'\x08\n':
-            if self.rtcm_rover2_logf:
-                self.rtcm_rover2_logf.write(bytes(data))
         else:
             raw_data = kwargs.get('raw')
             if self.user_logf and raw_data:
@@ -820,9 +812,7 @@ class Provider(OpenDeviceBase):
         if rule == 'sdk' and self.sdk_upgrade_flag:
             sdk_upgrade_worker = EthernetSDK9100UpgradeWorker(
                 self.communicator,
-                lambda: helper.format_firmware_content(content),
-                self.sdk_upgrade_chip_type
-            )
+                lambda: helper.format_firmware_content(content))
             sdk_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
             return sdk_upgrade_worker
 
@@ -1392,9 +1382,6 @@ class Provider(OpenDeviceBase):
 
                 if param == 'sdk':
                     self.sdk_upgrade_flag = True 
-                if param == 'sdk_2':
-                    self.sdk_upgrade_flag = True
-                    self.sdk_upgrade_chip_type = 2
 
                 if param == 'imu_boot':
                     self.imu_boot_upgrade_flag = True 

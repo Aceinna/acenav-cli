@@ -7,57 +7,57 @@
             {
                 "paramId": 1,
                 "name": "gnss lever arm x",
-                "value": 0.6
+                "value": 0.7
             },
             {
                 "paramId": 2,
                 "name": "gnss lever arm y",
-                "value": -0.0
+                "value": 0.02
             },
             {
                 "paramId": 3,
                 "name": "gnss lever arm z",
-                "value": -0.0
+                "value": -1.06
             },
             {
                 "paramId": 4,
                 "name": "vrp lever arm x",
-                "value": 0.1
+                "value": 0.38
             },
             {
                 "paramId": 5,
                 "name": "vrp lever arm y",
-                "value": 0.0
+                "value": 0.01
             },
             {
                 "paramId": 6,
                 "name": "vrp lever arm z",
-                "value": 0.0
+                "value": 0.21
             },
             {
                 "paramId": 7,
                 "name": "user lever arm x",
-                "value": 0.0
+                "value": 0.7
             },
             {
                 "paramId": 8,
                 "name": "user lever arm y",
-                "value": -0.0
+                "value": 0.02
             },
             {
                 "paramId": 9,
                 "name": "user lever arm z",
-                "value": -0.0
+                "value": -1.06
             },
             {
                 "paramId": 10,
                 "name": "rotation rbvx",
-                "value": 0.1
+                "value": 0.0
             },
             {
                 "paramId": 11,
                 "name": "rotation rbvy",
-                "value": 0.2
+                "value": 0.0
             },
             {
                 "paramId": 12,
@@ -67,17 +67,17 @@
             {
                 "paramId": 13,
                 "name": "sec lever arm x",
-                "value": 0.6
+                "value": 1.75
             },
             {
                 "paramId": 14,
                 "name": "sec lever arm y",
-                "value": 0.35
+                "value": 0.02
             },
             {
                 "paramId": 15,
                 "name": "sec lever arm z",
-                "value": -0.71
+                "value": -1.06
             },
             {
                 "paramId": 16,

@@ -1,5 +1,6 @@
 import os
 import time
+import math
 from ..base.upgrade_worker_base import UpgradeWorkerBase
 from ...framework.utils import helper
 from ...framework.command import Command
@@ -25,6 +26,8 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
         else:
             self._file_content = file_content()
         self.total = len(self._file_content)
+        self.sector_num = math.ceil(self.total / 2048)
+        self.erase_time = math.ceil(self.sector_num * (90 + 6) / 1000)
 
     def stop(self):
         self._is_stopped = True
@@ -65,7 +68,7 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
         # custom
         if current == 0:
             try:
-                self.emit(UPGRADE_EVENT.FIRST_PACKET)
+                self.emit(UPGRADE_EVENT.FIRST_PACKET, self.erase_time)
             except Exception as ex:
                 self.emit(UPGRADE_EVENT.ERROR, self._key,
                           'Fail in first packet: {0}'.format(ex))
@@ -132,7 +135,7 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
             else:
                 if self.current == 0:
                     self.write_block(packet_data_len, self.current, data)
-                    time.sleep(15)
+                    time.sleep(self.erase_time)
                 else:
                     for i in range(3):
                         self.write_block(packet_data_len, self.current, data)

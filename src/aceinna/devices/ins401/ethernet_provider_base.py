@@ -704,7 +704,7 @@ class Provider_base(OpenDeviceBase):
                 packet_len)
             rtk_upgrade_worker.name = 'MAIN_RTK'
             rtk_upgrade_worker.on(
-                UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(15))
+                UPGRADE_EVENT.FIRST_PACKET, lambda sleep_sec: time.sleep(sleep_sec))
             rtk_upgrade_worker.on(UPGRADE_EVENT.BEFORE_WRITE,
                                 lambda: self.before_write_content('0', len(content), ethernet_ack_enable))
             return rtk_upgrade_worker

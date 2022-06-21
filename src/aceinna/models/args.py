@@ -43,7 +43,8 @@ class WebserverArgs(KeyValuesArgumentBase):
         'force_bootloader': False,
         'set_mount_angle': False,
         'use_cli':False,
-        'para_path': None
+        'para_path': None,
+        'host_mac': 'auto'
     }
 
 
@@ -68,3 +69,4 @@ class LogParserArgs(KeyValuesArgumentBase):
         'kml_rate': 1,
         'powerdr': 'false'
     }
+

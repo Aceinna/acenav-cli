@@ -21,7 +21,7 @@ class Ethernet(Communicator):
         self.ethernet_name = None
         self.data = None
         self.iface = None
-
+        self.filter_device_type = None
         self.filter_host_mac = None
         self.filter_host_mac_assigned = False
 
@@ -30,6 +30,10 @@ class Ethernet(Communicator):
         self.use_length_as_protocol = True
         self.async_sniffer = None
         self.upgrading_flag = False
+
+        if options and options.device_type != 'auto':
+            self.filter_device_type = options.device_type
+            self.filter_device_type_assigned = True
 
         if options:
             self.filter_host_mac_assigned = options.host_mac != 'auto'

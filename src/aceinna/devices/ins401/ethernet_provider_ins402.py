@@ -118,7 +118,7 @@ class Provider(Provider_base):
                 dir_time = time.strftime("%Y%m%d_%H%M%S", time.localtime())
                 file_time = time.strftime("%Y_%m_%d_%H_%M_%S",
                                           time.localtime())
-                file_name = self.data_folder + '/' + 'ins401_log_' + dir_time
+                file_name = self.data_folder + '/' + 'ins402_log_' + dir_time
                 os.mkdir(file_name)
                 self.rtk_log_file_name = file_name
 

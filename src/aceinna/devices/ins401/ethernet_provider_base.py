@@ -536,11 +536,16 @@ class Provider_base(OpenDeviceBase):
         if response:
             text = helper.format_string(response)
             if text.__contains__('SN:'):
+                if text.__contains__('Bootloader'):
                     split_text = text.split('Bootloader ')
                     if len(split_text) > 1:
                         split_text = split_text[1].split(' ')
 
                         self.bootloader_version = split_text[0][1:]
+                else:
+                    split_text = text.split(' ')
+                    if len(split_text) > 2:
+                        self.bootloader_version = split_text[3]
         else:
             os._exit(1)
            

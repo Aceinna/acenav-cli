@@ -10,7 +10,7 @@ try:
     from aceinna.models.args import WebserverArgs
     from aceinna.framework.utils import (helper)
     from aceinna.framework.decorator import handle_application_exception
-    from aceinna.devices.ins401.ethernet_provider import Provider as EhternetProvider
+    from aceinna.devices.ins401.ethernet_provider_ins401 import Provider as EhternetProvider
     from aceinna.framework.constants import INTERFACES
 except:  # pylint: disable=bare-except
     print('load package from local')
@@ -19,7 +19,7 @@ except:  # pylint: disable=bare-except
     from aceinna.models.args import WebserverArgs
     from aceinna.framework.utils import (helper)
     from aceinna.framework.decorator import handle_application_exception
-    from aceinna.devices.ins401.ethernet_provider import Provider as EhternetProvider
+    from aceinna.devices.ins401.ethernet_provider_ins401 import Provider as EhternetProvider
     from aceinna.framework.constants import INTERFACES
 
 # Only loop firmware upgrade 
@@ -48,14 +48,14 @@ def loop_upgrade(EhternetProvider):
 
     while True:
         if EhternetProvider.is_upgrading == False:
-            time.sleep(120)
+            time.sleep(10)
             loop_upgrade_cnt += 1
             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt)
             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt, file = upgrade_log_file, flush = True)
             
-        EhternetProvider.upgrade_framework(['upgrade', './INS401_28.04a.bin'])
+        EhternetProvider.upgrade_framework(['upgrade', './INS401_28.04.16_test.bin', 'imu'])
 
-        if loop_upgrade_cnt == 100:
+        if loop_upgrade_cnt == 300:
             os._exit(1)
 
         time.sleep(5)

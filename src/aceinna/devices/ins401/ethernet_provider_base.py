@@ -31,13 +31,13 @@ from ..upgrade_workers import (
 
 GNZDA_DATA_LEN = 39
 
-class Provider(OpenDeviceBase):
+class Provider_base(OpenDeviceBase):
     '''
     INS401 Ethernet 100base-t1 provider
     '''
 
     def __init__(self, communicator, *args):
-        super(Provider, self).__init__(communicator)
+        super(Provider_base, self).__init__(communicator)
         self.type = 'INS401'
         self.server_update_rate = 100
         self.sky_data = []
@@ -80,47 +80,12 @@ class Provider(OpenDeviceBase):
         self.bootloader_version = None
         self.rtk_crc = []
         self.ins_crc = []
+        self.sdk_upgrade_chip_type = 1
+
     def prepare_folders(self):
         '''
-        Prepare folders for data storage and configuration
+        prepare_folders
         '''
-        executor_path = resource.get_executor_path()
-        setting_folder_name = 'setting'
-
-        data_folder_path = os.path.join(executor_path, 'data')
-        if not os.path.isdir(data_folder_path):
-            os.makedirs(data_folder_path)
-        self.data_folder = data_folder_path
-
-        # copy contents of app_config under executor path
-        self.setting_folder_path = os.path.join(executor_path,
-                                                setting_folder_name)
-
-        all_products = get_ins401_products()
-        config_file_mapping = get_configuratin_file_mapping()
-
-        for product in all_products:
-            product_folder = os.path.join(self.setting_folder_path, product)
-            if not os.path.isdir(product_folder):
-                os.makedirs(product_folder)
-
-            for app_name in all_products[product]:
-                app_name_path = os.path.join(product_folder, app_name)
-                app_name_config_path = os.path.join(
-                    app_name_path, config_file_mapping[product])
-
-                if not os.path.isfile(app_name_config_path):
-                    if not os.path.isdir(app_name_path):
-                        os.makedirs(app_name_path)
-                    app_config_content = resource.get_content_from_bundle(
-                        setting_folder_name,
-                        os.path.join(product, app_name,
-                                     config_file_mapping[product]))
-                    if app_config_content is None:
-                        continue
-
-                    with open(app_name_config_path, "wb") as code:
-                        code.write(app_config_content)
 
     @property
     def is_in_bootloader(self):
@@ -143,7 +108,7 @@ class Provider(OpenDeviceBase):
         self.connected = True
 
         self._device_info_string = '# Connected {0} with ethernet #\n\rDevice: {1} \n\rFirmware: {2}'\
-            .format('INS401', device_info, app_info)
+            .format(self.type, device_info, app_info)
 
         return self._device_info_string
 
@@ -235,6 +200,7 @@ class Provider(OpenDeviceBase):
             'app_name': app_name,
             'firmware':  split_text[2],
             'bootloader': split_text[4],
+            'sta9100': " ".join(split_text[8:]),
         }
 
     def load_properties(self):
@@ -410,39 +376,9 @@ class Provider(OpenDeviceBase):
         self.ethernet_rtcm_data_logger.run()
         
     def set_mountangle_config(self, result = []):
-        # copy contents of app_config under executor path
-        setting_folder_path = os.path.join(resource.get_executor_path(),
-                                                'setting')
-        # Load the openimu.json based on its app
-        product_name = 'INS401'
-        app_name = 'RTK_INS'  # self.app_info['app_name']
-        app_file_path = os.path.join(setting_folder_path, product_name,
-                                        app_name, 'ins401.json')
-
-        with open(app_file_path, 'r') as json_data:
-            self.properties = json.load(json_data)
-        
-        # update mountangle config file
-        with open(app_file_path, 'w') as json_data: 
-            userParameters = self.properties["initial"]["userParameters"]   
-            for i in range(3):
-                userParameters[9 + i]['value'] = result[i]
-            
-            json.dump(self.properties, 
-                    json_data,
-                    indent=4,
-                    ensure_ascii=False)
-
-        # setting params
-        with open(app_file_path, 'r') as json_data:
-            self.properties = json.load(json_data)
-
-        result = self.set_params(self.properties["initial"]["userParameters"])
-        if result['packetType'] == 'success':
-            self.save_config()
-
-        # check saved result
-        self.check_predefined_result()
+        '''
+        set_mountangle_config
+        '''
 
 
     def save_mountangle_file(self, type, length, content):
@@ -525,7 +461,7 @@ class Provider(OpenDeviceBase):
 
         elif type == b'\x06\n': # rover rtcm
             pass
-
+        
         elif type == b'\x07\n': # corr imu
             pass
 
@@ -571,30 +507,7 @@ class Provider(OpenDeviceBase):
         '''
         Listener for getting output packet
         '''
-        if packet_type == b'\x06\n':
-            if self.rtcm_rover_logf:
-                self.rtcm_rover_logf.write(bytes(data))
-        else:
-            raw_data = kwargs.get('raw')
-            if self.user_logf and raw_data:
-                self.user_logf.write(bytes(raw_data))
 
-                if self.mountangle:
-                    payload_len = struct.unpack('<I', bytes(raw_data[4:8]))[0]
-                    self.save_mountangle_file(packet_type, payload_len, raw_data[8:8+payload_len])
-              
-                if packet_type == b'\x07\n':
-                    if self.cli_options and self.cli_options.set_mount_angle and self.mountangle_thread is None:
-                        content = raw_data[8:]
-                        big_mountangle_rvb = []            
-                        for i in range(3):
-                            big_mountangle_rvb.append(struct.unpack('<d', bytes(content[7 + 8 * i:15 + 8 * i]))[0])
-
-                        for i in range(3):
-                            self.big_mountangle_rvb[i] = big_mountangle_rvb[i] * 57.29577951308232
-                        if self.mountangle:
-                            self.mountangle.mountangle_logger.debug("[mountangle] big_mountangle_rvb: {0}, {1}, {2}".format(self.big_mountangle_rvb[0], self.big_mountangle_rvb[1], self.big_mountangle_rvb[2]))
-                        self.start_mountangle_parse()
 
 
     def after_jump_bootloader(self):
@@ -623,11 +536,16 @@ class Provider(OpenDeviceBase):
         if response:
             text = helper.format_string(response)
             if text.__contains__('SN:'):
+                if text.__contains__('Bootloader'):
                     split_text = text.split('Bootloader ')
                     if len(split_text) > 1:
                         split_text = split_text[1].split(' ')
 
                         self.bootloader_version = split_text[0][1:]
+                else:
+                    split_text = text.split(' ')
+                    if len(split_text) > 2:
+                        self.bootloader_version = split_text[3]
         else:
             os._exit(1)
            
@@ -771,14 +689,23 @@ class Provider(OpenDeviceBase):
                             
         return result
 
+    def get_erase_time(self, erase_len):
+        sector_num = math.ceil(erase_len / 2048)
+        erase_time = math.ceil(sector_num * (90 + 6) / 1000)
+        return erase_time
+
     def build_worker(self, rule, content):
+        ''' Build upgarde worker by rule and content
+        '''
         ''' Build upgarde worker by rule and content
         '''
         if self.communicator.use_length_as_protocol:
             packet_len = 960
         else:
             packet_len = 192
-
+        
+        erase_len = len(content)
+        erase_time = self.get_erase_time(erase_len)
         ethernet_ack_enable = self.get_unit_ethernet_ack_flag()
         if rule == 'rtk' and self.rtk_upgrade_flag:
             rtk_upgrade_worker = FirmwareUpgradeWorker(
@@ -789,7 +716,7 @@ class Provider(OpenDeviceBase):
                 packet_len)
             rtk_upgrade_worker.name = 'MAIN_RTK'
             rtk_upgrade_worker.on(
-                UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(15))
+                UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(erase_time))
             rtk_upgrade_worker.on(UPGRADE_EVENT.BEFORE_WRITE,
                                 lambda: self.before_write_content('0', len(content), ethernet_ack_enable))
             return rtk_upgrade_worker
@@ -804,7 +731,7 @@ class Provider(OpenDeviceBase):
             ins_upgrade_worker.name = 'MAIN_RTK'
             ins_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
             ins_upgrade_worker.on(
-                UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(15))
+                UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(erase_time))
             ins_upgrade_worker.on(UPGRADE_EVENT.BEFORE_WRITE,
                                   lambda: self.before_write_content('1', len(content), ethernet_ack_enable))
             return ins_upgrade_worker
@@ -812,7 +739,9 @@ class Provider(OpenDeviceBase):
         if rule == 'sdk' and self.sdk_upgrade_flag:
             sdk_upgrade_worker = EthernetSDK9100UpgradeWorker(
                 self.communicator,
-                lambda: helper.format_firmware_content(content))
+                lambda: helper.format_firmware_content(content),
+                self.sdk_upgrade_chip_type
+            )
             sdk_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
             return sdk_upgrade_worker
 
@@ -847,7 +776,7 @@ class Provider(OpenDeviceBase):
                 imu_upgrade_worker.on(
                     UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(8))
                 return imu_upgrade_worker
-
+                
     def get_upgrade_workers(self, firmware_content):
         workers = []
 
@@ -1081,6 +1010,7 @@ class Provider(OpenDeviceBase):
                                                  time.localtime())
             session_info['device'] = self.device_info
             session_info['app'] = self.app_info
+
             if self.cli_options.debug == 'true':
                 session_info['compile'] = self.compile_info
             session_info['interface'] = self.cli_options.interface

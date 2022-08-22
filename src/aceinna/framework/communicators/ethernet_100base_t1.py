@@ -7,7 +7,7 @@ from ..utils import helper
 from ..communicator import Communicator
 
 UPGRADE_PACKETS = [b'\x01\xcc', b'\x01\xaa', b'\x02\xaa', b'\x03\xaa', b'\x04\xaa',
-                   b'\x05\xaa', b'\x06\xaa', b'\x07\xaa', b'\x08\xaa', b'\x4a\x49', b'\x4a\x41', b'\x57\x41']
+                   b'\x05\xaa', b'\x06\xaa', b'\x07\xaa', b'\x08\xaa', b'\x4a\x49', b'\x4a\x41', b'\x57\x41', b'\x0a\xaa']
 
 
 class Ethernet(Communicator):
@@ -21,9 +21,9 @@ class Ethernet(Communicator):
         self.ethernet_name = None
         self.data = None
         self.iface = None
-
         self.filter_device_type = None
-        self.filter_device_type_assigned = False
+        self.filter_host_mac = None
+        self.filter_host_mac_assigned = False
 
         self.iface_confirmed = False
         self.receive_cache = collections.deque(maxlen=10000)
@@ -35,10 +35,14 @@ class Ethernet(Communicator):
             self.filter_device_type = options.device_type
             self.filter_device_type_assigned = True
 
+        if options:
+            self.filter_host_mac_assigned = options.host_mac != 'auto'
+            self.filter_host_mac = options.host_mac if self.filter_host_mac_assigned else None
+
     def handle_iface_confirm_packet(self, packet):
         self.iface_confirmed = True
         self.dst_mac = packet.src
-
+    #TODO:
     def confirm_iface(self, iface):
         dst_mac_str = 'FF:FF:FF:FF:FF:FF'
 
@@ -103,7 +107,7 @@ class Ethernet(Communicator):
                     time.sleep(0.1)
 
         time.sleep(1)
-        
+
         # confirm device
         for i in range(3):
             self.confirm_device(self)
@@ -136,7 +140,7 @@ class Ethernet(Communicator):
         if self.async_sniffer and self.async_sniffer.running:
             self.async_sniffer.stop()
 
-        self.iface_confirmed=False
+        self.iface_confirmed = False
         dst_mac_str = 'FF:FF:FF:FF:FF:FF'
 
         filter_exp = 'ether dst host ' + \
@@ -190,7 +194,7 @@ class Ethernet(Communicator):
 
             if packet_raw_length == b'\x00\x00':
                 self.use_length_as_protocol = False
-        
+
         if self.upgrading_flag:
             if UPGRADE_PACKETS.__contains__(packet_type):
                 self.receive_cache.append(packet_raw[2:])
@@ -228,7 +232,7 @@ class Ethernet(Communicator):
         '''
         if len(self.receive_cache) == self.receive_cache.maxlen:
             print('receive cache full.')
-        
+
         if len(self.receive_cache) > 0:
             return self.receive_cache.popleft()
         return None
@@ -248,11 +252,13 @@ class Ethernet(Communicator):
     def get_network_card(self):
         network_card_info = []
         for item in conf.ifaces:
-            if conf.ifaces[item].ip == '127.0.0.1' or conf.ifaces[item].mac == '':
+            if conf.ifaces[item].ip == '127.0.0.1' or conf.ifaces[item].mac in ['00:00:00:00:00:00', '']:
+                continue
+            if self.filter_host_mac_assigned and conf.ifaces[item].mac != self.filter_host_mac:
                 continue
             network_card_info.append(
                 (conf.ifaces[item].name, conf.ifaces[item].mac))
         return network_card_info
+
     def upgrade(self):
         self.upgrading_flag = True
-

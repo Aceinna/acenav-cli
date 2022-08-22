@@ -43,6 +43,8 @@ def _build_args():
                         help="set mount angle", default=False)
     parser.add_argument("-debug", dest='debug', metavar='', type=str,
                         help="true or false")
+    parser.add_argument("-m", dest='host_mac', metavar='', type=str,
+                        help="The mac address for listen device data")
     '''
     parser.add_argument("-board", dest='board', metavar='', type=str,
                         help="RTK330LA beidou")

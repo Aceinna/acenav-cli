@@ -1793,6 +1793,7 @@ BLOCK_SIZE = 5120
 pG = [0x01, 0xcc]
 JA = [0x02, 0xaa]
 JS = [0x05, 0xaa]
+JS_2 = [0x0a, 0xaa]
 JG = [0x06, 0xaa]
 WS = [0x07, 0xaa]
 WP = [0x08, 0xaa]
@@ -1803,10 +1804,13 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
     Upgrade tool for SDK of OpenRTK
     '''
 
-    def __init__(self, communicator, file_content):
+    def __init__(self, communicator, file_content, dev_9100=1):
         super(SDKUpgradeWorker, self).__init__()
         self._communicator = communicator
-
+        if dev_9100 == 2:
+            self.JS = JS_2
+        else:
+            self.JS = JS
         if not callable(file_content):
             self._file_content = file_content
         else:
@@ -1941,10 +1945,10 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         self._communicator.reset_buffer()
 
         for i in range(3):
-            self.send_packet([], send_method=JS)
+            self.send_packet([], send_method=self.JS)
             time.sleep(5)
             response = helper.read_untils_have_data(
-                self._communicator, JS, 20, 1000)
+                self._communicator, self.JS, 20, 1000)
             if response is not None:
                 result = True
                 break

@@ -15,4 +15,15 @@ def get_configuratin_file_mapping():
     }
 
 
+def get_ins402_products():
+    return {
+        'INS402':['RTK_INS']
+    }
+
+
+def get_ins402_configuratin_file_mapping():
+    return {
+        'INS402':'ins402.json'
+    }
+
 APP_STR = ['RAWDATA', 'RTK', 'RTK_INS']

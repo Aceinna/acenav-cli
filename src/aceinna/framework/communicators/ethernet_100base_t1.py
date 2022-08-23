@@ -26,7 +26,7 @@ class Ethernet(Communicator):
         self.filter_host_mac_assigned = False
 
         self.iface_confirmed = False
-        self.receive_cache = collections.deque(maxlen=10000)
+        self.receive_cache = collections.deque(maxlen=20000)
         self.use_length_as_protocol = True
         self.async_sniffer = None
         self.upgrading_flag = False

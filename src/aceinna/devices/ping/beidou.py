@@ -60,8 +60,17 @@ def ping(communicator, *args):
     '''
     filter_device_type = args[0]
 
-    device_info_text = run_command_as_string(communicator, pG)      #TODO: step5
-    app_info_text = run_command_as_string(communicator, gV)
+    cmd_device_info_text = run_command_as_string(communicator, pG)
+    if cmd_device_info_text.find(',') > -1:
+        device_info_text = cmd_device_info_text.replace(',', ' ')
+    else:
+        device_info_text = cmd_device_info_text
+
+    cmd_app_info_text = run_command_as_string(communicator, gV)
+    if cmd_app_info_text.find(',') > -1:
+        app_info_text = cmd_app_info_text.replace(',', ' ')
+    else:
+        app_info_text = cmd_app_info_text
 
     # Prevent action. Get app info again,
     # if cannot retrieve any info at the first time of ping. Should find the root cause.

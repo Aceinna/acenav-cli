@@ -641,6 +641,19 @@ class Provider_base(OpenDeviceBase):
             self.communicator.write(command.actual_command)
             time.sleep(0.2)
 
+    def send_system_reset_command(self):
+        command_SR = [0x02, 0xaa]
+        message_bytes = []
+
+        command = helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(),
+            self.communicator.get_src_mac(),
+            command_SR, message_bytes)
+        command.packet_type = [0xaa, 0x02]
+        
+        for _ in range(3):
+            self.communicator.write(command.actual_command)
+            time.sleep(0.2)
 
     def ins_jump_bootloader_command_generator(self):
         return helper.build_ethernet_packet(
@@ -886,6 +899,9 @@ class Provider_base(OpenDeviceBase):
             command=self.imu_jump_application_command_generator,
             listen_packet=[0x4a, 0x41])
         imu_boot_jump_application_worker.group = UPGRADE_GROUP.FIRMWARE
+        imu_boot_jump_application_worker.on(
+            UPGRADE_EVENT.AFTER_COMMAND, self.send_system_reset_command)
+
 
         if start_index > -1 and end_index > -1:
             workers.insert(

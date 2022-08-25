@@ -100,7 +100,11 @@ def try_parse_bootloader_mode(info_text):
 def ping(communicator, *args):
     '''OpenDevice Ping
     '''
-    info_text = run_command_as_string(communicator, pG)
+    cmd_info_text = run_command_as_string(communicator, pG)
+    if cmd_info_text.find(',') > -1:
+        info_text = cmd_info_text.replace(',', ' ')
+    else:
+        info_text = cmd_info_text
 
     # Prevent action. Get app info again,
     # if cannot retrieve any info at the first time of ping. Should find the root cause.

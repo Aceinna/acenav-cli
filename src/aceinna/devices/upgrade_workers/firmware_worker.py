@@ -1,5 +1,6 @@
 import os
 import time
+import math
 from ..base.upgrade_worker_base import UpgradeWorkerBase
 from ...framework.utils import helper
 from ...framework.command import Command
@@ -114,7 +115,10 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
                 self.current + packet_data_len)]
             if self.ack_enable:
                 if self.current == 0:
-                    for i in range(10):
+                    # estimate value, it takes 8s per 100Kb while erasing flash
+                    timeout = math.ceil(self.total/102400)*8
+                    retry_cnt = int((timeout + 4) / 5)
+                    for i in range(retry_cnt):
                         write_result = self.write_block(packet_data_len, self.current, data)
                         if write_result:
                             break
@@ -132,7 +136,14 @@ class FirmwareUpgradeWorker(UpgradeWorkerBase):
             else:
                 if self.current == 0:
                     self.write_block(packet_data_len, self.current, data)
-                    time.sleep(15)
+                    
+                    # estimate value, it takes 8s per 100Kb while erasing flash
+                    timeout = math.ceil(self.total/102400)*8
+                    if timeout > 5:
+                        time.sleep(timeout - 5)
+                    else:
+                        print('Fail in erase flash')
+                        os._exit(1)
                 else:
                     for i in range(3):
                         self.write_block(packet_data_len, self.current, data)

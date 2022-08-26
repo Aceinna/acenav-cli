@@ -229,6 +229,7 @@ class beidouProvider(beidouProviderBase):
         if rule == 'ins':
             ins_upgrade_worker = FirmwareUpgradeWorker(
                 self.communicator,
+                True,
                 lambda: helper.format_firmware_content(content),
                 self.firmware_write_command_generator,
                 192)

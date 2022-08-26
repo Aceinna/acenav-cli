@@ -739,6 +739,7 @@ class beidouProviderBase(OpenDeviceBase):
             'JI')
         jumpBootloaderWorker = JumpBootloaderWorker(
             self.communicator,
+            True,
             command=jump_bootloader_command,
             listen_packet='JI',
             wait_timeout_after_command=1)
@@ -748,6 +749,7 @@ class beidouProviderBase(OpenDeviceBase):
         jump_application_command = helper.build_bootloader_input_packet('JA')
         jumpApplicationWorker = JumpApplicationWorker(
             self.communicator,
+            True,
             command=jump_application_command,
             listen_packet='JA',
             wait_timeout_after_command=1)

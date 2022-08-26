@@ -214,17 +214,6 @@ class beidouProvider(beidouProviderBase):
 
     # override
     def build_worker(self, rule, content):
-        if rule == 'rtk':
-            rtk_upgrade_worker = FirmwareUpgradeWorker(
-                self.communicator,
-                lambda: helper.format_firmware_content(content),
-                self.firmware_write_command_generator,
-                192)
-            rtk_upgrade_worker.on(
-                UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(15))
-            rtk_upgrade_worker.on(UPGRADE_EVENT.BEFORE_WRITE,
-                                  lambda: self.before_write_content('0', len(content)))
-            return rtk_upgrade_worker
 
         if rule == 'ins':
             ins_upgrade_worker = FirmwareUpgradeWorker(
@@ -233,13 +222,23 @@ class beidouProvider(beidouProviderBase):
                 lambda: helper.format_firmware_content(content),
                 self.firmware_write_command_generator,
                 192)
+            ins_upgrade_worker.name = 'INS'
             ins_upgrade_worker.on(
                 UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(15))
             ins_upgrade_worker.on(UPGRADE_EVENT.BEFORE_WRITE,
                                   lambda: self.before_write_content('1', len(content)))
             return ins_upgrade_worker
 
-        if rule == 'sdk':
-            sdk_upgrade_worker = SDK9100UpgradeWorker(
-                self.communicator, self.bootloader_baudrate, content)
-            return sdk_upgrade_worker
+        
+        if rule == 'imu':
+            imu_upgrade_worker = FirmwareUpgradeWorker(
+                self.communicator,
+				True,
+                lambda: helper.format_firmware_content(content),
+                self.firmware_write_command_generator,
+                192)
+            imu_upgrade_worker.name = 'IMU'
+            imu_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
+            imu_upgrade_worker.on(
+                UPGRADE_EVENT.FIRST_PACKET, lambda: time.sleep(20))
+            return imu_upgrade_worker

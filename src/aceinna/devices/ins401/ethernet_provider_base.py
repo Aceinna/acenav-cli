@@ -793,13 +793,20 @@ class Provider_base(OpenDeviceBase):
     def get_upgrade_workers(self, firmware_content):
         workers = []
 
-        rules = [
-            InternalCombineAppParseRule('rtk', 'rtk_start:', 4),
-            InternalCombineAppParseRule('ins', 'ins_start:', 4),
-            InternalCombineAppParseRule('sdk', 'sdk_start:', 4),
-            InternalCombineAppParseRule('imu_boot', 'imu_boot_start:', 4),
-            InternalCombineAppParseRule('imu', 'imu_start:', 4),
-        ]
+        if self.imu_upgrade_flag or self.imu_boot_upgrade_flag:
+            rules = [
+                InternalCombineAppParseRule('rtk', 'rtk_start:', 4),
+                InternalCombineAppParseRule('ins', 'ins_start:', 4),
+                InternalCombineAppParseRule('sdk', 'sdk_start:', 4),
+                InternalCombineAppParseRule('imu_boot', 'imu_boot_start:', 4),
+                InternalCombineAppParseRule('imu', 'imu_start:', 4),
+            ]
+        else:
+            rules = [
+                InternalCombineAppParseRule('rtk', 'rtk_start:', 4),
+                InternalCombineAppParseRule('ins', 'ins_start:', 4),
+                InternalCombineAppParseRule('sdk', 'sdk_start:', 4),
+            ]
 
         if self.communicator:
             self.communicator.reset_buffer()

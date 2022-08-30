@@ -690,6 +690,7 @@ class beidouProviderBase(OpenDeviceBase):
 
 
     def after_jump_bootloader_command(self):
+        time.sleep(8)
         pass
 
 
@@ -705,12 +706,14 @@ class beidouProviderBase(OpenDeviceBase):
             if info:
                 can_ping = True
             time.sleep(0.5)
+        time.sleep(25)
         pass
 
     def get_upgrade_workers(self, firmware_content):
         workers = []
         rules = [
             InternalCombineAppParseRule('ins', 'ins_start:', 4),
+            InternalCombineAppParseRule('imu', 'imu_start:', 4),
         ]
 
         parsed_content = firmware_content_parser(firmware_content, rules)
@@ -731,7 +734,7 @@ class beidouProviderBase(OpenDeviceBase):
         start_index = -1
         end_index = -1
         for i, worker in enumerate(workers):
-            if isinstance(worker, FirmwareUpgradeWorker):
+            if isinstance(worker, FirmwareUpgradeWorker) and worker.name == 'INS':
                 start_index = i if start_index == -1 else start_index
                 end_index = i
 
@@ -739,6 +742,7 @@ class beidouProviderBase(OpenDeviceBase):
             'JI')
         jumpBootloaderWorker = JumpBootloaderWorker(
             self.communicator,
+            True,
             command=jump_bootloader_command,
             listen_packet='JI',
             wait_timeout_after_command=1)
@@ -748,6 +752,7 @@ class beidouProviderBase(OpenDeviceBase):
         jump_application_command = helper.build_bootloader_input_packet('JA')
         jumpApplicationWorker = JumpApplicationWorker(
             self.communicator,
+            True,
             command=jump_application_command,
             listen_packet='JA',
             wait_timeout_after_command=1)
@@ -759,6 +764,44 @@ class beidouProviderBase(OpenDeviceBase):
                 start_index, jumpBootloaderWorker)
             workers.insert(
                 end_index+2, jumpApplicationWorker)
+
+        # wrap imu bootloader
+        start_index = -1
+        end_index = -1
+        for i, worker in enumerate(workers):
+            if isinstance(worker, FirmwareUpgradeWorker) and worker.name == 'IMU':
+                start_index = i if start_index == -1 else start_index
+                end_index = i
+
+        jump_imu_upgrade_command = helper.build_bootloader_input_packet(
+            'JZ')
+        jumpIMUBOOTWorker = JumpBootloaderWorker(
+            self.communicator,
+            True,
+            command=jump_imu_upgrade_command,
+            listen_packet='JZ',
+            wait_timeout_after_command=1)
+        jumpIMUBOOTWorker.on(
+            UPGRADE_EVENT.AFTER_COMMAND, self.after_jump_bootloader_command)
+        jumpIMUBOOTWorker.group = UPGRADE_GROUP.FIRMWARE
+
+
+        jump_application_command = helper.build_bootloader_input_packet('JA')
+        jumpApplicationWorker = JumpApplicationWorker(
+            self.communicator,
+            True,
+            command=jump_application_command,
+            listen_packet='JA',
+            wait_timeout_after_command=1)
+        jumpApplicationWorker.on(
+            UPGRADE_EVENT.AFTER_COMMAND, self.after_jump_app_command)
+
+        if start_index > -1 and end_index > -1:
+            workers.insert(
+                start_index, jumpIMUBOOTWorker)
+            workers.insert(
+                end_index+2, jumpApplicationWorker)
+
         return workers
 
     def get_device_connection_info(self):
@@ -845,7 +888,7 @@ class beidouProviderBase(OpenDeviceBase):
 
             session_info['parameters'] = parameters_configuration
             device_configuration.append(session_info)
-
+            self.device_message = json.dumps(parameters_configuration)
             with open(file_path, 'w') as outfile:
                 json.dump(device_configuration, outfile,
                           indent=4, ensure_ascii=False)

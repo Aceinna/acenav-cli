@@ -12,7 +12,9 @@
 - [INS401] Ping messages are compatible with old and new versions with different delimiters
 - [INS401] Ethernet cache queue increases
 - [INS401] rtk and ins firmware upgrade, erase flash delay time update
-- [INS401] After imu boot upgradation, the IMU fails to switch to boot because the baud rate of the IMU serial port is changed.
+- [INS401] After imu boot upgradation, the IMU fails to switch to boot because the baud rate of the IMU serial port 
+is changed.
+- [INS401] The default firmware upgrades include RTK, INS, and STA9100 SDK.
 
 ## 2.6.5， 04/11/2022
 

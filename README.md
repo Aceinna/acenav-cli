@@ -62,13 +62,15 @@ INS401 supports In-Application Programming (IAP) firmware upgrade through the Et
 # firmware is fully upgraded by default
 >>upgrade <INS401 FW file path>
 
-# one or more firmware parts(rtk, ins, sdk, imu_boot(if firmware is merged), imu) 
+# one or more firmware parts(rtk, ins, sdk, imu_boot(if firmware is merged), imu(if firmware is merged)) 
 # are optionally upgraded
->>upgrade <INS401 FW file path> rtk ins sdk
+>>upgrade <INS401 FW file path> rtk ins
 or
 >>upgrade <INS401 FW file path> sdk
 or
->>upgrade <INS401 FW file path> imu_boot imu
+>>upgrade <INS401 FW file path> imu
+or
+>>upgrade <INS401 FW file path> imu_boot
 ```
 
 After successful FW upgrade, the INS401 system restarts and starts logging data automatically. 

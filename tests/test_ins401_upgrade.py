@@ -4,6 +4,7 @@ import os
 import signal
 import struct
 import threading
+import datetime
 
 try:
     from aceinna.core.driver import (Driver, DriverEvents)
@@ -46,14 +47,27 @@ def loop_upgrade(EhternetProvider):
     
     upgrade_log_file = open(r'.\upgrade_log.txt', 'w+')
 
+    # 'upgrade ./INS401_v28.04.20_RTK.bin sdk imu' 
+    # 'upgrade ./INS401_v28.04.20_RTK.bin rtk ins' 
+    # 'upgrade ./INS401_v28.04.20_RTK.bin rtk ins sdk imu' 
+    # 'upgrade ./INS401_v28.04.20_RTK.bin'
+    upgrade_cmd_str = 'upgrade ./INS401_v28.04.20_RTK.bin sdk imu'
+
+    upgrade_cmd_list = upgrade_cmd_str.split(' ')
+
     while True:
         if EhternetProvider.is_upgrading == False:
             time.sleep(10)
             loop_upgrade_cnt += 1
             print('loop_upgrade_cnt: %d' % loop_upgrade_cnt)
-            print('loop_upgrade_cnt: %d' % loop_upgrade_cnt, file = upgrade_log_file, flush = True)
+            print(upgrade_cmd_str)
             
-        EhternetProvider.upgrade_framework(['upgrade', './INS401_v28.04.20.bin'])
+            print('loop_upgrade_cnt: %d' % loop_upgrade_cnt, file = upgrade_log_file, flush = True)
+            print(upgrade_cmd_str, file = upgrade_log_file, flush = True)
+            print(EhternetProvider._device_info_string, file = upgrade_log_file, flush = True)
+            print("Upgrade INS401 firmware started at:[{0}].".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')), file = upgrade_log_file, flush = True)
+
+        EhternetProvider.upgrade_framework(upgrade_cmd_list)
 
         if loop_upgrade_cnt == 300:
             os._exit(1)

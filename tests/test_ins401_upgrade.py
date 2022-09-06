@@ -59,12 +59,13 @@ def loop_upgrade(EhternetProvider):
         if EhternetProvider.is_upgrading == False:
             time.sleep(10)
             loop_upgrade_cnt += 1
-            print('loop_upgrade_cnt: %d' % loop_upgrade_cnt)
+            print('\nloop_upgrade_cnt: %d\n' % loop_upgrade_cnt)
             print(upgrade_cmd_str)
             
-            print('loop_upgrade_cnt: %d' % loop_upgrade_cnt, file = upgrade_log_file, flush = True)
+            print('\nloop_upgrade_cnt: %d\n' % loop_upgrade_cnt, file = upgrade_log_file, flush = True)
+            device_info = EhternetProvider._device_info_string.replace('\n', '')
+            print('{0}\n'.format(device_info), file = upgrade_log_file, flush = True)
             print(upgrade_cmd_str, file = upgrade_log_file, flush = True)
-            print(EhternetProvider._device_info_string, file = upgrade_log_file, flush = True)
             print("Upgrade INS401 firmware started at:[{0}].".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')), file = upgrade_log_file, flush = True)
 
         EhternetProvider.upgrade_framework(upgrade_cmd_list)

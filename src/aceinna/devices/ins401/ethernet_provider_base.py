@@ -559,7 +559,7 @@ class Provider_base(OpenDeviceBase):
             if result:
                 break
             else:
-                time.sleep(0.5)
+                time.sleep(1)
 
     def before_write_content(self, core, content_len, ack_enable):
         command_CS = [0x04, 0xaa]
@@ -1142,7 +1142,6 @@ class Provider_base(OpenDeviceBase):
                 break
 
             parameter_values.append(result['data'])
-            time.sleep(0.3)
 
         if not has_error:
             self.parameters = parameter_values
@@ -1201,7 +1200,6 @@ class Provider_base(OpenDeviceBase):
                 if data['error'] > 0:
                     yield {'packetType': 'error', 'data': {'error': data}}
                     break
-            time.sleep(0.1)
 
         yield {'packetType': 'success', 'data': {'error': 0}}
 
@@ -1236,8 +1234,6 @@ class Provider_base(OpenDeviceBase):
             self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
             sC)
 
-        # self.communicator.write(command_line)
-        # result = self.get_input_result('sC', timeout=2)
         result = yield self._message_center.build(command=command_line.actual_command,
                                                   timeout=2)
 

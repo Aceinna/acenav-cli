@@ -856,7 +856,9 @@ class Provider_base(OpenDeviceBase):
             ethernet_ack_enable,
             command=self.ins_jump_bootloader_command_generator,
             listen_packet=[0x01, 0xaa],
-            wait_timeout_after_command=ins_wait_timeout)
+            wait_timeout_after_command=ins_wait_timeout,
+            ethernet_reshake=None,
+            system_reset=None)
         ins_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE
         ins_jump_bootloader_worker.on(
             UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
@@ -894,7 +896,9 @@ class Provider_base(OpenDeviceBase):
             ethernet_ack_enable,
             command=self.imu_jump_bootloader_command_generator,
             listen_packet=[0x4a, 0x49],
-            wait_timeout_after_command=15)
+            wait_timeout_after_command=15,
+            ethernet_reshake=self.do_reshake,
+            system_reset=self.send_system_reset_command)
         imu_boot_jump_bootloader_worker.on(
             UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
         imu_boot_jump_bootloader_worker.on(
@@ -929,7 +933,9 @@ class Provider_base(OpenDeviceBase):
             ethernet_ack_enable,
             command=self.imu_jump_bootloader_command_generator,
             listen_packet=[0x4a, 0x49],
-            wait_timeout_after_command=15)
+            wait_timeout_after_command=15,
+            ethernet_reshake=self.do_reshake,
+            system_reset=self.send_system_reset_command)
         imu_jump_bootloader_worker.on(
             UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
         imu_jump_bootloader_worker.on(

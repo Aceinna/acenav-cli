@@ -57,7 +57,7 @@ def loop_upgrade(EhternetProvider):
 
     while True:
         if EhternetProvider.is_upgrading == False:
-            time.sleep(10)
+            time.sleep(1)
             loop_upgrade_cnt += 1
             print('\nloop_upgrade_cnt: %d\n' % loop_upgrade_cnt)
             print(upgrade_cmd_str)
@@ -87,10 +87,10 @@ def handle_discovered(EhternetProvider):
     while True:
         if EhternetProvider.is_upgrading == False:
             if loop_upgrade_thread:
-                loop_upgrade_thread.join(1.0)
+                loop_upgrade_thread.join(0.5)
         else:
             if ntrip_client_thread:
-                ntrip_client_thread.join(1.0)
+                ntrip_client_thread.join(0.5)
     
 
 def kill_app(signal_int, call_back):

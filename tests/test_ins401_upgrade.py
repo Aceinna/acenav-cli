@@ -5,6 +5,7 @@ import signal
 import struct
 import threading
 import datetime
+import re
 
 try:
     from aceinna.core.driver import (Driver, DriverEvents)
@@ -47,13 +48,13 @@ def loop_upgrade(EhternetProvider):
     
     upgrade_log_file = open(r'.\upgrade_log.txt', 'w+')
 
-    # 'upgrade ./INS401_v28.04.20_RTK.bin sdk imu' 
-    # 'upgrade ./INS401_v28.04.20_RTK.bin rtk ins' 
-    # 'upgrade ./INS401_v28.04.20_RTK.bin rtk ins sdk imu' 
-    # 'upgrade ./INS401_v28.04.20_RTK.bin'
-    upgrade_cmd_str = 'upgrade ./INS401_v28.04.20_RTK.bin sdk imu'
+    # 'upgrade ./INS401_v28.04.20.bin sdk imu' 
+    # 'upgrade ./INS401_v28.04.20.bin rtk ins' 
+    # 'upgrade ./INS401_v28.04.20.bin rtk ins sdk imu' 
+    # 'upgrade ./INS401_v28.04.20.bin'
+    upgrade_cmd_str = 'upgrade ./INS401_28.04.20_test.bin imu'
 
-    upgrade_cmd_list = upgrade_cmd_str.split(' ')
+    upgrade_cmd_list = re.split(r'\s+', upgrade_cmd_str)
 
     while True:
         if EhternetProvider.is_upgrading == False:
@@ -70,7 +71,7 @@ def loop_upgrade(EhternetProvider):
 
         EhternetProvider.upgrade_framework(upgrade_cmd_list)
 
-        if loop_upgrade_cnt == 300:
+        if loop_upgrade_cnt == 500:
             os._exit(1)
 
         time.sleep(5)

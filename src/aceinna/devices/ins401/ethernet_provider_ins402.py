@@ -251,6 +251,7 @@ class Provider(Provider_base):
         self.rtk_upgrade_flag = False
         self.ins_upgrade_flag = False
         self.sdk_upgrade_flag = False
+        self.sdk_2_upgrade_flag = False
         self.imu_upgrade_flag = False
         self.imu_boot_upgrade_flag = False
 
@@ -264,12 +265,10 @@ class Provider(Provider_base):
                     self.ins_upgrade_flag = True
 
                 if param == 'sdk':
-                    self.sdk_upgrade_flag = True 
-                    self.sdk_upgrade_chip_type = 1
+                    self.sdk_upgrade_flag = True
 
                 if param == 'sdk_2':
-                    self.sdk_upgrade_flag = True
-                    self.sdk_upgrade_chip_type = 2
+                    self.sdk_2_upgrade_flag = True
 
                 if param == 'imu_boot':
                     self.imu_boot_upgrade_flag = True 
@@ -283,8 +282,9 @@ class Provider(Provider_base):
             self.rtk_upgrade_flag = True
             self.ins_upgrade_flag = True
             self.sdk_upgrade_flag = True
-            self.imu_upgrade_flag = True
-            self.imu_boot_upgrade_flag = True
+            self.sdk_2_upgrade_flag = True
+            self.imu_upgrade_flag = False
+            self.imu_boot_upgrade_flag = False
 
         # start a thread to do upgrade
         if not self.is_upgrading:

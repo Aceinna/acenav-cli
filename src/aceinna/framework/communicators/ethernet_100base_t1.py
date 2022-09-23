@@ -1,5 +1,6 @@
 import time
 import collections
+import os
 from scapy.all import sendp, conf, AsyncSniffer
 from ..constants import (BAUDRATE_LIST, INTERFACES)
 from ..utils.print import (print_red)
@@ -97,6 +98,7 @@ class Ethernet(Communicator):
 
             if self.iface_confirmed is False:
                 print_red('No available Ethernet card was found.')
+                os._exit(1)
                 return None
         else:
             for i in range(100):

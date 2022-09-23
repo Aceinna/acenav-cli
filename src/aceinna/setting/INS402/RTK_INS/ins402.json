@@ -1,7 +1,7 @@
 {
-	"appVersion": "INS401 28.00.01",
-	"type": "INS401",
-    "description": "6-axis INS401 with INS application",
+    "appVersion": "INS401 31.00.01",
+    "type": "INS402",
+    "description": "6-axis INS402 with INS application",
     "initial":{
         "userParameters": [            
             {
@@ -93,6 +93,11 @@
                 "paramId": 18,
                 "name": "rotation alignz",
                 "value": 0.0
+            },
+            {
+                "paramId": 19,
+                "name": "NHC switch",
+                "value": 1
             }
 		],
 		"ntrip":[
@@ -269,6 +274,13 @@
 			"type": "float",
 			"name": "rotation alignz",
 			"value_accuracy": 4
+		},
+                {
+			"paramId": 19,
+			"category": "INS",
+			"paramType": "input",
+			"type": "uint32",
+			"name": "NHC switch"
 		}
 	],
 	"userMessages": {

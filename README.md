@@ -27,10 +27,16 @@ Run the CLI software and connect with the INS401 system for the first time, ther
 
 #### Log data
 
-Run the following command to log all data output from Ethernet port to binary files, and streaming GNSS RTK correction data through Ethernet port to INS401 (e.g. on Ubuntu)
+Run the following command to log all data output from Ethernet port to binary files, and streaming GNSS RTK correction data through Ethernet port to the unit (e.g. on Ubuntu)
 
+## INS401
 ```shell
 ./acenav -i 100base-t1
+```
+
+## INS402
+```shell
+./acenav -i 100base-t1 --device-type INS402 
 ```
 
 A “data” subfolder will be created for the first time, and every session of data logging will be stored in a subfolder inside the “data” folder.
@@ -39,18 +45,33 @@ A “data” subfolder will be created for the first time, and every session of 
 
 Run the following command to parse the logged data into text or csv files, 
 
+## ins401
+
 ```shell
 ./acenav parse -t ins401 -p <path to data folder/session data subfolder>
 ```
 
+## ins402
+
+```shell
+./acenav parse -t ins402 -p <path to data folder/session data subfolder>
+```
+
 #### Save Settings
 
-If user changed the GNSS/INS user settings in the "ins401.json" file, and wants to make it effective, run the data logging command with "-s" option like below, and the changed user settings will be saved into flash
+If user changed the GNSS/INS user settings in the "ins401.json" or "ins402.json" file, and wants to make it effective, run the data logging command with "-s" option like below, and the changed user settings will be saved into flash
+
+## ins401
 
 ```shell
 ./acenav -i 100base-t1 -s
 ```
 
+## ins402
+
+```shell
+./acenav -i 100base-t1 --device-type INS402 -s
+```
 ## Firmware Upgrade
 
 # 1.INS401 Firmware Upgrade
@@ -105,7 +126,7 @@ or
 
 After successful FW upgrade, the INS402 system restarts and starts logging data automatically. 
 
-# 2 canfd app  
+# canfd app  
 
 ### run  
 please run $Env:PYTHONPATH="./src/aceinna/devices/widgets;"+$Env:PYTHONPATH in powershell  

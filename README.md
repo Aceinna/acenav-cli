@@ -74,7 +74,7 @@ If user changed the GNSS/INS user settings in the "ins401.json" or "ins402.json"
 ```
 ## Firmware Upgrade
 
-# 1.INS401 Firmware Upgrade
+# INS401 Firmware Upgrade
 
 INS401 supports In-Application Programming (IAP) firmware upgrade through the Ethernet interface, run the executable with the CLI option, and prompt for user input 
 
@@ -82,24 +82,21 @@ INS401 supports In-Application Programming (IAP) firmware upgrade through the Et
 ./acenav -i 100base-t1 --cli
 # console display with connection information
 # prompt for user input, type in command and file path after the arrow symbol
-# firmware is fully upgraded by default, contains a list of the modules which are 
+# firmware is fully upgraded by default, contains a list of the components which are 
 # rtk, ins and sdk
 >>upgrade <INS401 FW file path>
 
-# one or more firmware parts(rtk, ins, sdk, imu_boot(if firmware is merged), imu(if firmware is merged)) 
+# one or more firmware components (rtk, ins, sdk, imu_boot(if firmware is merged), imu(if firmware is merged)) 
 # are optionally upgraded
->>upgrade <INS401 FW file path> rtk ins
-or
->>upgrade <INS401 FW file path> sdk
-or
->>upgrade <INS401 FW file path> imu
-or
->>upgrade <INS401 FW file path> imu_boot
+>>upgrade <INS401 FW file path> <one or more components are optional, the names of adjacent components are separated by a space bar>
+
+eg:
+>>upgrade <INS402 FW file path> rtk ins sdk imu_boot imu
 ```
 
 After successful FW upgrade, the INS401 system restarts and starts logging data automatically. 
 
-# 2.INS402 Firmware Upgrade
+# INS402 Firmware Upgrade
 
 INS402 supports In-Application Programming (IAP) firmware upgrade through the Ethernet interface, run the executable with the CLI option, and prompt for user input 
 
@@ -107,21 +104,15 @@ INS402 supports In-Application Programming (IAP) firmware upgrade through the Et
 ./acenav -i 100base-t1 --device-type INS402 --cli
 # console display with connection information
 # prompt for user input, type in command and file path after the arrow symbol
-# firmware is fully upgraded by default, contains a list of the modules which are 
+# firmware is fully upgraded by default, contains a list of the components which are 
 # rtk, ins, sdk and sdk_2
 >>upgrade <INS402 FW file path>
 
-# one or more firmware parts(rtk, ins, sdk, sdk_2, imu_boot(if firmware is merged), imu(if firmware is merged)) 
-# are optionally upgraded
->>upgrade <INS402 FW file path> rtk ins
-or
->>upgrade <INS402 FW file path> sdk sdk_2
-or
->>upgrade <INS402 FW file path> sdk_2
-or
->>upgrade <INS402 FW file path> imu
-or
->>upgrade <INS402 FW file path> imu_boot
+# one or more firmware components(rtk, ins, sdk, sdk_2, imu_boot(if firmware is merged), imu(if firmware is merged)) are optionally upgraded
+>>upgrade <INS402 FW file path> <one or more components are optional, the names of adjacent components are separated by a space bar>
+
+eg:
+>>upgrade <INS402 FW file path> rtk ins sdk sdk_2 imu_boot imu
 ```
 
 After successful FW upgrade, the INS402 system restarts and starts logging data automatically. 

@@ -84,6 +84,7 @@ class Provider_base(OpenDeviceBase):
         self.bootloader_version = None
         self.rtk_crc = []
         self.ins_crc = []
+        self.loop_upgrade_flag = False
 
 
     def prepare_folders(self):
@@ -1098,6 +1099,7 @@ class Provider_base(OpenDeviceBase):
             and not self.is_in_bootloader:
             threading.Thread(target=self.ntrip_client_thread).start()
         
+        self.loop_upgrade_flag = False
         pass
 
     # command list

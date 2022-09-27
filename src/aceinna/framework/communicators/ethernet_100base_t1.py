@@ -7,8 +7,8 @@ from ..utils.print import (print_red)
 from ..utils import helper
 from ..communicator import Communicator
 
-# Add parameter configuration type to resove timeout issues
-OTHER_FILTER_PACKETS = [b'\x02\xcc', b'\x03\xcc', b'\x03\xcc', b'\x04\xcc', b'\x05\xcc', b'\x06\xcc']
+# Add parameter configuration type to be filtered to resolve timeout issue
+OTHER_FILTER_PACKETS = [b'\x02\xcc', b'\x03\xcc', b'\x04\xcc', b'\x05\xcc', b'\x06\xcc']
 
 UPGRADE_PACKETS = [b'\x01\xcc', b'\x01\xaa', b'\x02\xaa', b'\x03\xaa', b'\x04\xaa',b'\x05\xaa', 
                    b'\x06\xaa', b'\x07\xaa', b'\x08\xaa', b'\x4a\x49', b'\x4a\x41', b'\x57\x41', b'\x0a\xaa']

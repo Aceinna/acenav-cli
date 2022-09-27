@@ -7,9 +7,11 @@ from ..utils.print import (print_red)
 from ..utils import helper
 from ..communicator import Communicator
 
-UPGRADE_PACKETS = [b'\x01\xcc', b'\x01\xaa', b'\x02\xaa', b'\x03\xaa', b'\x04\xaa',
-                   b'\x05\xaa', b'\x06\xaa', b'\x07\xaa', b'\x08\xaa', b'\x4a\x49', b'\x4a\x41', b'\x57\x41', b'\x0a\xaa']
+# Add parameter configuration type to resove timeout issues
+OTHER_FILTER_PACKETS = [b'\x02\xcc', b'\x03\xcc', b'\x03\xcc', b'\x04\xcc', b'\x05\xcc', b'\x06\xcc']
 
+UPGRADE_PACKETS = [b'\x01\xcc', b'\x01\xaa', b'\x02\xaa', b'\x03\xaa', b'\x04\xaa',b'\x05\xaa', 
+                   b'\x06\xaa', b'\x07\xaa', b'\x08\xaa', b'\x4a\x49', b'\x4a\x41', b'\x57\x41', b'\x0a\xaa']
 
 class Ethernet(Communicator):
     '''Ethernet'''
@@ -198,7 +200,8 @@ class Ethernet(Communicator):
                 self.use_length_as_protocol = False
 
         if self.upgrading_flag:
-            if UPGRADE_PACKETS.__contains__(packet_type):
+            if UPGRADE_PACKETS.__contains__(packet_type)\
+              or OTHER_FILTER_PACKETS.__contains__(packet_type):
                 self.receive_cache.append(packet_raw[2:])
         else:
             self.receive_cache.append(packet_raw[2:])

@@ -91,7 +91,7 @@ INS401 supports In-Application Programming (IAP) firmware upgrade through the Et
 >>upgrade <INS401 FW file path> <one or more components are optional, the names of adjacent components are separated by a space bar>
 
 eg:
->>upgrade <INS402 FW file path> rtk ins sdk imu_boot imu
+>>upgrade <INS401 FW file path> rtk ins sdk imu_boot imu
 ```
 
 After successful FW upgrade, the INS401 system restarts and starts logging data automatically. 
@@ -132,4 +132,4 @@ set "canfd_type": "canfd",
 set "canfd_type": "can"  
 
 #### Parse  
-***python main.py parse -t ins401c -p <path to data folder>***  
+./acenav parse -t ins401c -p <path to data folder>

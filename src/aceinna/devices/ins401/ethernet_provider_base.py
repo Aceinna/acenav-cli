@@ -31,6 +31,9 @@ from ..upgrade_workers import (
 
 GNZDA_DATA_LEN = 39
 
+SDK_UPGRADE_CHIP_FIRST = 1
+SDK_UPGRADE_CHIP_SECOND = 2
+
 class Provider_base(OpenDeviceBase):
     '''
     INS401 Ethernet 100base-t1 provider
@@ -74,13 +77,15 @@ class Provider_base(OpenDeviceBase):
         self.rtk_upgrade_flag = False
         self.ins_upgrade_flag = False
         self.sdk_upgrade_flag = False
+        self.sdk_2_upgrade_flag = False
         self.imu_upgrade_flag = False
         self.imu_boot_upgrade_flag = False
         self.unit_sn = None
         self.bootloader_version = None
         self.rtk_crc = []
         self.ins_crc = []
-        self.sdk_upgrade_chip_type = 1
+        self.loop_upgrade_flag = False
+
 
     def prepare_folders(self):
         '''
@@ -753,10 +758,22 @@ class Provider_base(OpenDeviceBase):
             sdk_upgrade_worker = EthernetSDK9100UpgradeWorker(
                 self.communicator,
                 lambda: helper.format_firmware_content(content),
-                self.sdk_upgrade_chip_type
+                SDK_UPGRADE_CHIP_FIRST
             )
             sdk_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
+
             return sdk_upgrade_worker
+
+        if rule == 'sdk_2' and self.sdk_2_upgrade_flag:
+            sdk2_upgrade_worker = EthernetSDK9100UpgradeWorker(
+                self.communicator,
+                lambda: helper.format_firmware_content(content),
+                SDK_UPGRADE_CHIP_SECOND
+            )
+            sdk2_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
+
+            return sdk2_upgrade_worker
+
 
         if self.imu_boot_upgrade_flag:
             if rule == 'imu_boot':
@@ -830,12 +847,26 @@ class Provider_base(OpenDeviceBase):
             if rule == 'ins':
                 ins_len = len(content) & 0xFFFF
                 self.ins_crc = helper.calc_crc(content[0:ins_len])
+            
 
-            worker = self.build_worker(rule, content)
-            if not worker:
-                continue
+            if rule == 'sdk':
+                if self.sdk_upgrade_flag:
+                    worker = self.build_worker(rule, content)
+                    if worker:
+                        workers.append(worker)
+                    
+                if self.sdk_2_upgrade_flag:           
+                    worker = self.build_worker('sdk_2', content)
+                    if worker:
+                        workers.append(worker)
+                
+            else:
+                worker = self.build_worker(rule, content)
+                if not worker:
+                    continue
 
-            workers.append(worker)
+                workers.append(worker)
+                        
 
         # wrap rtk and ins
         start_index = -1
@@ -1068,6 +1099,7 @@ class Provider_base(OpenDeviceBase):
             and not self.is_in_bootloader:
             threading.Thread(target=self.ntrip_client_thread).start()
         
+        self.loop_upgrade_flag = False
         pass
 
     # command list

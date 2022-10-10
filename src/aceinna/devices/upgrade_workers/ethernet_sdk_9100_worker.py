@@ -1826,6 +1826,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         self.wait_erase_factor = 60000
         self.erase_factors = 4
         self.wait_erase_all = self.wait_erase_factor * self.erase_factors
+        self.wait_nvm_erase = 2000
         self.wait_crc = 30000
         self.passthrough_time = 15
 
@@ -1990,13 +1991,13 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
             return False
 
         sync = [0xfd, 0xc6, 0x49, 0x28]
-        retry_times = 20
+        retry_times = self.sync_repeat_count
         is_matched = False
 
         for i in range(retry_times):
             self.send_packet(sync)
             time.sleep(0.05)
-            is_matched = self.read_until([0x3A, 0x54, 0x2C, 0xA6], self.wait_read_driver)
+            is_matched = self.read_until([0x3A, 0x54, 0x2C, 0xA6], self.wait_sync)
             if is_matched:
                 break
 
@@ -2259,7 +2260,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
     def erase_nvm_wait(self):
         if self._is_stopped:
             return False
-        return self.read_until(0xCC, 1000)
+        return self.read_until(0xCC, self.wait_nvm_erase)
     
     def flash_write_pre(self, bin_data):
         data_to_sdk = bin_data[0:BLOCK_SIZE]
@@ -2358,11 +2359,11 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
 
         # need a device ping command, ping 5 times
         self._communicator.reset_buffer()
-        for i in range(50):
+        for i in range(100):
             self.write_wrapper(
                 bytes([int(x, 16) for x in 'ff:ff:ff:ff:ff:ff'.split(':')]),
                 self._communicator.get_src_mac(), pG, [])
-            time.sleep(0.2)
+            time.sleep(1)
             response = helper.read_untils_have_data(
                 self._communicator, pG, 10, 1000)
             if response:
@@ -2371,12 +2372,13 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if not self.send_sdk_cmd_JS():
             return self._raise_error('Send sdk JS command failed')
         
-        for i in range(50):
+        time.sleep(2)
+        for i in range(100):
             result = self._communicator.reshake_hand()
             if result:
                 break
             else:
-                time.sleep(0.5)
+                time.sleep(1)
 
         for i in range(10):
             self.write_wrapper(
@@ -2404,7 +2406,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         if not self.is_host_ready():
             return self._raise_error('Host is not ready.')
 
-        if self.new_boot_enable:            
+        if self.new_boot_enable:          
             if not self.send_new_boot():
                 return self._raise_error('SDK boot failed')
         else:
@@ -2437,7 +2439,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
                 return self._raise_error('CRC check fail')
             else:
                 break  
-
+    
         if not self.send_sdk_cmd_JG():
             return self._raise_error('Send sdk command JG fail')
         else:

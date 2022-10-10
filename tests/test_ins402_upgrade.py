@@ -12,7 +12,7 @@ try:
     from aceinna.models.args import WebserverArgs
     from aceinna.framework.utils import (helper)
     from aceinna.framework.decorator import handle_application_exception
-    from aceinna.devices.ins401.ethernet_provider_ins401 import Provider as EhternetProvider
+    from aceinna.devices.ins401.ethernet_provider_ins402 import Provider as EhternetProvider
     from aceinna.framework.constants import INTERFACES
 except:  # pylint: disable=bare-except
     print('load package from local')
@@ -21,9 +21,9 @@ except:  # pylint: disable=bare-except
     from aceinna.models.args import WebserverArgs
     from aceinna.framework.utils import (helper)
     from aceinna.framework.decorator import handle_application_exception
-    from aceinna.devices.ins401.ethernet_provider_ins401 import Provider as EhternetProvider
+    from aceinna.devices.ins401.ethernet_provider_ins402 import Provider as EhternetProvider
     from aceinna.framework.constants import INTERFACES
-
+    
 setattr(sys, '__dev__', True)
 
 # loop firmware upgrade and log
@@ -32,11 +32,11 @@ def loop_upgrade(EhternetProvider):
     
     upgrade_log_file = open(r'.\upgrade_log.txt', 'w+')
 
-    # 'upgrade ./INS401_v28.04.20.bin sdk imu' 
-    # 'upgrade ./INS401_v28.04.20.bin rtk ins' 
-    # 'upgrade ./INS401_v28.04.20.bin rtk ins sdk imu' 
-    # 'upgrade ./INS401_v28.04.20.bin'
-    upgrade_cmd_str = 'upgrade ./INS401_v28.05.bin rtk ins'
+    # 'upgrade ./INS402_31.00.01_test.bin sdk imu' 
+    # 'upgrade ./INS402_31.00.01_test.bin rtk ins' 
+    # 'upgrade ./INS402_31.00.01_test.bin rtk ins sdk imu' 
+    # 'upgrade ./INS402_31.00.01_test.bin'
+    upgrade_cmd_str = 'upgrade ./INS402_31.00.01_test.bin rtk ins'
 
     upgrade_cmd_list = re.split(r'\s+', upgrade_cmd_str)
 
@@ -75,7 +75,7 @@ def handle_discovered(EhternetProvider):
 
     while True:
         if (EhternetProvider.is_upgrading == False)\
-            and (EhternetProvider.loop_upgrade_flag == False):
+            and EhternetProvider.loop_upgrade_flag == False:
             if loop_upgrade_thread:
                 loop_upgrade_thread.join(0.5)
         else:
@@ -93,6 +93,7 @@ def kill_app(signal_int, call_back):
 def simple_start(): 
     driver = Driver(WebserverArgs(
         interface = INTERFACES.ETH_100BASE_T1,
+        device_type = 'INS402',
         use_cli = True
     ))
     driver.on(DriverEvents.Discovered, handle_discovered)

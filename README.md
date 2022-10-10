@@ -27,10 +27,16 @@ Run the CLI software and connect with the INS401 system for the first time, ther
 
 #### Log data
 
-Run the following command to log all data output from Ethernet port to binary files, and streaming GNSS RTK correction data through Ethernet port to INS401 (e.g. on Ubuntu)
+Run the following command to log all data output from Ethernet port to binary files, and streaming GNSS RTK correction data through Ethernet port to the unit (e.g. on Ubuntu)
 
+## INS401
 ```shell
 ./acenav -i 100base-t1
+```
+
+## INS402
+```shell
+./acenav -i 100base-t1 --device-type INS402 
 ```
 
 A “data” subfolder will be created for the first time, and every session of data logging will be stored in a subfolder inside the “data” folder.
@@ -39,19 +45,36 @@ A “data” subfolder will be created for the first time, and every session of 
 
 Run the following command to parse the logged data into text or csv files, 
 
+## ins401
+
 ```shell
 ./acenav parse -t ins401 -p <path to data folder/session data subfolder>
 ```
 
+## ins402
+
+```shell
+./acenav parse -t ins402 -p <path to data folder/session data subfolder>
+```
+
 #### Save Settings
 
-If user changed the GNSS/INS user settings in the "ins401.json" file, and wants to make it effective, run the data logging command with "-s" option like below, and the changed user settings will be saved into flash
+If user changed the GNSS/INS user settings in the "ins401.json" or "ins402.json" file, and wants to make it effective, run the data logging command with "-s" option like below, and the changed user settings will be saved into flash
+
+## ins401
 
 ```shell
 ./acenav -i 100base-t1 -s
 ```
 
+## ins402
+
+```shell
+./acenav -i 100base-t1 --device-type INS402 -s
+```
 ## Firmware Upgrade
+
+# INS401 Firmware Upgrade
 
 INS401 supports In-Application Programming (IAP) firmware upgrade through the Ethernet interface, run the executable with the CLI option, and prompt for user input 
 
@@ -59,23 +82,42 @@ INS401 supports In-Application Programming (IAP) firmware upgrade through the Et
 ./acenav -i 100base-t1 --cli
 # console display with connection information
 # prompt for user input, type in command and file path after the arrow symbol
-# firmware is fully upgraded by default
+# firmware is fully upgraded by default, contains a list of the components which are 
+# rtk, ins and sdk
 >>upgrade <INS401 FW file path>
 
-# one or more firmware parts(rtk, ins, sdk, imu_boot(if firmware is merged), imu(if firmware is merged)) 
+# one or more firmware components (rtk, ins, sdk, imu_boot(if firmware is merged), imu(if firmware is merged)) 
 # are optionally upgraded
->>upgrade <INS401 FW file path> rtk ins
-or
->>upgrade <INS401 FW file path> sdk
-or
->>upgrade <INS401 FW file path> imu
-or
->>upgrade <INS401 FW file path> imu_boot
+>>upgrade <INS401 FW file path> <one or more components are optional, the names of adjacent components are separated by a space bar>
+
+eg:
+>>upgrade <INS401 FW file path> rtk ins sdk imu_boot imu
 ```
 
 After successful FW upgrade, the INS401 system restarts and starts logging data automatically. 
 
-## canfd app  
+# INS402 Firmware Upgrade
+
+INS402 supports In-Application Programming (IAP) firmware upgrade through the Ethernet interface, run the executable with the CLI option, and prompt for user input 
+
+```shell
+./acenav -i 100base-t1 --device-type INS402 --cli
+# console display with connection information
+# prompt for user input, type in command and file path after the arrow symbol
+# firmware is fully upgraded by default, contains a list of the components which are 
+# rtk, ins, sdk and sdk_2
+>>upgrade <INS402 FW file path>
+
+# one or more firmware components(rtk, ins, sdk, sdk_2, imu_boot(if firmware is merged), imu(if firmware is merged)) are optionally upgraded
+>>upgrade <INS402 FW file path> <one or more components are optional, the names of adjacent components are separated by a space bar>
+
+eg:
+>>upgrade <INS402 FW file path> rtk ins sdk sdk_2 imu_boot imu
+```
+
+After successful FW upgrade, the INS402 system restarts and starts logging data automatically. 
+
+# canfd app  
 
 ### run  
 please run $Env:PYTHONPATH="./src/aceinna/devices/widgets;"+$Env:PYTHONPATH in powershell  
@@ -90,4 +132,4 @@ set "canfd_type": "canfd",
 set "canfd_type": "can"  
 
 #### Parse  
-***python main.py parse -t ins401c -p <path to data folder>***  
+./acenav parse -t ins401c -p <path to data folder>

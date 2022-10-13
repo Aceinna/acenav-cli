@@ -212,7 +212,7 @@ class Provider(Provider_base):
         if packet_type == b'\x06\n':
             if self.rtcm_rover_logf:
                 self.rtcm_rover_logf.write(bytes(data))
-        elif packet_type == b'\x08\n':
+        elif packet_type == b'\x0c\x0a':
             if self.rtcm_rover2_logf:
                 self.rtcm_rover2_logf.write(bytes(data))
         else:

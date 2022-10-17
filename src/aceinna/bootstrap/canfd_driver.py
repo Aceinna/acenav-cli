@@ -192,7 +192,10 @@ class canfd_app_driver:
             for inode in self.canfd_setting['canfd_remote_messages']:
                 if(inode['valid_len'] > 0):
                     length = 0
-                    pack_fmt = '<'
+                    if inode['name'] == 'LEVER_ARM_GET':
+                        pack_fmt = '>'
+                    else:
+                        pack_fmt = '<'
                     self.id_name[inode["id"]] = inode["name"]
                     for value in inode['signals']:
                         if value['type'] == 'float':

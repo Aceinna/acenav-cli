@@ -1826,7 +1826,7 @@ class SDKUpgradeWorker(UpgradeWorkerBase):
         self.wait_erase_factor = 60000
         self.erase_factors = 4
         self.wait_erase_all = self.wait_erase_factor * self.erase_factors
-        self.wait_nvm_erase = 2000
+        self.wait_nvm_erase = 5000
         self.wait_crc = 30000
         self.passthrough_time = 15
 

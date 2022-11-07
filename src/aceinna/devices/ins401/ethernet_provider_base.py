@@ -126,33 +126,41 @@ class Provider_base(OpenDeviceBase):
         '''
         Build compile info
         '''
-        split_text = text.split(',')
-        self.compile_info = {
-            'ins_lib':{
-                'version': split_text[0],
-                'time': split_text[1],
-                'author': split_text[2],
-                'commit':split_text[3]
-            },
-            'ins_app':{
-                'version': split_text[4],
-                'time': split_text[5],
-                'author': split_text[6],
-                'commit':split_text[7]
-            },
-            'rtk_lib':{
-                'version': split_text[8],
-                'time': split_text[9],
-                'author': split_text[10],
-                'commit':split_text[11]
-            },
-            'rtk_app':{
-                'version': split_text[12],
-                'time': split_text[13],
-                'author': split_text[14],
-                'commit':split_text[15]
+        split_text = text.replace(" ", "").split(',')
+        if len(split_text) > 2:
+            self.compile_info = {
+                'ins_lib':{
+                    'version': split_text[0],
+                    'time': split_text[1],
+                    'author': split_text[2],
+                    'commit':split_text[3]
+                },
+                'ins_app':{
+                    'version': split_text[4],
+                    'time': split_text[5],
+                    'author': split_text[6],
+                    'commit':split_text[7]
+                },
+                'rtk_lib':{
+                    'version': split_text[8],
+                    'time': split_text[9],
+                    'author': split_text[10],
+                    'commit':split_text[11]
+                },
+                'rtk_app':{
+                    'version': split_text[12],
+                    'time': split_text[13],
+                    'author': split_text[14],
+                    'commit':split_text[15]
+                }
             }
-        }        
+        else:
+            self.compile_info = {
+            'lib_version':{
+                'ins': split_text[0],
+                'gnss': split_text[1]
+                }
+            }
         print(self.compile_info)
     def _build_device_info(self, text):
         '''

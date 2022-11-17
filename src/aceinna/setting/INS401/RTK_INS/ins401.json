@@ -726,7 +726,7 @@
                 "signals": [
                     {
                         "bit_length": 16,
-                        "factor": "0.0076293",
+                        "factor": "0.00762951",
                         "is_big_endian": true,
                         "is_float": true,
                         "is_signed": false,
@@ -735,11 +735,11 @@
                         "start_bit": 8,
                         "type": "uint16",
                         "format": "11.4f",
-                        "unit": "s"
+                        "unit": "deg/s"
                     },
                     {
                         "bit_length": 16,
-                        "factor": "0.0076293",
+                        "factor": "0.00762951",
                         "is_big_endian": true,
                         "is_float": true,
                         "is_signed": false,
@@ -748,11 +748,11 @@
                         "start_bit": 24,
                         "type": "uint16",
                         "format": "11.4f",
-                        "unit": "s"
+                        "unit": "deg/s"
                     },
                     {
                         "bit_length": 16,
-                        "factor": "0.0076293",
+                        "factor": "0.00762951",
                         "is_big_endian": true,
                         "is_float": true,
                         "is_signed": false,
@@ -761,7 +761,7 @@
                         "start_bit": 40,
                         "type": "uint16",
                         "format": "11.4f",
-                        "unit": "s"
+                        "unit": "deg/s"
                     }
                 ]
             },
@@ -1186,7 +1186,7 @@
                     },
                     {
                         "bit_length": 16,
-                        "factor": "0.0076293",
+                        "factor": "0.00762951",
                         "is_big_endian": true,
                         "is_float": true,
                         "is_signed": false,
@@ -1195,11 +1195,11 @@
                         "start_bit": 56,
                         "type": "uint16",
                         "format": "11.4f",
-                        "unit": "s"
+                        "unit": "deg/s"
                     },
                     {
                         "bit_length": 16,
-                        "factor": "0.0076293",
+                        "factor": "0.00762951",
                         "is_big_endian": true,
                         "is_float": true,
                         "is_signed": false,
@@ -1208,11 +1208,11 @@
                         "start_bit": 72,
                         "type": "uint16",
                         "format": "11.4f",
-                        "unit": "s"
+                        "unit": "deg/s"
                     },
                     {
                         "bit_length": 16,
-                        "factor": "0.0076293",
+                        "factor": "0.00762951",
                         "is_big_endian": true,
                         "is_float": true,
                         "is_signed": false,
@@ -1221,7 +1221,7 @@
                         "start_bit": 88,
                         "type": "uint16",
                         "format": "11.4f",
-                        "unit": "s"
+                        "unit": "deg/s"
                     },
                     {
                         "bit_length": 16,

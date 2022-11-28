@@ -98,6 +98,11 @@
                 "paramId": 19,
                 "name": "NHC switch",
                 "value": 1
+            },
+            {
+                "paramId": 20,
+                "name": "antenna switch",
+                "value": 0
             }
         ],
         "ntrip":[
@@ -281,6 +286,13 @@
             "paramType": "input",
             "type": "uint32",
             "name": "NHC switch"
+        },
+        {
+            "paramId": 20,
+            "category": "INS",
+            "paramType": "input",
+            "type": "uint32",
+            "name": "antenna switch"
         }
     ],
     "userMessages": {

@@ -100,8 +100,18 @@
                 "value": 1
             },
             {
-                "paramId": 20,
-                "name": "antenna switch",
+                "paramId": 22,
+                "name": "dual ant switch",
+                "value": 1
+            },
+            {
+                "paramId": 23,
+                "name": "dual ant baseline length",
+                "value": 6.7
+            },
+            {
+                "paramId": 24,
+                "name": "dual ant heading cali",
                 "value": 0
             }
         ],
@@ -288,12 +298,28 @@
             "name": "NHC switch"
         },
         {
-            "paramId": 20,
-            "category": "INS",
-            "paramType": "input",
-            "type": "uint32",
-            "name": "antenna switch"
-        }
+             "paramId": 22,
+             "category": "GNSS",
+             "paramType": "input",
+             "type": "uint32",
+             "name": "dual ant switch"
+         },
+         {
+              "paramId": 23,
+              "category": "GNSS",
+              "paramType": "input",
+              "type": "float",
+              "name": "dual ant baseline length",
+              "value_accuracy": 4
+          },
+          {
+               "paramId": 24,
+               "category": "GNSS",
+               "paramType": "input",
+               "type": "float",
+               "name": "dual ant heading cali",
+               "value_accuracy": 4
+           }
     ],
     "userMessages": {
         "inputPackets": [

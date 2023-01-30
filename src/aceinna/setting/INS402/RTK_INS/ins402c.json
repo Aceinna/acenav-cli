@@ -1,0 +1,2161 @@
+{
+    "appVersion": "INS401 31.00.01",
+    "type": "INS402",
+    "description": "6-axis INS402 with INS application",
+    "initial":{
+        "userParameters": [            
+            {
+                "paramId": 1,
+                "name": "gnss lever arm x",
+                "value": 0.7
+            },
+            {
+                "paramId": 2,
+                "name": "gnss lever arm y",
+                "value": 0.02
+            },
+            {
+                "paramId": 3,
+                "name": "gnss lever arm z",
+                "value": -1.06
+            },
+            {
+                "paramId": 4,
+                "name": "vrp lever arm x",
+                "value": 0.38
+            },
+            {
+                "paramId": 5,
+                "name": "vrp lever arm y",
+                "value": 0.01
+            },
+            {
+                "paramId": 6,
+                "name": "vrp lever arm z",
+                "value": 0.21
+            },
+            {
+                "paramId": 7,
+                "name": "user lever arm x",
+                "value": 0.7
+            },
+            {
+                "paramId": 8,
+                "name": "user lever arm y",
+                "value": 0.02
+            },
+            {
+                "paramId": 9,
+                "name": "user lever arm z",
+                "value": -1.06
+            },
+            {
+                "paramId": 10,
+                "name": "rotation rbvx",
+                "value": 0.0
+            },
+            {
+                "paramId": 11,
+                "name": "rotation rbvy",
+                "value": 0.0
+            },
+            {
+                "paramId": 12,
+                "name": "rotation rbvz",
+                "value": 180.0
+            },
+            {
+                "paramId": 13,
+                "name": "sec lever arm x",
+                "value": 1.75
+            },
+            {
+                "paramId": 14,
+                "name": "sec lever arm y",
+                "value": 0.02
+            },
+            {
+                "paramId": 15,
+                "name": "sec lever arm z",
+                "value": -1.06
+            },
+            {
+                "paramId": 16,
+                "name": "dual ant switch",
+                "value": 1
+            },
+            {
+                "paramId": 17,
+                "name": "dual ant baseline length",
+                "value": 6.7
+            },
+            {
+                "paramId": 18,
+                "name": "dual ant heading cali",
+                "value": 0
+            }
+        ],
+        "ntrip":[
+            {
+                "name": "ip",
+                "value": "58.215.20.43"
+            },
+            {
+                "name": "port",
+                "value": 2201
+            },
+            {
+                "name": "mountPoint",
+                "value": "WX02"
+            },
+            {
+                "name": "username",
+                "value": "daich"
+            },
+            {
+                "name": "password",
+                "value": "888999"
+            }
+        ]
+    },
+    "userConfiguration": [
+        {
+            "paramId": 0,
+            "category": "General",
+            "paramType": "disabled",
+            "type": "uint16",
+            "name": "Data CRC"
+        },
+        {
+            "paramId": 1,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "gnss lever arm x",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 2,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "gnss lever arm y",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 3,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "gnss lever arm z",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 4,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "vrp lever arm x",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 5,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "vrp lever arm y",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 6,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "vrp lever arm z",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 7,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "user lever arm x",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 8,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "user lever arm y",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 9,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "user lever arm z",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 10,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "rotation rbvx",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 11,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "rotation rbvy",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 12,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "rotation rbvz",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 13,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "sec lever arm x",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 14,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "sec lever arm y",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 15,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "sec lever arm z",
+            "value_accuracy": 4
+        },
+        {
+             "paramId": 16,
+             "category": "GNSS",
+             "paramType": "input",
+             "type": "uint32",
+             "name": "dual ant switch"
+         },
+         {
+              "paramId": 17,
+              "category": "GNSS",
+              "paramType": "input",
+              "type": "float",
+              "name": "dual ant baseline length",
+              "value_accuracy": 4
+          },
+          {
+               "paramId": 18,
+               "category": "GNSS",
+               "paramType": "input",
+               "type": "float",
+               "name": "dual ant heading cali",
+               "value_accuracy": 4
+           }
+    ],
+    "userMessages": {
+        "inputPackets": [
+            {
+                "name": "pG",
+                "description": "Get device serial number & factory ID",
+                "inputPayload": {},
+                "responsePayload": {
+                    "type": "string",
+                    "name": "Device ID and SN"
+                }
+            },
+            {
+                "name": "gV",
+                "description": "Get user app version",
+                "inputPayload": {},
+                "responsePayload": {
+                    "type": "string",
+                    "name": "User Version"
+                }
+            },
+            {
+                "name": "gA",
+                "description": "Get All Configuration Parameters",
+                "inputPayload": {},
+                "responsePayload": {
+                    "type": "userConfiguration",
+                    "name": "Full Current Configuration"
+                }
+            },
+            {
+                "name": "sC",
+                "description": "Save Conifguration Parameters to Flash",
+                "inputPayload": {},
+                "responsePayload": {}
+            },            
+            {
+                "name": "uP",
+                "description": "Update Configuration Parameter",
+                "inputPayload": {
+                    "type": "userParameter",
+                    "name": "Parameter to be Updated"
+                },
+                "responsePayload": {
+                    "type": "paramId",
+                    "name": "ID of the Updated Parameter"
+                }
+            }
+        ],
+        "outputPackets": [
+            {
+                "name": "s1",
+                "isList": 0,
+                "payload": [
+                    {
+                        "type": "uint32",
+                        "name": "GPS_Week",
+                        "unit": ""
+                    },
+                    {
+                        "type": "double",
+                        "name": "GPS_TimeofWeek",
+                        "unit": "sec"
+                    },
+                    {
+                        "type": "float",
+                        "name": "x_accel",
+                        "unit": "m/s^2"
+                    },
+                    {
+                        "type": "float",
+                        "name": "y_accel",
+                        "unit": "m/s^2"
+                    },
+                    {
+                        "type": "float",
+                        "name": "z_accel",
+                        "unit": "m/s^2"
+                    },
+                    {
+                        "type": "float",
+                        "name": "x_rate",
+                        "unit": "deg/s"
+                    },
+                    {
+                        "type": "float",
+                        "name": "y_rate",
+                        "unit": "deg/s"
+                    },
+                    {
+                        "type": "float",
+                        "name": "z_rate",
+                        "unit": "deg/s"
+                    }
+                ],
+                "graphs": [
+                    {
+                        "name": "Acceleration",
+                        "units": "m/s^2",
+                        "xAxis": {"name":"GPS_TimeofWeek", "unit":"sec"},
+                        "yAxes": [
+                            "x_accel",
+                            "y_accel",
+                            "z_accel"
+                        ],
+                        "colors": [
+                            "#FF0000",
+                            "#00FF00",
+                            "#0000FF"
+                        ],
+                        "yMax": 20
+                    },
+                    {
+                        "name": "Angular-Rate",
+                        "units": "deg/s",
+                        "xAxis": {"name":"GPS_TimeofWeek", "unit":"sec"},
+                        "yAxes": [
+                            "x_rate",
+                            "y_rate",
+                            "z_rate"
+                        ],
+                        "colors": [
+                            "#FF0000",
+                            "#00FF00",
+                            "#0000FF"
+                        ],
+                        "yMax": 200
+                    }
+                ]
+            },
+            {
+                "name": "iN",
+                "isList": 0,
+                "payload": [
+                    {
+                        "type": "uint32",
+                        "name": "GPS_Week",
+                        "unit": ""
+                    },
+                    {
+                        "type": "double",
+                        "name": "GPS_TimeofWeek",
+                        "unit": "sec"
+                    },
+                    {
+                        "type": "uint8",
+                        "name": "insStatus",
+                        "unit": ""
+                    },
+                    {
+                        "type": "uint8",
+                        "name": "insPositionType",
+                        "unit": ""
+                    },
+                    {
+                        "type": "int32",
+                        "name": "latitude",
+                        "unit": "deg"
+                    },
+                    {
+                        "type": "int32",
+                        "name": "longitude",
+                        "unit": "deg"
+                    },
+                    {
+                        "type": "float",
+                        "name": "height",
+                        "unit": "m"
+                    },
+                    {
+                        "type": "int16",
+                        "name": "velocityNorth",
+                        "unit": "m/s"
+                    },
+                    {
+                        "type": "int16",
+                        "name": "velocityEast",
+                        "unit": "m/s"
+                    },
+                    {
+                        "type": "int16",
+                        "name": "velocityUp",
+                        "unit": "m/s"
+                    },
+                    {
+                        "type": "int16",
+                        "name": "roll",
+                        "unit": "m/s"
+                    },
+                    {
+                        "type": "int16",
+                        "name": "pitch",
+                        "unit": "m/s"
+                    },
+                    {
+                        "type": "int16",
+                        "name": "heading",
+                        "unit": "m/s"
+                    }
+                ],
+                "graphs": []
+            },
+            {
+                "name": "d1",
+                "isList": 0,
+                "payload": [
+                    {
+                        "type": "uint32",
+                        "name": "GPS_Week",
+                        "unit": ""
+                    },
+                    {
+                        "type": "double",
+                        "name": "GPS_TimeofWeek",
+                        "unit": "sec"
+                    },
+                    {
+                        "type": "int16",
+                        "name": "latitude_std",
+                        "unit": ""
+                    },
+                    {
+                        "type": "int16",
+                        "name": "longitude_std",
+                        "unit": ""
+                    },
+                    {
+                        "type": "int16",
+                        "name": "height_std",
+                        "unit": ""
+                    },
+                    {
+                        "type": "int16",
+                        "name": "north_vel_std",
+                        "unit": ""
+                    },
+                    {
+                        "type": "int16",
+                        "name": "east_vel_std",
+                        "unit": ""
+                    },
+                    {
+                        "type": "int16",
+                        "name": "up_vel_std",
+                        "unit": ""
+                    },
+                    {
+                        "type": "int16",
+                        "name": "roll_std",
+                        "unit": ""
+                    },
+                    {
+                        "type": "int16",
+                        "name": "pitch_std",
+                        "unit": ""
+                    },
+                    {
+                        "type": "int16",
+                        "name": "heading_std",
+                        "unit": ""
+                    }
+                ],
+                "graphs": []
+            },
+            {
+                "name": "gN",
+                "isList": 0,
+                "payload": [
+                    {
+                        "type": "uint32",
+                        "name": "GPS_Week",
+                        "unit": ""
+                    },
+                    {
+                        "type": "double",
+                        "name": "GPS_TimeofWeek",
+                        "unit": "sec"
+                    },
+                    {
+                        "type": "uint8",
+                        "name": "positionMode",
+                        "unit": ""
+                    },
+                    {
+                        "type": "int32",
+                        "name": "latitude",
+                        "unit": "deg"
+                    },
+                    {
+                        "type": "int32",
+                        "name": "longitude",
+                        "unit": "deg"
+                    },
+                    {
+                        "type": "float",
+                        "name": "height",
+                        "unit": "m"
+                    },
+                    {
+                        "type": "uint8",
+                        "name": "numberOfSVs",
+                        "unit": ""
+                    },
+                    {
+                        "type": "float",
+                        "name": "hdop",
+                        "unit": ""
+                    },
+                    {
+                        "type": "uint16",
+                        "name": "diffage",
+                        "unit": ""
+                    },
+                    {
+                        "type": "int16",
+                        "name": "velocityNorth",
+                        "unit": "m/s"
+                    },
+                    {
+                        "type": "int16",
+                        "name": "velocityEast",
+                        "unit": "m/s"
+                    },
+                    {
+                        "type": "int16",
+                        "name": "velocityUp",
+                        "unit": "m/s"
+                    }
+                ],
+                "graphs": []
+            },
+            {
+                "name": "sT",
+                "isList": 0,
+                "payload": [
+                    {
+                        "type": "uint32",
+                        "name": "GPS_Week",
+                        "unit": ""
+                    },
+                    {
+                        "type": "double",
+                        "name": "GPS_TimeofWeek",
+                        "unit": "sec"
+                    },
+                    {
+                        "type": "uint16",
+                        "name": "year",
+                        "unit": ""
+                    },
+                    {
+                        "type": "uint8",
+                        "name": "mouth",
+                        "unit": ""
+                    },
+                    {
+                        "type": "uint8",
+                        "name": "day",
+                        "unit": ""
+                    },
+                    {
+                        "type": "uint8",
+                        "name": "hour",
+                        "unit": ""
+                    },
+                    {
+                        "type": "uint8",
+                        "name": "min",
+                        "unit": ""
+                    },
+                    {
+                        "type": "uint8",
+                        "name": "sec",
+                        "unit": ""
+                    },
+
+                    {
+                        "type": "uint32",
+                        "name": "imu_status",
+                        "unit": ""
+                    },
+                    {
+                        "type": "float",
+                        "name": "imu_temperature",
+                        "unit": "sec"
+                    },
+                    {
+                        "type": "float",
+                        "name": "mcu_temperature",
+                        "unit": ""
+                    }
+                ],
+                "graphs": []
+            }
+        ]
+    },
+    "CLICommands": [{
+            "name": "help",
+            "description": "CLI help menu",
+            "function": "help_handler"
+        },
+        {
+            "name": "exit",
+            "description": "exit CLI",
+            "function": ""
+        },
+        {
+            "name": "run",
+            "description": "Operations defined by users",
+            "function": "run_handler"
+        },
+        {
+            "name": "save",
+            "description": "Save the configuration into EEPROM",
+            "function": "save_handler"
+        },
+        {
+            "name": "connect",
+            "description": "Find OpenIMU device",
+            "function": "connect_handler"
+        },
+        {
+            "name": "upgrade",
+            "description": "Upgrade firmware",
+            "function": "upgrade_handler"
+        },
+        {
+            "name": "record",
+            "description": "Record output data of OpenIMU on local machine",
+            "function": "record_handler"
+        },
+        {
+            "name": "stop",
+            "description": "stop recording outputs on local machine",
+            "function": "stop_handler"
+        },
+        {
+            "name": "server_start",
+            "description": "start server thread and must use exit command to quit",
+            "function": "server_start_handler"
+        },
+        {
+            "name": "get",
+            "description": "Read the current configuration and output data",
+            "function": "get_handler"
+        },
+        {
+            "name": "set",
+            "description": "Write parameters to OpenIMU",
+            "function": "set_handler"
+        }
+    ],
+    "canfd_settings":
+    {
+        "canfd_type": "canfd",
+        "is_parse": false,
+        "canfd_id": [384, 640, 641, 1412],
+        "canfd_remote_id":[1408, 1409, 1410, 1411],
+        "can_id": [384, 385, 386, 387, 388, 389, 390, 391, 392, 640],
+        "can_config":{
+            "bus_type": "bmcan",
+            "channel": 0,
+            "bitrate": 500000,
+            "data_bitrate": 2000000
+        },
+        "imu_log_config":
+        {
+            "title": "GPS_Week(),GPS_TimeofWeek(s),x_accel(m/s^2),y_accel(m/s^2),z_accel(m/s^2),x_rate(deg/s),y_rate(deg/s),z_rate(deg/s)\n",
+            "index":0
+
+        },
+        "ins_log_config":
+        {
+            "title": "GPS_Week(),GPS_TimeofWeek(s),insCarStatus(),insPositionType(),latitude(deg),longitude(deg),height(m),velocityNorth(m/s),velocityEast(m/s),velocityUp(m/s),roll(deg),pitch(deg),heading(deg),latitude_std(m),longitude_std(m),height_std(m)\n",
+            "index":0
+        },
+        "can_messages": [
+            {
+                "id": 384,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "INS_ACC",
+                "valid_len": 6,
+                "signals": [
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0001220703125",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ACC_X",
+                        "offset": "-4",
+                        "start_bit": 8,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0001220703125",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ACC_Y",
+                        "offset": "-4",
+                        "start_bit": 24,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0001220703125",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ACC_Z",
+                        "offset": "-4",
+                        "start_bit": 40,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 385,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "INS_GYRO",
+                "valid_len": 6,
+                "signals": [
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0076293",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GYRO_X",
+                        "offset": "-250",
+                        "start_bit": 8,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0076293",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GYRO_Y",
+                        "offset": "-250",
+                        "start_bit": 24,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0076293",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GYRO_Z",
+                        "offset": "-250",
+                        "start_bit": 40,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 386,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "INS_HeadingPitchRoll",
+                "valid_len": 6,
+                "signals": [
+                    {
+                        "bit_length": 16,
+                        "factor": "0.010986",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_PitchAngle",
+                        "offset": "-250",
+                        "start_bit": 8,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.010986",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_RollAngle",
+                        "offset": "-250",
+                        "start_bit": 24,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.010986",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_HeadingAngle",
+                        "offset": "-250",
+                        "start_bit": 40,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 387,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "INS_HeightAndIMUStatus",
+                "valid_len": 8,
+                "signals": [
+                    {
+                        "bit_length": 32,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_LocatHeight",
+                        "offset": "-10000",
+                        "start_bit": 24,
+                        "type": "uint32",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "IMU_Status",
+                        "offset": "0",
+                        "start_bit": 56,
+                        "type": "uint32",
+                        "format": "",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 388,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "INS_LatitudeLongitude",
+                "valid_len": 8,
+                "signals": [
+                    {
+                        "bit_length": 32,
+                        "factor": "0.0000001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_Latitude",
+                        "offset": "-180",
+                        "start_bit": 24,
+                        "type": "uint32",
+                        "format": "11.7f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "0.0000001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_Longitude",
+                        "offset": "-180",
+                        "start_bit": 56,
+                        "type": "uint32",
+                        "format": "11.7f",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 389,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "INS_Speed",
+                "valid_len": 6,
+                "signals": [
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0030517",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_NorthSpd",
+                        "offset": "-100",
+                        "start_bit": 8,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0030517",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_EastSpd",
+                        "offset": "-100",
+                        "start_bit": 24,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0030517",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_ToGroundSpd",
+                        "offset": "-100",
+                        "start_bit": 40,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 390,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "INS_DataInfo",
+                "valid_len": 6,
+                "signals": [
+                    {
+                        "bit_length": 8,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "INS_GpsFlag_Pos",
+                        "offset": "0",
+                        "start_bit": 0,
+                        "type": "uint8",
+                        "format": "2",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 8,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "INS_NumSV",
+                        "offset": "0",
+                        "start_bit": 8,
+                        "type": "uint8",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 8,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "INS_GpsFlag_Heading",
+                        "offset": "0",
+                        "start_bit": 16,
+                        "type": "uint8",
+                        "format": "2",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 8,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "INS_Gps_Age",
+                        "offset": "0",
+                        "start_bit": 24,
+                        "type": "uint8",
+                        "format": "3f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 8,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "INS_Car_Status",
+                        "offset": "0",
+                        "start_bit": 32,
+                        "type": "uint8",
+                        "format": "2",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 8,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "INS_Status",
+                        "offset": "0",
+                        "start_bit": 40,
+                        "type": "uint8",
+                        "format": "2",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 391,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "INS_Std",
+                "valid_len": 8,
+                "signals": [
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_Std_Lat",
+                        "offset": "0",
+                        "start_bit": 8,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_Std_Lon",
+                        "offset": "0",
+                        "start_bit": 24,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_Std_LocatHeight",
+                        "offset": "0",
+                        "start_bit": 40,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_Std_Heading",
+                        "offset": "0",
+                        "start_bit": 56,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 392,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "INS_Time",
+                "valid_len": 6,
+                "signals": [
+                    {
+                        "bit_length": 16,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "Week",
+                        "offset": "0",
+                        "start_bit": 8,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "TimeOfWeek",
+                        "offset": "0",
+                        "start_bit": 24,
+                        "type": "uint32",
+                        "format": "11.4f",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 640,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "BASE_RTCM",
+                "valid_len": 6,
+                "signals": [
+                    {
+                        "bit_length": 8,
+                        "factor": "0",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "BASE",
+                        "offset": "0",
+                        "start_bit": 0,
+                        "type": "",
+                        "format": "",
+                        "unit": "s"
+                    }
+                ]
+            }
+        ],
+        "canfd_messages": [
+            {
+                "id": 384,
+                "is_extended_frame": false,
+                "is_fd": true,
+                "name": "INSPVAX",
+                "valid_len": 60,
+                "signals": [
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0001220703125",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ACC_X",
+                        "offset": "-4",
+                        "start_bit": 8,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0001220703125",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ACC_Y",
+                        "offset": "-4",
+                        "start_bit": 24,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0001220703125",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ACC_Z",
+                        "offset": "-4",
+                        "start_bit": 40,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0076293",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GYRO_X",
+                        "offset": "-250",
+                        "start_bit": 56,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0076293",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GYRO_Y",
+                        "offset": "-250",
+                        "start_bit": 72,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0076293",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GYRO_Z",
+                        "offset": "-250",
+                        "start_bit": 88,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.010986",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_PitchAngle",
+                        "offset": "-250",
+                        "start_bit": 104,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.010986",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_RollAngle",
+                        "offset": "-250",
+                        "start_bit": 120,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.010986",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_HeadingAngle",
+                        "offset": "-250",
+                        "start_bit": 136,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_LocatHeight",
+                        "offset": "-10000",
+                        "start_bit": 168,
+                        "type": "uint32",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "IMU_Status",
+                        "offset": "0",
+                        "start_bit": 200,
+                        "type": "uint32",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "0.0000001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_Latitude",
+                        "offset": "-180",
+                        "start_bit": 232,
+                        "type": "uint32",
+                        "format": "11.7f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "0.0000001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_Longitude",
+                        "offset": "-180",
+                        "start_bit": 264,
+                        "type": "uint32",
+                        "format": "11.7f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0030517",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_NorthSpd",
+                        "offset": "-100",
+                        "start_bit": 280,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0030517",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_EastSpd",
+                        "offset": "-100",
+                        "start_bit": 296,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.0030517",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_ToGroundSpd",
+                        "offset": "-100",
+                        "start_bit": 312,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 8,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "INS_GpsFlag_Pos",
+                        "offset": "0",
+                        "start_bit": 320,
+                        "type": "uint8",
+                        "format": "2",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 8,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "INS_NumSV",
+                        "offset": "0",
+                        "start_bit": 328,
+                        "type": "uint8",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 8,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "INS_GpsFlag_Heading",
+                        "offset": "0",
+                        "start_bit": 336,
+                        "type": "uint8",
+                        "format": "2",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 8,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "INS_Gps_Age",
+                        "offset": "0",
+                        "start_bit": 344,
+                        "type": "uint8",
+                        "format": "3f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 8,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "INS_Car_Status",
+                        "offset": "0",
+                        "start_bit": 352,
+                        "type": "uint8",
+                        "format": "2",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 8,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "INS_Status",
+                        "offset": "0",
+                        "start_bit": 360,
+                        "type": "uint8",
+                        "format": "2",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_Std_Lat",
+                        "offset": "0",
+                        "start_bit": 376,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_Std_Lon",
+                        "offset": "0",
+                        "start_bit": 392,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_Std_LocatHeight",
+                        "offset": "0",
+                        "start_bit": 408,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "INS_Std_Heading",
+                        "offset": "0",
+                        "start_bit": 424,
+                        "type": "uint16",
+                        "format": "11.4f",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "Week",
+                        "offset": "0",
+                        "start_bit": 440,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 32,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "TimeOfWeek",
+                        "offset": "0",
+                        "start_bit": 456,
+                        "type": "uint32",
+                        "format": "11.4f",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 640,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "BASE_RTCM",
+                "valid_len": 62,
+                "signals": [
+                    {
+                        "bit_length": 512,
+                        "factor": "0",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "BASE",
+                        "offset": "0",
+                        "start_bit": 0,
+                        "type": "",
+                        "format": "",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 641,
+                "is_extended_frame": false,
+                "is_fd": false,
+                "name": "ROVER_RTCM",
+                "valid_len": 63,
+                "signals": [
+                    {
+                        "bit_length": 512,
+                        "factor": "0",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "BASE",
+                        "offset": "0",
+                        "start_bit": 0,
+                        "type": "",
+                        "format": "",
+                        "unit": "s"
+                    }
+                ]
+            },
+            {
+                "id": 1412,
+                "is_extended_frame": false,
+                "is_fd": true,
+                "name": "LEVER_ARM_SET",
+                "valid_len": 36,
+                "signals": [
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "GNSS_LEVER_ARM_X",
+                        "offset": "-30",
+                        "start_bit": 8,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GNSS_LEVER_ARM_Y",
+                        "offset": "-30",
+                        "start_bit": 24,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "GNSS_LEVER_ARM_Z",
+                        "offset": "-30",
+                        "start_bit": 40,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "VRP_LEVER_ARM_X",
+                        "offset": "-30",
+                        "start_bit": 56,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "VRP_LEVER_ARM_Y",
+                        "offset": "-30",
+                        "start_bit": 72,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "VRP_LEVER_ARM_Z",
+                        "offset": "-30",
+                        "start_bit": 88,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "USER_LEVER_ARM_X",
+                        "offset": "-30",
+                        "start_bit": 104,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "USER_LEVER_ARM_Y",
+                        "offset": "-30",
+                        "start_bit": 120,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "USER_LEVER_ARM_Z",
+                        "offset": "-30",
+                        "start_bit": 136,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.01",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ROTATION_RBVX",
+                        "offset": "-180",
+                        "start_bit": 152,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.01",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ROTATION_RBVY",
+                        "offset": "-180",
+                        "start_bit": 168,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.01",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ROTATION_RBVZ",
+                        "offset": "-180",
+                        "start_bit": 184,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "SEC_LEVER_ARM_X",
+                        "offset": "-30",
+                        "start_bit": 200,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "SEC_LEVER_ARM_Y",
+                        "offset": "-30",
+                        "start_bit": 216,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "SEC_LEVER_ARM_Z",
+                        "offset": "-30",
+                        "start_bit": 232,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "DUAL_ANT_SWITCH",
+                        "offset": "0",
+                        "start_bit": 248,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "BASELINE_LENGTH",
+                        "offset": "-30",
+                        "start_bit": 264,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.01",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "HEADING_CALI",
+                        "offset": "-180",
+                        "start_bit": 280,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    }
+                ]
+            }
+        ],
+        "canfd_remote_messages": [
+            {
+                "id": 1408,
+                "is_extended_frame": false,
+                "is_fd": true,
+                "name": "INS_VERSION",
+                "valid_len": 0,
+                "signals": [
+                    {
+                        "name": "INS_VERSION"
+                    }
+                ]
+            },
+            {
+                "id": 1409,
+                "is_extended_frame": false,
+                "is_fd": true,
+                "name": "SDK_VERSION",
+                "valid_len": 0,
+                "signals": [
+                    {
+                        "name": "SDK_VERSION"
+                    }
+                ]
+            },
+            {
+                "id": 1410,
+                "is_extended_frame": false,
+                "is_fd": true,
+                "name": "IMU_VERSION",
+                "valid_len": 0,
+                "signals": [
+                    {
+                        "name": "IMU_VERSION"
+                    }
+                ]
+            },
+            {
+                "id": 1411,
+                "is_extended_frame": false,
+                "is_fd": true,
+                "name": "LEVER_ARM_GET",
+                "valid_len": 36,
+                "signals": [
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "GNSS_LEVER_ARM_X",
+                        "offset": "-30",
+                        "start_bit": 8,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "GNSS_LEVER_ARM_Y",
+                        "offset": "-30",
+                        "start_bit": 24,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "GNSS_LEVER_ARM_Z",
+                        "offset": "-30",
+                        "start_bit": 40,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "VRP_LEVER_ARM_X",
+                        "offset": "-30",
+                        "start_bit": 56,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "VRP_LEVER_ARM_Y",
+                        "offset": "-30",
+                        "start_bit": 72,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "VRP_LEVER_ARM_Z",
+                        "offset": "-30",
+                        "start_bit": 88,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "USER_LEVER_ARM_X",
+                        "offset": "-30",
+                        "start_bit": 104,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "USER_LEVER_ARM_Y",
+                        "offset": "-30",
+                        "start_bit": 120,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "USER_LEVER_ARM_Z",
+                        "offset": "-30",
+                        "start_bit": 136,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.01",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ROTATION_RBVX",
+                        "offset": "-180",
+                        "start_bit": 152,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.01",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ROTATION_RBVY",
+                        "offset": "-180",
+                        "start_bit": 168,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.01",
+                        "is_big_endian": true,
+                        "is_float": true,
+                        "is_signed": false,
+                        "name": "ROTATION_RBVZ",
+                        "offset": "-180",
+                        "start_bit": 184,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "SEC_LEVER_ARM_X",
+                        "offset": "-30",
+                        "start_bit": 200,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "SEC_LEVER_ARM_Y",
+                        "offset": "-30",
+                        "start_bit": 216,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "SEC_LEVER_ARM_Z",
+                        "offset": "-30",
+                        "start_bit": 232,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "1",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "DUAL_ANT_SWITCH",
+                        "offset": "0",
+                        "start_bit": 248,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.001",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "BASELINE_LENGTH",
+                        "offset": "-30",
+                        "start_bit": 264,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    },
+                    {
+                        "bit_length": 16,
+                        "factor": "0.01",
+                        "is_big_endian": true,
+                        "is_float": false,
+                        "is_signed": false,
+                        "name": "HEADING_CALI",
+                        "offset": "-180",
+                        "start_bit": 280,
+                        "type": "uint16",
+                        "format": "",
+                        "unit": "s"
+                    }
+                ]
+            }            
+        ]
+    }
+}

@@ -173,7 +173,7 @@ def ethernet_command_send_receive(device_provider:EhternetProvider):
 
 def set_product_serial_number(dest, src, command):
     message_bytes = []
-    serial_number = 2179000181;
+    serial_number = 2379600022
 
     serial_number_bytes = struct.pack('<I', serial_number)
     message_bytes.extend(serial_number_bytes)
@@ -222,6 +222,7 @@ def kill_app(signal_int, call_back):
 def simple_start():
     driver = Driver(WebserverArgs(
         interface=INTERFACES.ETH_100BASE_T1,
+        device_type = 'INS402',
         use_cli = True
     ))
     driver.on(DriverEvents.Discovered, handle_discovered)

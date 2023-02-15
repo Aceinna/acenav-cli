@@ -139,7 +139,8 @@ class Provider(Provider_base):
 
                 # check saved result
                 self.check_predefined_result()
-
+                
+            self.set_unit_sn_message()
 
             if set_mount_angle:
                 self.set_mount_angle()
@@ -212,7 +213,7 @@ class Provider(Provider_base):
         if packet_type == b'\x06\n':
             if self.rtcm_rover_logf:
                 self.rtcm_rover_logf.write(bytes(data))
-        elif packet_type == b'\x08\n':
+        elif packet_type == b'\x0c\x0a':
             if self.rtcm_rover2_logf:
                 self.rtcm_rover2_logf.write(bytes(data))
         else:
@@ -251,6 +252,7 @@ class Provider(Provider_base):
         self.rtk_upgrade_flag = False
         self.ins_upgrade_flag = False
         self.sdk_upgrade_flag = False
+        self.sdk_2_upgrade_flag = False
         self.imu_upgrade_flag = False
         self.imu_boot_upgrade_flag = False
 
@@ -264,12 +266,10 @@ class Provider(Provider_base):
                     self.ins_upgrade_flag = True
 
                 if param == 'sdk':
-                    self.sdk_upgrade_flag = True 
-                    self.sdk_upgrade_chip_type = 1
+                    self.sdk_upgrade_flag = True
 
                 if param == 'sdk_2':
-                    self.sdk_upgrade_flag = True
-                    self.sdk_upgrade_chip_type = 2
+                    self.sdk_2_upgrade_flag = True
 
                 if param == 'imu_boot':
                     self.imu_boot_upgrade_flag = True 
@@ -283,13 +283,15 @@ class Provider(Provider_base):
             self.rtk_upgrade_flag = True
             self.ins_upgrade_flag = True
             self.sdk_upgrade_flag = True
-            self.imu_upgrade_flag = True
-            self.imu_boot_upgrade_flag = True
+            self.sdk_2_upgrade_flag = True
+            self.imu_upgrade_flag = False
+            self.imu_boot_upgrade_flag = False
 
         # start a thread to do upgrade
         if not self.is_upgrading:
             self.is_upgrading = True
             self._message_center.pause()
+            self.loop_upgrade_flag = True
 
             if self._logger is not None:
                 self._logger.stop_user_log()

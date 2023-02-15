@@ -139,7 +139,8 @@ class Provider(Provider_base):
 
                 # check saved result
                 self.check_predefined_result()
-
+            
+            self.set_unit_sn_message()
 
             if set_mount_angle:
                 self.set_mount_angle()
@@ -291,6 +292,7 @@ class Provider(Provider_base):
         if not self.is_upgrading:
             self.is_upgrading = True
             self._message_center.pause()
+            self.loop_upgrade_flag = True
 
             if self._logger is not None:
                 self._logger.stop_user_log()

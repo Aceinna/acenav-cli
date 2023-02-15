@@ -1,14 +1,17 @@
 import time
 import collections
+import os
 from scapy.all import sendp, conf, AsyncSniffer
 from ..constants import (BAUDRATE_LIST, INTERFACES)
 from ..utils.print import (print_red)
 from ..utils import helper
 from ..communicator import Communicator
 
-UPGRADE_PACKETS = [b'\x01\xcc', b'\x01\xaa', b'\x02\xaa', b'\x03\xaa', b'\x04\xaa',
-                   b'\x05\xaa', b'\x06\xaa', b'\x07\xaa', b'\x08\xaa', b'\x4a\x49', b'\x4a\x41', b'\x57\x41', b'\x0a\xaa']
+# Add parameter configuration type to be filtered to resolve timeout issue
+OTHER_FILTER_PACKETS = [b'\x02\xcc', b'\x03\xcc', b'\x04\xcc', b'\x05\xcc', b'\x06\xcc']
 
+UPGRADE_PACKETS = [b'\x01\xcc', b'\x01\xaa', b'\x02\xaa', b'\x03\xaa', b'\x04\xaa',b'\x05\xaa', 
+                   b'\x06\xaa', b'\x07\xaa', b'\x08\xaa', b'\x4a\x49', b'\x4a\x41', b'\x57\x41', b'\x0a\xaa']
 
 class Ethernet(Communicator):
     '''Ethernet'''
@@ -24,6 +27,7 @@ class Ethernet(Communicator):
         self.filter_device_type = None
         self.filter_host_mac = None
         self.filter_host_mac_assigned = False
+        self.config_unit_sn = None
 
         self.iface_confirmed = False
         self.receive_cache = collections.deque(maxlen=20000)
@@ -38,6 +42,10 @@ class Ethernet(Communicator):
         if options:
             self.filter_host_mac_assigned = options.host_mac != 'auto'
             self.filter_host_mac = options.host_mac if self.filter_host_mac_assigned else None
+        
+        if options:
+            self.config_unit_sn = options.unit_sn != 'auto'
+            self.config_unit_sn = options.unit_sn if self.config_unit_sn else None
 
     def handle_iface_confirm_packet(self, packet):
         self.iface_confirmed = True
@@ -97,6 +105,7 @@ class Ethernet(Communicator):
 
             if self.iface_confirmed is False:
                 print_red('No available Ethernet card was found.')
+                os._exit(1)
                 return None
         else:
             for i in range(100):
@@ -196,7 +205,8 @@ class Ethernet(Communicator):
                 self.use_length_as_protocol = False
 
         if self.upgrading_flag:
-            if UPGRADE_PACKETS.__contains__(packet_type):
+            if UPGRADE_PACKETS.__contains__(packet_type)\
+              or OTHER_FILTER_PACKETS.__contains__(packet_type):
                 self.receive_cache.append(packet_raw[2:])
         else:
             self.receive_cache.append(packet_raw[2:])

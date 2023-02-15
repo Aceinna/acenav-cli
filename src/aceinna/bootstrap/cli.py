@@ -7,6 +7,7 @@ import time
 import threading
 from os import getpid
 import psutil
+import re
 # from .web import Webserver
 from ..models import WebserverArgs
 
@@ -149,9 +150,8 @@ class CommandLine:
                 token = input(">>")
             else:
                 token = input("")
-                
-            self.input_string = token.split(" ")
-
+            
+            self.input_string = re.split(r'\s+', token)
             if token.strip() == 'exit':
                 break
 

@@ -109,6 +109,9 @@ class canfd_app_driver:
         self.imu_version_id = 0
         self.get_lever_arm_id = 0
         self.set_lever_arm_id = 0
+        self.set_lever_config = None
+        self.lever_arm_get_config = None
+        self.lever_arm_valid_len = 0
         self.prepare_can_setting()
         self.prepare_log_config()
         args=[r"powershell",r"$Env:PYTHONPATH=\"./src/aceinna/devices/widgets;\"+$Env:PYTHONPATH"]
@@ -128,6 +131,8 @@ class canfd_app_driver:
             self.can_id_list = self.canfd_setting["canfd_id"]
             output = next((x for x in self.canfd_setting['canfd_messages'] if x['id'] == 640), None)
             self.set_lever_arm_id = next((x['id'] for x in self.canfd_setting['canfd_messages'] if x['name'] == 'LEVER_ARM_SET'), None)
+            self.set_lever_config = next((x['signals'] for x in self.canfd_setting['canfd_messages'] if x['name'] == 'LEVER_ARM_SET'), None)
+            self.lever_arm_get_config = next((x['signals'] for x in self.canfd_setting['canfd_remote_messages'] if x['name'] == 'LEVER_ARM_GET'), None)
         else:
             self.can_id_list = self.canfd_setting["can_id"]
             output = next((x for x in self.canfd_setting['can_messages'] if x['id'] == 640), None)
@@ -192,7 +197,11 @@ class canfd_app_driver:
             for inode in self.canfd_setting['canfd_remote_messages']:
                 if(inode['valid_len'] > 0):
                     length = 0
-                    pack_fmt = '<'
+                    if inode['name'] == 'LEVER_ARM_GET':
+                        pack_fmt = '>'
+                        self.lever_arm_valid_len = inode['valid_len']
+                    else:
+                        pack_fmt = '<'
                     self.id_name[inode["id"]] = inode["name"]
                     for value in inode['signals']:
                         if value['type'] == 'float':
@@ -288,13 +297,13 @@ class canfd_app_driver:
 
     def load_properties(self):
         local_config_file_path = os.path.join(
-            os.getcwd(), 'setting/INS401/RTK_INS/ins401.json')
-        setting_folder_path = 'setting/INS401/RTK_INS'
+            os.getcwd(), 'setting/INS402/RTK_INS/ins402c.json')
+        setting_folder_path = 'setting/INS402/RTK_INS'
         if not os.path.isdir(setting_folder_path):
             os.makedirs(setting_folder_path)
         if not os.path.isfile(local_config_file_path):
             app_config_content = resource.get_content_from_bundle(
-                'setting','INS401\\RTK_INS\\ins401.json')
+                'setting','INS402\\RTK_INS\\ins402c.json')
             with open(local_config_file_path, "wb") as code:
                 code.write(app_config_content)
         if os.path.isfile(local_config_file_path):
@@ -356,8 +365,8 @@ class canfd_app_driver:
             'firmware_version': firmware_version,
             'sn': sn
         }
-        version = 'RTK_INS App {0} Bootloader {1} IMU330ZA FW {2} STA9100 FW {3}'.format(
-            firmware_version, boot, imu, sta
+        version = 'RTK_INS App {0} Bootloader {1} IMU330ZA FW {2} STA9100 FW {3} SN {4}'.format(
+            firmware_version, boot, imu, sta, sn
         )
         self.app_info = {
             'app_name': 'INS401c',
@@ -365,18 +374,38 @@ class canfd_app_driver:
         }
     def get_lever_arm_dict(self, lever_arm_packet):
         parameters_configuration = dict()
-        parameters_configuration['gnss lever arm x'] = lever_arm_packet[0]
-        parameters_configuration['gnss lever arm y'] = lever_arm_packet[1]
-        parameters_configuration['gnss lever arm z'] = lever_arm_packet[2]
-        parameters_configuration['vrp lever arm x']  = lever_arm_packet[3]
-        parameters_configuration['vrp lever arm y']  = lever_arm_packet[4]
-        parameters_configuration['vrp lever arm z']  = lever_arm_packet[5]
-        parameters_configuration['user lever arm x'] = lever_arm_packet[6]
-        parameters_configuration['user lever arm y'] = lever_arm_packet[7]
-        parameters_configuration['user lever arm z'] = lever_arm_packet[8]
-        parameters_configuration['rotation rbvx']    = lever_arm_packet[9]
-        parameters_configuration['rotation rbvy']    = lever_arm_packet[10]
-        parameters_configuration['rotation rbvz']    = lever_arm_packet[11]
+        data_value = list()
+        for i in range(len(lever_arm_packet)):
+
+            try:
+                if self.lever_arm_get_config[i]['is_float'] == True:
+                    offset = float(self.lever_arm_get_config[i]['offset'])
+                    factor = float(self.lever_arm_get_config[i]['factor'])
+                else:
+                    offset = float(self.lever_arm_get_config[i]['offset'])
+                    factor = float(self.lever_arm_get_config[i]['factor'])
+            except Exception as e:
+                print(e, self.lever_arm_get_config[i]['is_float'], type(self.lever_arm_get_config[i]['is_float']))
+            data_value.append(lever_arm_packet[i]*factor + offset)
+
+        parameters_configuration['gnss lever arm x'] = data_value[0]
+        parameters_configuration['gnss lever arm y'] = data_value[1]
+        parameters_configuration['gnss lever arm z'] = data_value[2]
+        parameters_configuration['vrp lever arm x']  = data_value[3]
+        parameters_configuration['vrp lever arm y']  = data_value[4]
+        parameters_configuration['vrp lever arm z']  = data_value[5]
+        parameters_configuration['user lever arm x'] = data_value[6]
+        parameters_configuration['user lever arm y'] = data_value[7]
+        parameters_configuration['user lever arm z'] = data_value[8]
+        parameters_configuration['rotation rbvx']    = data_value[9]
+        parameters_configuration['rotation rbvy']    = data_value[10]
+        parameters_configuration['rotation rbvz']    = data_value[11]
+        parameters_configuration['sec lever arm x']    = data_value[12]
+        parameters_configuration['sec lever arm y']    = data_value[13]
+        parameters_configuration['sec lever arm z']    = data_value[14]
+        parameters_configuration['dual ant switch']    = data_value[15]
+        parameters_configuration['dual ant baseline length']    = data_value[16]
+        parameters_configuration['dual ant heading cali']    = data_value[17]
         return parameters_configuration
 
     def save_device_info(self):
@@ -387,7 +416,10 @@ class canfd_app_driver:
         imu_result = self.get_imu_message()
         time.sleep(0.1)
         lever_arm_result = self.get_lever_arm_message()
-        data = struct.pack(self.remote_pkfmt['LEVER_ARM_GET']['len_b'], *lever_arm_result['data'])
+        try:
+            data = struct.pack(self.remote_pkfmt['LEVER_ARM_GET']['len_b'], *lever_arm_result['data'][0:self.lever_arm_valid_len])
+        except Exception as e:
+            print(e)
         lever_arm_packet = struct.unpack(self.remote_pkfmt['LEVER_ARM_GET']['pack'], data)
         device_configuration = None
         fname_time = self.fname_time + '_configuration.json'
@@ -506,10 +538,18 @@ class canfd_app_driver:
 
     def set_ins401c_lever_arm(self, data):
         data_list = []
-        for item in data:
-            data_list.append(item["value"])
-        para_len = self.pkfmt['LEVER_ARM_SET']['len'] / 4
-        data_bytes = struct.pack('{0}f'.format(int(para_len)), *data_list)
+        for i in range(len(data)):
+            data_ori = data[i]["value"]
+            test = 0
+            offset = float(self.set_lever_config[i]['offset'])
+            factor = float(self.set_lever_config[i]['factor'])
+            try:
+                data_list.append( int((data_ori - offset) / factor) )
+            except Exception as e:
+                print(e)
+
+        para_len = self.pkfmt['LEVER_ARM_SET']['len'] / 2
+        data_bytes = struct.pack('>{0}H'.format(int(para_len)), *data_list)
         self.canfd_handle.write(self.set_lever_arm_id, list(data_bytes), False, False, True)
 
     def check_predefined_result(self):
@@ -518,7 +558,7 @@ class canfd_app_driver:
         file_path = os.path.join(self.path, fname_time)
         # save parameters to data log folder after predefined parameters setup
         lever_arm_result = self.get_lever_arm_message()
-        data = struct.pack(self.remote_pkfmt['LEVER_ARM_GET']['len_b'], *lever_arm_result['data'])
+        data = struct.pack(self.remote_pkfmt['LEVER_ARM_GET']['len_b'], *lever_arm_result['data'][0:self.lever_arm_valid_len])
         lever_arm_packet = struct.unpack(self.remote_pkfmt['LEVER_ARM_GET']['pack'], data)
         parameters_configuration = self.get_lever_arm_dict(lever_arm_packet)
         with open(file_path, 'w') as outfile:
@@ -532,7 +572,7 @@ class canfd_app_driver:
         for key in hashed_predefined_parameters:
             # if parameters_configuration[key] == \
             #         hashed_predefined_parameters[key]['value']:
-            if abs(parameters_configuration[key] - hashed_predefined_parameters[key]['value'] < 0.1e5):
+            if abs(parameters_configuration[key] - hashed_predefined_parameters[key]['value'] < 0.1e4):
                 success_count += 1
             else:
                 fail_count += 1

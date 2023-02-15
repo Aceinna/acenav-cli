@@ -31,6 +31,9 @@ from ..upgrade_workers import (
 
 GNZDA_DATA_LEN = 39
 
+SDK_UPGRADE_CHIP_FIRST = 1
+SDK_UPGRADE_CHIP_SECOND = 2
+
 class Provider_base(OpenDeviceBase):
     '''
     INS401 Ethernet 100base-t1 provider
@@ -74,13 +77,15 @@ class Provider_base(OpenDeviceBase):
         self.rtk_upgrade_flag = False
         self.ins_upgrade_flag = False
         self.sdk_upgrade_flag = False
+        self.sdk_2_upgrade_flag = False
         self.imu_upgrade_flag = False
         self.imu_boot_upgrade_flag = False
         self.unit_sn = None
         self.bootloader_version = None
         self.rtk_crc = []
         self.ins_crc = []
-        self.sdk_upgrade_chip_type = 1
+        self.loop_upgrade_flag = False
+
 
     def prepare_folders(self):
         '''
@@ -121,33 +126,41 @@ class Provider_base(OpenDeviceBase):
         '''
         Build compile info
         '''
-        split_text = text.split(',')
-        self.compile_info = {
-            'ins_lib':{
-                'version': split_text[0],
-                'time': split_text[1],
-                'author': split_text[2],
-                'commit':split_text[3]
-            },
-            'ins_app':{
-                'version': split_text[4],
-                'time': split_text[5],
-                'author': split_text[6],
-                'commit':split_text[7]
-            },
-            'rtk_lib':{
-                'version': split_text[8],
-                'time': split_text[9],
-                'author': split_text[10],
-                'commit':split_text[11]
-            },
-            'rtk_app':{
-                'version': split_text[12],
-                'time': split_text[13],
-                'author': split_text[14],
-                'commit':split_text[15]
+        split_text = text.replace(" ", "").split(',')
+        if len(split_text) > 2:
+            self.compile_info = {
+                'ins_lib':{
+                    'version': split_text[0],
+                    'time': split_text[1],
+                    'author': split_text[2],
+                    'commit':split_text[3]
+                },
+                'ins_app':{
+                    'version': split_text[4],
+                    'time': split_text[5],
+                    'author': split_text[6],
+                    'commit':split_text[7]
+                },
+                'rtk_lib':{
+                    'version': split_text[8],
+                    'time': split_text[9],
+                    'author': split_text[10],
+                    'commit':split_text[11]
+                },
+                'rtk_app':{
+                    'version': split_text[12],
+                    'time': split_text[13],
+                    'author': split_text[14],
+                    'commit':split_text[15]
+                }
             }
-        }        
+        else:
+            self.compile_info = {
+            'lib_version':{
+                'ins': split_text[0],
+                'gnss': split_text[1]
+                }
+            }
         print(self.compile_info)
     def _build_device_info(self, text):
         '''
@@ -282,8 +295,7 @@ class Provider_base(OpenDeviceBase):
 
                 # check saved result
                 self.check_predefined_result()
-
-
+        
             if set_mount_angle:
                 self.set_mount_angle()
                 self.prepare_lib_folder()
@@ -559,7 +571,7 @@ class Provider_base(OpenDeviceBase):
             if result:
                 break
             else:
-                time.sleep(0.5)
+                time.sleep(1)
 
     def before_write_content(self, core, content_len, ack_enable):
         command_CS = [0x04, 0xaa]
@@ -753,10 +765,22 @@ class Provider_base(OpenDeviceBase):
             sdk_upgrade_worker = EthernetSDK9100UpgradeWorker(
                 self.communicator,
                 lambda: helper.format_firmware_content(content),
-                self.sdk_upgrade_chip_type
+                SDK_UPGRADE_CHIP_FIRST
             )
             sdk_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
+
             return sdk_upgrade_worker
+
+        if rule == 'sdk_2' and self.sdk_2_upgrade_flag:
+            sdk2_upgrade_worker = EthernetSDK9100UpgradeWorker(
+                self.communicator,
+                lambda: helper.format_firmware_content(content),
+                SDK_UPGRADE_CHIP_SECOND
+            )
+            sdk2_upgrade_worker.group = UPGRADE_GROUP.FIRMWARE
+
+            return sdk2_upgrade_worker
+
 
         if self.imu_boot_upgrade_flag:
             if rule == 'imu_boot':
@@ -830,12 +854,26 @@ class Provider_base(OpenDeviceBase):
             if rule == 'ins':
                 ins_len = len(content) & 0xFFFF
                 self.ins_crc = helper.calc_crc(content[0:ins_len])
+            
 
-            worker = self.build_worker(rule, content)
-            if not worker:
-                continue
+            if rule == 'sdk':
+                if self.sdk_upgrade_flag:
+                    worker = self.build_worker(rule, content)
+                    if worker:
+                        workers.append(worker)
+                    
+                if self.sdk_2_upgrade_flag:           
+                    worker = self.build_worker('sdk_2', content)
+                    if worker:
+                        workers.append(worker)
+                
+            else:
+                worker = self.build_worker(rule, content)
+                if not worker:
+                    continue
 
-            workers.append(worker)
+                workers.append(worker)
+                        
 
         # wrap rtk and ins
         start_index = -1
@@ -856,7 +894,9 @@ class Provider_base(OpenDeviceBase):
             ethernet_ack_enable,
             command=self.ins_jump_bootloader_command_generator,
             listen_packet=[0x01, 0xaa],
-            wait_timeout_after_command=ins_wait_timeout)
+            wait_timeout_after_command=ins_wait_timeout,
+            ethernet_reshake=None,
+            system_reset=None)
         ins_jump_bootloader_worker.group = UPGRADE_GROUP.FIRMWARE
         ins_jump_bootloader_worker.on(
             UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
@@ -894,7 +934,9 @@ class Provider_base(OpenDeviceBase):
             ethernet_ack_enable,
             command=self.imu_jump_bootloader_command_generator,
             listen_packet=[0x4a, 0x49],
-            wait_timeout_after_command=15)
+            wait_timeout_after_command=15,
+            ethernet_reshake=self.do_reshake,
+            system_reset=self.send_system_reset_command)
         imu_boot_jump_bootloader_worker.on(
             UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
         imu_boot_jump_bootloader_worker.on(
@@ -929,7 +971,9 @@ class Provider_base(OpenDeviceBase):
             ethernet_ack_enable,
             command=self.imu_jump_bootloader_command_generator,
             listen_packet=[0x4a, 0x49],
-            wait_timeout_after_command=15)
+            wait_timeout_after_command=15,
+            ethernet_reshake=self.do_reshake,
+            system_reset=self.send_system_reset_command)
         imu_jump_bootloader_worker.on(
             UPGRADE_EVENT.BEFORE_COMMAND, self.do_reshake)
         imu_jump_bootloader_worker.on(
@@ -1062,6 +1106,7 @@ class Provider_base(OpenDeviceBase):
             and not self.is_in_bootloader:
             threading.Thread(target=self.ntrip_client_thread).start()
         
+        self.loop_upgrade_flag = False
         pass
 
     # command list
@@ -1142,7 +1187,6 @@ class Provider_base(OpenDeviceBase):
                 break
 
             parameter_values.append(result['data'])
-            time.sleep(0.3)
 
         if not has_error:
             self.parameters = parameter_values
@@ -1201,7 +1245,6 @@ class Provider_base(OpenDeviceBase):
                 if data['error'] > 0:
                     yield {'packetType': 'error', 'data': {'error': data}}
                     break
-            time.sleep(0.1)
 
         yield {'packetType': 'success', 'data': {'error': 0}}
 
@@ -1236,8 +1279,6 @@ class Provider_base(OpenDeviceBase):
             self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
             sC)
 
-        # self.communicator.write(command_line)
-        # result = self.get_input_result('sC', timeout=2)
         result = yield self._message_center.build(command=command_line.actual_command,
                                                   timeout=2)
 
@@ -1299,6 +1340,30 @@ class Provider_base(OpenDeviceBase):
             yield {'packetType': 'error', 'data': {'error': error}, 'raw_data': {'error': error}}
 
         yield {'packetType': 'success', 'data': data, 'raw_data': raw_data}
+    
+    @with_device_message
+    def set_unit_sn_message(self):
+        command_sn = b'\x01\xfc'
+        message_bytes = []
+
+        if self.communicator and self.communicator.config_unit_sn:
+            config_unit_sn = int(self.communicator.config_unit_sn)
+            message_bytes.append(config_unit_sn & 0xFF)
+            message_bytes.append((config_unit_sn >> 8) & 0xFF)
+            message_bytes.append((config_unit_sn >> 16) & 0xFF)
+            message_bytes.append((config_unit_sn >> 24) & 0xFF)
+            command_line = helper.build_ethernet_packet(
+                self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
+                command_sn, message_bytes)
+            result = yield self._message_center.build(command=command_line.actual_command, timeout=3)
+            error = result['error']
+            data = result['data']
+            raw_data = result['raw']
+            if error:
+                yield {'packetType': 'error', 'data': {'error': error}, 'raw_data': {'error': error}}
+            else:
+                self.send_system_reset_command()
+                os._exit(1)
 
     @with_device_message
     def reset_params(self, params, *args):  # pylint: disable=unused-argument

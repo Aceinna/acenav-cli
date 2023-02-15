@@ -1,4 +1,5 @@
 import functools
+import time
 from .message_center import (DeviceMessage)
 
 
@@ -17,6 +18,7 @@ def with_device_message(func):
         def check_result():
             global generator_result
             while not generator_result:
+                time.sleep(0.05)
                 continue
 
             if generator_result:
@@ -25,12 +27,14 @@ def with_device_message(func):
                     generator_result = None
                     next_device_message.on('finished', on_resolve)
                     next_device_message.send()
+
                     return check_result()
                 else:
                     return next_device_message
 
         def on_resolve(*args, **kwargs):
             global generator_result
+
             generator_result = {
                 'packet_type': kwargs['packet_type'],
                 'data': kwargs['data'],

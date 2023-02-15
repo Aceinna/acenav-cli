@@ -15,7 +15,7 @@ T = TypeVar('T')
 
 INTERFACE_LIST = INTERFACES.list()
 MODES = ['default', 'cli', 'receiver']
-TYPES_OF_LOG = ['rtkl', 'ins401', 'beidou', 'ins401c']
+TYPES_OF_LOG = ['rtkl', 'ins401', 'beidou', 'ins401c', 'ins402']
 KML_RATES = [1, 2, 5, 10]
 
 
@@ -45,6 +45,8 @@ def _build_args():
                         help="true or false")
     parser.add_argument("-m", dest='host_mac', metavar='', type=str,
                         help="The mac address for listen device data")
+    parser.add_argument("-sn", dest='unit_sn', metavar='', type=str,
+                        help="set the unit serial number")
     '''
     parser.add_argument("-board", dest='board', metavar='', type=str,
                         help="RTK330LA beidou")

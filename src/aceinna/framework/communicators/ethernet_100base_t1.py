@@ -27,6 +27,7 @@ class Ethernet(Communicator):
         self.filter_device_type = None
         self.filter_host_mac = None
         self.filter_host_mac_assigned = False
+        self.config_unit_sn = None
 
         self.iface_confirmed = False
         self.receive_cache = collections.deque(maxlen=20000)
@@ -41,6 +42,10 @@ class Ethernet(Communicator):
         if options:
             self.filter_host_mac_assigned = options.host_mac != 'auto'
             self.filter_host_mac = options.host_mac if self.filter_host_mac_assigned else None
+        
+        if options:
+            self.config_unit_sn = options.unit_sn != 'auto'
+            self.config_unit_sn = options.unit_sn if self.config_unit_sn else None
 
     def handle_iface_confirm_packet(self, packet):
         self.iface_confirmed = True

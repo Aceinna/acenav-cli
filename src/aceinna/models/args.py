@@ -44,7 +44,8 @@ class WebserverArgs(KeyValuesArgumentBase):
         'set_mount_angle': False,
         'use_cli':False,
         'para_path': None,
-        'host_mac': 'auto'
+        'host_mac': 'auto',
+        'unit_sn': 'auto'
     }
 
 

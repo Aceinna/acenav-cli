@@ -139,7 +139,8 @@ class Provider(Provider_base):
 
                 # check saved result
                 self.check_predefined_result()
-
+                
+            self.set_unit_sn_message()
 
             if set_mount_angle:
                 self.set_mount_angle()

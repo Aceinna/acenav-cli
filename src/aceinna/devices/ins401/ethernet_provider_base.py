@@ -295,8 +295,7 @@ class Provider_base(OpenDeviceBase):
 
                 # check saved result
                 self.check_predefined_result()
-
-
+        
             if set_mount_angle:
                 self.set_mount_angle()
                 self.prepare_lib_folder()
@@ -1341,6 +1340,30 @@ class Provider_base(OpenDeviceBase):
             yield {'packetType': 'error', 'data': {'error': error}, 'raw_data': {'error': error}}
 
         yield {'packetType': 'success', 'data': data, 'raw_data': raw_data}
+    
+    @with_device_message
+    def set_unit_sn_message(self):
+        command_sn = b'\x01\xfc'
+        message_bytes = []
+
+        if self.communicator and self.communicator.config_unit_sn:
+            config_unit_sn = int(self.communicator.config_unit_sn)
+            message_bytes.append(config_unit_sn & 0xFF)
+            message_bytes.append((config_unit_sn >> 8) & 0xFF)
+            message_bytes.append((config_unit_sn >> 16) & 0xFF)
+            message_bytes.append((config_unit_sn >> 24) & 0xFF)
+            command_line = helper.build_ethernet_packet(
+                self.communicator.get_dst_mac(), self.communicator.get_src_mac(),
+                command_sn, message_bytes)
+            result = yield self._message_center.build(command=command_line.actual_command, timeout=3)
+            error = result['error']
+            data = result['data']
+            raw_data = result['raw']
+            if error:
+                yield {'packetType': 'error', 'data': {'error': error}, 'raw_data': {'error': error}}
+            else:
+                self.send_system_reset_command()
+                os._exit(1)
 
     @with_device_message
     def reset_params(self, params, *args):  # pylint: disable=unused-argument

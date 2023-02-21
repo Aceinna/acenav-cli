@@ -1,6 +1,24 @@
 # CHANGELOG
 
 ---
+## 2.6.7， 02/15/2023
+- [INS402] Add ins402 parse command
+- [INS401] Add parameter configuration type to be filtered to resolve timeout issue
+- [INS401C] modify canfd setings, add can_id 0x181 0x282
+- [INS401C] set lever format issue
+- [INS401] log corrimu data
+- [INS401] Add FreeRTOS of ins firmware, after upgrade sta9100 SDK firmware, GPGGA fixed type is RTK_FLOAT
+- [INS401C] print ins401c serial number
+- [INS401] print ins and gnss lib version
+- [INS401] modify ins401c gyro unit
+- [INS402] add antenna switch enable(default value: 0) for INS402 8100 double antenna version
+- [INS402] add dual ant cali config
+- [INS402C] update canfd protocol
+- [INS402C] enable log id: 0x181, 0x282
+- [INS402C] modify .json file: modify canfd and can factor and unit of sigal GYRO_X GYRO_Y GYRO_Z, 0.0076293 to 0.00762951, unit s to deg/s
+- [INS401/INS402]Add set ins401 and ins402 unit serial number command, ".\acenav.exe -i 100base-t1 -sn XXXXXX" or ".\acenav.exe -i 100base-t1 --device-type INS402 -sn XXXXXX"
+- [INS402C] Update User DecoderLib
+
 ## 2.6.6， 09/23/2022
 
 - [INS401] The reply message 0xcc01 can't be received after the "JS" command is executed.

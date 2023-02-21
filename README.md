@@ -117,6 +117,17 @@ eg:
 
 After successful FW upgrade, the INS402 system restarts and starts logging data automatically. 
 
+## Set the Unit Serial Number
+# ins401
+```shell
+./acenav -i 100base-t1 -sn <Ins401 serial number>
+```
+
+# ins402
+```shell
+./acenav -i 100base-t1 --device-type INS402 -sn <Ins402 serial number>
+```
+
 # canfd app  
 
 ### run  

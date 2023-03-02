@@ -1593,7 +1593,7 @@
                 "is_extended_frame": false,
                 "is_fd": false,
                 "name": "BASE_RTCM",
-                "valid_len": 62,
+                "valid_len": 63,
                 "signals": [
                     {
                         "bit_length": 512,

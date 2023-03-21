@@ -21,12 +21,14 @@ def do_ping(communicator_type, device_access, filter_device_type):
 
     if communicator_type == INTERFACES.ETH_100BASE_T1:
         if device_access.filter_device_type == 'INS402':
-            pin_tools = ping_ins402
+            ping_tools = ping_ins402
         else:
-            pin_tools = ping_ins401
+            ping_tools = ping_ins401
         APP_CONTEXT.get_logger().logger.debug('Checking if is INS401 device...')
-        ping_result = pin_tools(device_access, None)
-        if ping_result:
-            return ping_result
+
+        if ping_tools:
+            ping_result = ping_tools(device_access, None)
+            if ping_result:
+                return ping_result
 
     return None

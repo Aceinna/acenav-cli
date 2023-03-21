@@ -128,6 +128,7 @@ class Ethernet(Communicator):
                 if i == 2:
                     print_red(
                         'Cannot confirm the device in ethernet 100base-t1 connection')
+                    os._exit(1)
                 else:
                     time.sleep(0.1)
 

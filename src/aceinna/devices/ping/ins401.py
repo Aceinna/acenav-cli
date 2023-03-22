@@ -126,5 +126,6 @@ def ping(communicator, *args):
         cmd_info = info_text.split(' ')
         if len(cmd_info) > 0:
             print_red('INS401 != {0}'.format(cmd_info[0]))
+            print(info_text)
 
     return None

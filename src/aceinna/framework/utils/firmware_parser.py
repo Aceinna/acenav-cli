@@ -27,6 +27,8 @@ def parser(content, parser_rules):
             part_data_end_pos = part_data_len_pos + part_data_len
             parsed_content[rule.name] = content[part_data_len_pos: part_data_end_pos]
             current_pos = part_data_end_pos
+            if current_pos == len(content):
+                break
         else:
             parsed_content[rule.name] = b''
 

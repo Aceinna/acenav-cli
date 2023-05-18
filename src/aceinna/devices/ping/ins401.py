@@ -3,6 +3,8 @@ import time
 import struct
 from ...framework.utils import (helper, resource)
 from ...framework.context import APP_CONTEXT
+from ...framework.utils.print import (print_red)
+
 pG = [0x01, 0xcc]
 
 
@@ -120,5 +122,10 @@ def ping(communicator, *args):
             return bootloader_ping_info
 
         return None
+    else:
+        cmd_info = info_text.split(' ')
+        if len(cmd_info) > 0:
+            print_red('INS401 != {0}'.format(cmd_info[0]))
+            print(info_text)
 
     return None

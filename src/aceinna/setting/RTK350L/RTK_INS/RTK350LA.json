@@ -42,63 +42,83 @@
                 "name": "d1",
                 "value": 10
             },
-                        {
+            {
                 "paramId": 6,
-                "name": "pri lever arm x",
-                "value": 1.19
+                "name": "s1 port",
+                "value": 1
             },
             {
                 "paramId": 7,
+                "name": "gN port",
+                "value": 1
+            },
+            {
+                "paramId": 8,
+                "name": "iN port",
+                "value": 1
+            },
+            {
+                "paramId": 9,
+                "name": "d1 port",
+                "value": 1
+            },
+            {
+                "paramId": 10,
+                "name": "pri lever arm x",
+                "value": 2.5
+            },
+            {
+                "paramId": 11,
                 "name": "pri lever arm y",
                 "value": -0.24
             },
             {
-                "paramId": 8,
+                "paramId": 12,
                 "name": "pri lever arm z",
                 "value": -0.9
             },
             {
-                "paramId": 9,
+                "paramId": 13,
                 "name": "vrp lever arm x",
                 "value": 0.0
             },
             {
-                "paramId": 10,
+                "paramId": 14,
                 "name": "vrp lever arm y",
                 "value": 0.0
             },
             {
-                "paramId": 11,
+                "paramId": 15,
                 "name": "vrp lever arm z",
                 "value": 0.0
             },
             {
-                "paramId": 12,
+                "paramId": 16,
                 "name": "user lever arm x",
                 "value": 1.19
             },
             {
-                "paramId": 13,
+                "paramId": 17,
                 "name": "user lever arm y",
                 "value": -0.24
             },
             {
-                "paramId": 14,
+                "paramId": 18,
                 "name": "user lever arm z",
                 "value": -0.9
             },
             {
-                "paramId": 15,
+                "paramId": 19,
                 "name": "rotation rbvx",
                 "value": 0.0
             },
             {
-                "paramId": 16,
+                "paramId": 20,
                 "name": "rotation rbvy",
                 "value": 0.0
             },
             {
-                "paramId": 17,
+                "paramId": 21,
                 "name": "rotation rbvz",
                 "value": 0.0
             }
@@ -173,8 +193,40 @@
 			"name": "INSSTD Packet Rate",
 			"argument": "d1"
 		},
-		{
+        {
 			"paramId": 6,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "RAWIMU Packet Port",
+			"argument": "d1"
+		},
+        {
+			"paramId": 7,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "BESTGNSS Packet Port",
+			"argument": "d1"
+		},
+        {
+			"paramId": 8,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "INSPVA Packet Port",
+			"argument": "d1"
+		},
+        {
+			"paramId": 9,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "INSSTD Packet Port",
+			"argument": "d1"
+		},
+		{
+			"paramId": 10,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -182,7 +234,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 7,
+			"paramId": 11,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -190,7 +242,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 8,
+			"paramId": 12,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -198,7 +250,7 @@
 			"value_accuracy": 4
 		},
         {
-			"paramId": 9,
+			"paramId": 13,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -206,7 +258,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 10,
+			"paramId": 14,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -214,7 +266,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 11,
+			"paramId": 15,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -222,7 +274,7 @@
 			"value_accuracy": 4
 		},
         {
-			"paramId": 12,
+			"paramId": 16,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -230,7 +282,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 13,
+			"paramId": 17,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -238,7 +290,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 14,
+			"paramId": 18,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -246,7 +298,7 @@
 			"value_accuracy": 4
 		},
         {
-			"paramId": 15,
+			"paramId": 19,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -254,7 +306,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 16,
+			"paramId": 20,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -262,7 +314,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 17,
+			"paramId": 21,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",

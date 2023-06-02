@@ -236,7 +236,9 @@ class beidouProviderBase(OpenDeviceBase):
 
         self.app_info = {
             'app_name': app_name,
-            'version': text
+            # Tag20230530 modify by wrj, change key to firmware from version, to keep same with ins401 script
+            # 'version': text
+            'firmware': text
         }
 
     def load_properties(self):

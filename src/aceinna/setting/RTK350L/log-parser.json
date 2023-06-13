@@ -1,7 +1,7 @@
 {
-    "version": "2.0.5",
+    "version": "2.0.5", 
     "userNMEAList": ["$GPGGA", "$GPRMC", "$GPGSV", "$GLGSV", "$GAGSV", "$BDGSV", "$GPGSA", "$GLGSA", "$GAGSA", "$BDGSA"],
-	"userPacketsTypeList": ["s1", "gN", "iN", "d1", "sT", "fM", "o1", "rt"],
+	"userPacketsTypeList": ["S2", "gN", "iN", "d1", "sT", "fM", "o1", "rt"],
 	"userOutputPackets": [
         {
             "name": "o1",

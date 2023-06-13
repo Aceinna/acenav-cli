@@ -24,7 +24,7 @@
         "userParameters": [
             {
                 "paramId": 2,
-                "name": "s1",
+                "name": "S2",
                 "value": 100
             },
             {
@@ -44,7 +44,7 @@
             },
             {
                 "paramId": 6,
-                "name": "s1 port",
+                "name": "S2 port",
                 "value": 1
             },
             {
@@ -167,7 +167,7 @@
 			"paramType": "input",
 			"type": "uint8",
 			"name": "RAWIMU Packet Rate",
-			"argument": "s1"
+			"argument": "S2"
 		},
         {
 			"paramId": 3,
@@ -372,7 +372,7 @@
 		],
 		"outputPackets": [
             {
-                "name": "s1",
+                "name": "S2",
                 "isList": 0,
                 "payload": [
                     {

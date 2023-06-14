@@ -39,7 +39,7 @@
             },
             {
                 "paramId": 5,
-                "name": "d1",
+                "name": "iS",
                 "value": 10
             },
             {
@@ -59,7 +59,7 @@
             },
             {
                 "paramId": 9,
-                "name": "d1 port",
+                "name": "iS port",
                 "value": 1
             },
             {

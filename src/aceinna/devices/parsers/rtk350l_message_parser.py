@@ -75,6 +75,131 @@ class OpenDevicePacket:
         crc_value = self._raw_data_bytes[-2:]
         return crc_calculate_value == crc_value
 
+
+# class UartMessageParser(MessageParserBase):
+#     _current_analysis_status = ANALYSIS_STATUS.INIT
+#     _current_packet = None
+#     _read_index = 0
+#     _current_packet_type = []
+
+#     def __init__(self, configuration):
+#         super(UartMessageParser, self).__init__(configuration)
+#         self._current_analysis_status = ANALYSIS_STATUS.INIT
+#         self._sync_pattern = collections.deque(2*[0], 2)
+#         self._current_packet_type = []
+
+#     def set_run_command(self, command):
+#         pass
+
+#     def analyse(self, data):
+#         for value in data:
+#             if self._current_analysis_status == ANALYSIS_STATUS.INIT:
+#                 self._sync_pattern.append(value)
+
+#                 if self._sync_pattern[0] == MSG_HEADER[0] and self._sync_pattern[1] == MSG_HEADER[1]:
+#                     self._current_packet = OpenDevicePacket()
+#                     self._current_packet.accept_to_header(
+#                         list(self._sync_pattern))
+#                     self._current_analysis_status = ANALYSIS_STATUS.FOUND_HEADER
+#                     self._read_index = len(MSG_HEADER)
+
+#                 continue
+
+#             if self._current_analysis_status == ANALYSIS_STATUS.FOUND_HEADER:
+#                 if len(self._current_packet_type) < 2:
+#                     self._current_packet_type.append(value)
+
+#                 if len(self._current_packet_type) == 2:
+#                     self._current_packet.accept_to_packet_type(
+#                         self._current_packet_type)
+#                     self._current_analysis_status = ANALYSIS_STATUS.FOUND_PACKET_TYPE
+#                     self._read_index += 2
+
+#                 continue
+
+#             if self._current_analysis_status == ANALYSIS_STATUS.FOUND_PACKET_TYPE:
+#                 self._current_packet.accept_to_length(value)
+#                 self._current_analysis_status = ANALYSIS_STATUS.FOUND_PAYLOAD_LENGTH
+#                 self._read_index += 1
+#                 continue
+
+#             if self._current_analysis_status == ANALYSIS_STATUS.FOUND_PAYLOAD_LENGTH:
+#                 self._current_packet.accept_to_payload(value)
+#                 self._read_index += 1
+#                 if self._read_index == self._current_packet.payload_length + 2:
+#                     # calculate crc
+#                     crc_result = self._current_packet.check_crc()
+#                     if not crc_result:
+#                         self.reset()
+#                         continue
+
+#                     # crc valid
+#                     self._current_analysis_status = ANALYSIS_STATUS.CRC_PASSED
+
+#                 if self._current_analysis_status == ANALYSIS_STATUS.CRC_PASSED:
+#                     #self.crc_passed_count += 1
+#                     # packets.push(this._currentPacket);
+#                     self._parse_message(self._current_packet)
+#                     self.reset()
+
+#                 continue
+
+#     def reset(self):
+#         self._current_analysis_status = ANALYSIS_STATUS.INIT
+#         self._sync_pattern = collections.deque(2*[0], 2)
+#         self._current_packet_type = []
+#         self._read_index = 0
+
+#     def _parse_message(self, data_packet):
+#         # parse interactive commands
+#         is_interactive_cmd = INPUT_PACKETS.__contains__(
+#             data_packet.packet_type)
+#         if is_interactive_cmd:
+#             self._parse_input_packet(data_packet)
+#         else:
+#             # consider as output packet, parse output Messages
+#             self._parse_output_packet(data_packet)
+
+#     def _parse_input_packet(self, data_packet):
+#         payload_parser = match_command_handler(data_packet.packet_type)
+#         if payload_parser:
+#             data, error = payload_parser(
+#                 data_packet.payload, self.properties['userConfiguration'])
+
+#             self.emit('command',
+#                       packet_type=data_packet.packet_type,
+#                       data=data,
+#                       error=error,
+#                       raw=data_packet.raw)
+#         else:
+#             print('[Warning] Unsupported command {0}'.format(
+#                 data_packet.packet_type))
+
+#     def _parse_output_packet(self, data_packet):
+#         # check if it is the valid out packet
+#         payload_parser = None
+#         is_other_output_packet = OTHER_OUTPUT_PACKETS.__contains__(
+#             data_packet.packet_type)
+#         if is_other_output_packet:
+#             payload_parser = other_output_parser
+#             data = payload_parser(data_packet.payload)
+#             return
+
+#         payload_parser = common_continuous_parser
+
+#         output_packet_config = next(
+#             (x for x in self.properties['userMessages']['outputPackets']
+#                 if x['name'] == data_packet.packet_type), None)
+#         data = payload_parser(data_packet.payload, output_packet_config)
+
+#         if not data:
+#             return
+#         self.emit('continuous_message',
+#                   packet_type=data_packet.packet_type,
+#                   data=data,
+#                   event_time=time.time())
+
+
 class UartMessageParser(MessageParserBase):
     def __init__(self, configuration):
         super(UartMessageParser, self).__init__(configuration)

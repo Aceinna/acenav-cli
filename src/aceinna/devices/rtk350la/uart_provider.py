@@ -1,7 +1,7 @@
 import time 
 import serial
 import struct
-
+from ..decorator import with_device_message
 from ..base.rtk_provider_base import RTKProviderBase
 from ..upgrade_workers import (
     FirmwareUpgradeWorker,
@@ -30,6 +30,58 @@ class Provider(RTKProviderBase):
             'user': 0,
             'rtcm': -2,
             'debug': 1,
+        }
+
+
+    @with_device_message
+    def get_params(self, *args):  # pylint: disable=unused-argument
+        '''
+        Get all parameters
+        '''
+        has_error = False
+        parameter_values = []
+
+        if self.app_info['app_name'] == 'RTK_INS':
+            conf_parameters = self.properties['userConfiguration']
+            conf_parameters_len = len(conf_parameters)-1
+            step = 10
+
+            for i in range(2, conf_parameters_len, step):
+                start_byte = i
+                end_byte = i+step-1 if i+step < conf_parameters_len else conf_parameters_len
+                time.sleep(0.2)
+
+                para_num = end_byte - start_byte + 1
+                message_bytes = []
+                message_bytes.append(para_num)
+                for i in range(start_byte, end_byte+1):
+                    message_bytes.append(i)
+                command_line = helper.build_packet(
+                    'gB', message_bytes)
+                result = yield self._message_center.build(command=command_line, timeout=10)
+                if result['error']:
+                    has_error = True
+                    break
+
+                parameter_values.extend(result['data'])
+        else:
+            command_line = helper.build_input_packet('gA')
+            result = yield self._message_center.build(command=command_line, timeout=3)
+            if result['error']:
+                has_error = True
+
+            parameter_values = result['data']
+
+        if not has_error:
+            self.parameters = parameter_values
+            yield {
+                'packetType': 'inputParams',
+                'data': parameter_values
+            }
+
+        yield {
+            'packetType': 'error',
+            'data': 'No Response'
         }
 
     def thread_debug_port_receiver(self, *args, **kwargs):

@@ -4,7 +4,7 @@ import time
 from ..base.message_parser_base import MessageParserBase
 from ...framework.utils import helper
 from ...framework.context import APP_CONTEXT
-from .rtk330l_packet_parser import (
+from .rtk350l_packet_parser import (
     match_command_handler, common_continuous_parser, other_output_parser)
 
 MSG_HEADER = [0x55, 0x55]

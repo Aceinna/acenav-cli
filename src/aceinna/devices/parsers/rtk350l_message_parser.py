@@ -1,5 +1,5 @@
 import collections
-import operator
+import operator 
 import time
 from ..base.message_parser_base import MessageParserBase
 from ...framework.utils import helper
@@ -270,7 +270,6 @@ class UartMessageParser(MessageParserBase):
         if payload_parser:
             data, error = payload_parser(
                 payload, self.properties['userConfiguration'])
-
             self.emit('command',
                       packet_type=packet_type,
                       data=data,

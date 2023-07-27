@@ -2,7 +2,7 @@ import sys
 import struct
 import collections
 from . import filter_nan
-from .rtk330l_field_parser import decode_value
+from .rtk330l_field_parser import decode_value 
 from ...framework.utils.print import print_yellow
 from ...framework.context import APP_CONTEXT
 
@@ -204,16 +204,15 @@ def update_parameters_parser(payload, user_configuration):
     '''
     uB parser
     '''
-    error = False
+    # print('uB response: ', payload)
+    error = True
     data = 0
-    for i in range(1, len(payload), 2):
-        if payload[i] != 0:
+    # print('data', payload)
+    for i in range(0, len(payload), 2):
+        if payload[i+1] != 0:
             error = False
             data = payload[i]
             break
-    # data = decode_value('uint8', payload[1:2])
-    # if data:
-    #     error = True
     return data, error
 
 

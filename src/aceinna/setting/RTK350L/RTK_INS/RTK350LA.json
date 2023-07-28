@@ -24,101 +24,161 @@
         "userParameters": [
             {
                 "paramId": 2,
-                "name": "S2",
-                "value": 100
+                "name": "S2 rate",
+                "value": 200
             },
             {
                 "paramId": 3,
-                "name": "gN",
+                "name": "gN rate",
                 "value": 1
             },
             {
                 "paramId": 4,
-                "name": "iN",
+                "name": "iN rate",
                 "value": 100
             },
             {
                 "paramId": 5,
-                "name": "iS",
-                "value": 10
+                "name": "iS rate",
+                "value": 100
             },
             {
                 "paramId": 6,
+                "name": "sT rate",
+                "value": 100
+            },
+            {
+                "paramId": 7,
+                "name": "iB rate",
+                "value": 100
+            },
+            {
+                "paramId": 8,
+                "name": "RM rate",
+                "value": 100
+            },
+            {
+                "paramId": 9,
+                "name": "rr rate",
+                "value": 255
+            },
+            {
+                "paramId": 10,
+                "name": "pvt rate",
+                "value": 100
+            },
+            {
+                "paramId": 11,
+                "name": "nmea rate",
+                "value": 1
+            },                        
+            {
+                "paramId": 12,
                 "name": "S2 port",
                 "value": 1
             },
             {
-                "paramId": 7,
+                "paramId": 13,
                 "name": "gN port",
                 "value": 1
             },
             {
-                "paramId": 8,
+                "paramId": 14,
                 "name": "iN port",
                 "value": 1
             },
             {
-                "paramId": 9,
+                "paramId": 15,
                 "name": "iS port",
                 "value": 1
             },
             {
-                "paramId": 10,
+                "paramId": 16,
+                "name": "sT port",
+                "value": 1
+            },
+            {
+                "paramId": 17,
+                "name": "iB port",
+                "value": 1
+            },
+            {
+                "paramId": 18,
+                "name": "RM port",
+                "value": 1
+            },
+            {
+                "paramId": 19,
+                "name": "rr port",
+                "value": 1
+            },
+            {
+                "paramId": 20,
+                "name": "pvt port",
+                "value": 1
+            },
+            {
+                "paramId": 21,
+                "name": "nmea port",
+                "value": 1
+            },                        
+            {
+                "paramId": 22,
                 "name": "pri lever arm x",
                 "value": 2.5
             },
             {
-                "paramId": 11,
+                "paramId": 23,
                 "name": "pri lever arm y",
                 "value": -0.24
             },
             {
-                "paramId": 12,
+                "paramId": 24,
                 "name": "pri lever arm z",
                 "value": -0.9
             },
             {
-                "paramId": 13,
+                "paramId": 25,
                 "name": "vrp lever arm x",
                 "value": 0.0
             },
             {
-                "paramId": 14,
+                "paramId": 26,
                 "name": "vrp lever arm y",
                 "value": 0.0
             },
             {
-                "paramId": 15,
+                "paramId": 27,
                 "name": "vrp lever arm z",
                 "value": 0.0
             },
             {
-                "paramId": 16,
+                "paramId": 28,
                 "name": "user lever arm x",
                 "value": 1.19
             },
             {
-                "paramId": 17,
+                "paramId": 29,
                 "name": "user lever arm y",
                 "value": -0.24
             },
             {
-                "paramId": 18,
+                "paramId": 30,
                 "name": "user lever arm z",
                 "value": -0.9
             },
             {
-                "paramId": 19,
+                "paramId": 31,
                 "name": "rotation rbvx",
                 "value": 0.0
             },
             {
-                "paramId": 20,
+                "paramId": 32,
                 "name": "rotation rbvy",
                 "value": 0.0
             },
             {
-                "paramId": 21,
+                "paramId": 33,
                 "name": "rotation rbvz",
                 "value": 0.0
             }
@@ -191,42 +251,138 @@
 			"paramType": "input",
 			"type": "uint8",
 			"name": "INSSTD Packet Rate",
-			"argument": "d1"
+			"argument": "iS"
 		},
         {
 			"paramId": 6,
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
-			"name": "RAWIMU Packet Port",
-			"argument": "d1"
+			"name": "RUNSTATUS Packet Rate",
+			"argument": "sT"
 		},
         {
 			"paramId": 7,
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
-			"name": "BESTGNSS Packet Port",
-			"argument": "d1"
+			"name": "INSBIAS Packet Rate",
+			"argument": "iB"
 		},
         {
 			"paramId": 8,
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
-			"name": "INSPVA Packet Port",
-			"argument": "d1"
+			"name": "MONITOR Packet Rate",
+			"argument": "RM"
 		},
         {
 			"paramId": 9,
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
+			"name": "ROVER RTCM Packet Rate",
+			"argument": "rr"
+		},
+        {
+			"paramId": 10,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "PVT Packet Rate",
+			"argument": "pv"
+		},
+        {
+			"paramId": 11,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "NMEA Packet Rate",
+			"argument": "nm"
+		},                
+        {
+			"paramId": 12,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "RAWIMU Packet Port",
+			"argument": "S2"
+		},
+        {
+			"paramId": 13,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "BESTGNSS Packet Port",
+			"argument": "gN"
+		},
+        {
+			"paramId": 14,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "INSPVA Packet Port",
+			"argument": "iN"
+		},
+        {
+			"paramId": 15,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "INSSTD Packet Port",
+			"argument": "iS"
+		},
+        {
+			"paramId": 16,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
 			"name": "INSSTD Packet Port",
 			"argument": "d1"
 		},
+        {
+			"paramId": 17,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "RUNSTATUS Packet Port",
+			"argument": "sT"
+		},
+        {
+			"paramId": 18,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "INSBIAS Packet Port",
+			"argument": "iS"
+		},
+        {
+			"paramId": 19,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "MONITOR Packet Port",
+			"argument": "RM"
+		},
+        {
+			"paramId": 20,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "PVT Packet Port",
+			"argument": "pv"
+		},     
+        {
+			"paramId": 21,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "NMEA Packet Port",
+			"argument": "nm"
+		},     
 		{
-			"paramId": 10,
+			"paramId": 22,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -234,7 +390,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 11,
+			"paramId": 23,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -242,7 +398,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 12,
+			"paramId": 24,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -250,7 +406,7 @@
 			"value_accuracy": 4
 		},
         {
-			"paramId": 13,
+			"paramId": 25,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -258,7 +414,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 14,
+			"paramId": 26,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -266,7 +422,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 15,
+			"paramId": 27,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -274,7 +430,7 @@
 			"value_accuracy": 4
 		},
         {
-			"paramId": 16,
+			"paramId": 28,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -282,7 +438,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 17,
+			"paramId": 29,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -290,7 +446,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 18,
+			"paramId": 30,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -298,7 +454,7 @@
 			"value_accuracy": 4
 		},
         {
-			"paramId": 19,
+			"paramId": 31,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -306,7 +462,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 20,
+			"paramId": 32,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -314,7 +470,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 21,
+			"paramId": 33,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",

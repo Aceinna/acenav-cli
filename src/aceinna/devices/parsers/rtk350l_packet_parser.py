@@ -103,7 +103,6 @@ def get_parameters_by_block_parser(payload, user_configuration):
                 param_type, payload[index+2: index+2+para_len], exist_param_conf)
         # data_len = data_len - 2 - para_len
         index+= para_len+1+1
-
         data.append({
             "paramId": para_id,
             "name": exist_param_conf['name'],

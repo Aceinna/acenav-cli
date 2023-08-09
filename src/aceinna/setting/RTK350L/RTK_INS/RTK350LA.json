@@ -59,7 +59,7 @@
             },
             {
                 "paramId": 9,
-                "name": "rr rate",
+                "name": "rR rate",
                 "value": 255
             },
             {
@@ -71,116 +71,181 @@
                 "paramId": 11,
                 "name": "nmea rate",
                 "value": 1
-            },                        
+            },
             {
                 "paramId": 12,
-                "name": "S2 port",
-                "value": 1
+                "name": "odo rate",
+                "value": 255
             },
             {
                 "paramId": 13,
-                "name": "gN port",
+                "name": "movbs rate",
                 "value": 1
             },
             {
                 "paramId": 14,
-                "name": "iN port",
+                "name": "heading rate",
                 "value": 1
-            },
+            },               
             {
                 "paramId": 15,
-                "name": "iS port",
+                "name": "S2 port",
                 "value": 1
             },
             {
                 "paramId": 16,
-                "name": "sT port",
+                "name": "gN port",
                 "value": 1
             },
             {
                 "paramId": 17,
-                "name": "iB port",
+                "name": "iN port",
                 "value": 1
             },
             {
                 "paramId": 18,
-                "name": "RM port",
+                "name": "iS port",
                 "value": 1
             },
             {
                 "paramId": 19,
-                "name": "rr port",
+                "name": "sT port",
                 "value": 1
             },
             {
                 "paramId": 20,
-                "name": "pvt port",
+                "name": "iB port",
                 "value": 1
             },
             {
                 "paramId": 21,
-                "name": "nmea port",
+                "name": "RM port",
                 "value": 1
-            },                        
+            },
             {
                 "paramId": 22,
+                "name": "rR port",
+                "value": 1
+            },
+            {
+                "paramId": 23,
+                "name": "pvt port",
+                "value": 1
+            },
+            {
+                "paramId": 24,
+                "name": "nmea port",
+                "value": 1
+            }, 
+            {
+                "paramId": 25,
+                "name": "odo port",
+                "value": 1
+            },
+            {
+                "paramId": 26,
+                "name": "movbs port",
+                "value": 1
+            },
+            {
+                "paramId": 27,
+                "name": "heading port",
+                "value": 1
+            },
+            {
+                "paramId": 28,
                 "name": "pri lever arm x",
                 "value": 2.5
             },
             {
-                "paramId": 23,
+                "paramId": 29,
                 "name": "pri lever arm y",
                 "value": -0.24
             },
             {
-                "paramId": 24,
+                "paramId": 30,
                 "name": "pri lever arm z",
                 "value": -0.9
             },
             {
-                "paramId": 25,
+                "paramId": 31,
                 "name": "vrp lever arm x",
                 "value": 0.0
             },
             {
-                "paramId": 26,
+                "paramId": 32,
                 "name": "vrp lever arm y",
                 "value": 0.0
             },
             {
-                "paramId": 27,
+                "paramId": 33,
                 "name": "vrp lever arm z",
                 "value": 0.0
             },
             {
-                "paramId": 28,
+                "paramId": 34,
                 "name": "user lever arm x",
                 "value": 1.19
             },
             {
-                "paramId": 29,
+                "paramId": 35,
                 "name": "user lever arm y",
                 "value": -0.24
             },
             {
-                "paramId": 30,
+                "paramId": 36,
                 "name": "user lever arm z",
                 "value": -0.9
             },
             {
-                "paramId": 31,
+                "paramId": 37,
                 "name": "rotation rbvx",
                 "value": 0.0
             },
             {
-                "paramId": 32,
+                "paramId": 38,
                 "name": "rotation rbvy",
                 "value": 0.0
             },
             {
-                "paramId": 33,
+                "paramId": 39,
                 "name": "rotation rbvz",
                 "value": 0.0
+            },
+            {
+                "paramId": 40,
+                "name": "second lever arm x",
+                "value": 0.0
+            },
+            {
+                "paramId": 41,
+                "name": "second lever arm y",
+                "value": 0.0
+            },
+            {
+                "paramId": 42,
+                "name": "second lever arm z",
+                "value": 0.0
+            },
+            {
+                "paramId": 43,
+                "name": "rotation align x",
+                "value": 0.0
+            },
+            {
+                "paramId": 44,
+                "name": "rotation align y",
+                "value": 0.0
+            },
+            {
+                "paramId": 45,
+                "name": "rotation align z",
+                "value": 0.0
+            },
+            {
+                "paramId": 46,
+                "name": "master_slave_type",
+                "value": 0
             }
 		],
 		"ntrip":[
@@ -283,7 +348,7 @@
 			"paramType": "input",
 			"type": "uint8",
 			"name": "ROVER RTCM Packet Rate",
-			"argument": "rr"
+			"argument": "rR"
 		},
         {
 			"paramId": 10,
@@ -300,9 +365,33 @@
 			"type": "uint8",
 			"name": "NMEA Packet Rate",
 			"argument": "nm"
-		},                
+		},
         {
 			"paramId": 12,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "odo Packet Rate",
+			"argument": "odo"
+		},
+        {
+			"paramId": 13,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "movbs Packet Rate",
+			"argument": "nm"
+		},
+        {
+			"paramId": 14,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "heading Packet Rate",
+			"argument": "nm"
+		},
+        {
+			"paramId": 15,
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
@@ -310,7 +399,7 @@
 			"argument": "S2"
 		},
         {
-			"paramId": 13,
+			"paramId": 16,
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
@@ -318,7 +407,7 @@
 			"argument": "gN"
 		},
         {
-			"paramId": 14,
+			"paramId": 17,
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
@@ -326,35 +415,11 @@
 			"argument": "iN"
 		},
         {
-			"paramId": 15,
-			"category": "General",
-			"paramType": "input",
-			"type": "uint8",
-			"name": "INSSTD Packet Port",
-			"argument": "iS"
-		},
-        {
-			"paramId": 16,
-			"category": "General",
-			"paramType": "input",
-			"type": "uint8",
-			"name": "INSSTD Packet Port",
-			"argument": "d1"
-		},
-        {
-			"paramId": 17,
-			"category": "General",
-			"paramType": "input",
-			"type": "uint8",
-			"name": "RUNSTATUS Packet Port",
-			"argument": "sT"
-		},
-        {
 			"paramId": 18,
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
-			"name": "INSBIAS Packet Port",
+			"name": "INSSTD Packet Port",
 			"argument": "iS"
 		},
         {
@@ -362,11 +427,35 @@
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
+			"name": "INSSTD Packet Port",
+			"argument": "d1"
+		},
+        {
+			"paramId": 20,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "RUNSTATUS Packet Port",
+			"argument": "sT"
+		},
+        {
+			"paramId": 21,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "INSBIAS Packet Port",
+			"argument": "iS"
+		},
+        {
+			"paramId": 22,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
 			"name": "MONITOR Packet Port",
 			"argument": "RM"
 		},
         {
-			"paramId": 20,
+			"paramId": 23,
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
@@ -374,15 +463,39 @@
 			"argument": "pv"
 		},     
         {
-			"paramId": 21,
+			"paramId": 24,
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
 			"name": "NMEA Packet Port",
 			"argument": "nm"
-		},     
+		},
+        {
+			"paramId": 25,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "odo Packet Port",
+			"argument": "nm"
+		},
+        {
+			"paramId": 26,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "movbs Packet Port",
+			"argument": "nm"
+		},
+        {
+			"paramId": 27,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "heading Packet Port",
+			"argument": "nm"
+		},
 		{
-			"paramId": 22,
+			"paramId": 28,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -390,7 +503,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 23,
+			"paramId": 29,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -398,7 +511,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 24,
+			"paramId": 30,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -406,7 +519,7 @@
 			"value_accuracy": 4
 		},
         {
-			"paramId": 25,
+			"paramId": 31,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -414,7 +527,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 26,
+			"paramId": 32,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -422,7 +535,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 27,
+			"paramId": 33,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -430,7 +543,7 @@
 			"value_accuracy": 4
 		},
         {
-			"paramId": 28,
+			"paramId": 34,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -438,7 +551,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 29,
+			"paramId": 35,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -446,7 +559,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 30,
+			"paramId": 36,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -454,7 +567,7 @@
 			"value_accuracy": 4
 		},
         {
-			"paramId": 31,
+			"paramId": 37,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -462,7 +575,7 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 32,
+			"paramId": 38,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
@@ -470,12 +583,68 @@
 			"value_accuracy": 4
 		},
 		{
-			"paramId": 33,
+			"paramId": 39,
 			"category": "INS",
 			"paramType": "input",
 			"type": "float",
 			"name": "rotation rbvz",
 			"value_accuracy": 4
+		},
+		{
+			"paramId": 40,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "second lever arm x",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 41,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "second lever arm y",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 42,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "second lever arm z",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 43,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "rotation align x",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 44,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "rotation align y",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 45,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "rotation align z",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 46,
+			"category": "type",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "master_slave_type",
+			"value_accuracy": 1
 		}
 	],
 	"userMessages": {

@@ -40,17 +40,17 @@
             {
                 "paramId": 5,
                 "name": "iS rate",
-                "value": 100
+                "value": 10
             },
             {
                 "paramId": 6,
                 "name": "sT rate",
-                "value": 100
+                "value": 10
             },
             {
                 "paramId": 7,
                 "name": "iB rate",
-                "value": 100
+                "value": 10
             },
             {
                 "paramId": 8,
@@ -242,8 +242,33 @@
                 "name": "rotation align z",
                 "value": 0.0
             },
+			{
+				"paramId": 46,
+				"name": "nhc_enable",
+				"value": 1
+			},
+			{
+				"paramId": 47,
+				"name": "odo_enable",
+				"value": 1
+			},
+			{
+				"paramId": 48,
+				"name": "cali_enable",
+				"value": 1
+			},
+			{
+				"paramId": 49,
+				"name": "baseline length",
+				"value": 0.8
+			},
+			{
+				"paramId": 50,
+				"name": "heading calibration",
+				"value": 0.0
+			},
             {
-                "paramId": 46,
+                "paramId": 51,
                 "name": "master_slave_type",
                 "value": 0
             }
@@ -640,6 +665,46 @@
 		},
 		{
 			"paramId": 46,
+			"category": "INS",
+			"paramType": "input",
+			"name": "nhc_enable",
+			"type": "uint8",
+			"value_accuracy": 1
+		},
+		{
+			"paramId": 47,
+			"category": "INS",
+			"paramType": "input",
+			"name": "odo_enable",
+			"type": "uint8",
+			"value_accuracy": 1
+		},
+		{
+			"paramId": 48,
+			"category": "INS",
+			"paramType": "input",
+			"name": "cali_enable",
+			"type": "uint8",
+			"value_accuracy": 1
+		},
+		{
+			"paramId": 49,
+			"category": "INS",
+			"paramType": "input",
+			"name": "baseline length",
+			"type": "float",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 50,
+			"category": "INS",
+			"paramType": "input",
+			"name": "heading calibration",
+			"type": "float",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 51,
 			"category": "type",
 			"paramType": "input",
 			"type": "uint8",

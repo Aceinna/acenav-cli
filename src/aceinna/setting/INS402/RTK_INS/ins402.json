@@ -737,29 +737,19 @@
             "function": "save_handler"
         },
         {
-            "name": "connect",
-            "description": "Find OpenIMU device",
-            "function": "connect_handler"
-        },
-        {
             "name": "upgrade",
             "description": "Upgrade firmware",
             "function": "upgrade_handler"
         },
         {
-            "name": "record",
-            "description": "Record output data of OpenIMU on local machine",
-            "function": "record_handler"
+            "name": "configure",
+            "description": "Update the configuration on algorithm",
+            "function": "configure_handler"
         },
         {
             "name": "stop",
             "description": "stop recording outputs on local machine",
             "function": "stop_handler"
-        },
-        {
-            "name": "server_start",
-            "description": "start server thread and must use exit command to quit",
-            "function": "server_start_handler"
         },
         {
             "name": "get",

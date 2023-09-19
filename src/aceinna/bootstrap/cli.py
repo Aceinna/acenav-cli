@@ -150,7 +150,7 @@ class CommandLine:
                 token = input(">>")
             else:
                 token = input("")
-            
+
             self.input_string = re.split(r'\s+', token)
             if token.strip() == 'exit':
                 break
@@ -162,7 +162,10 @@ class CommandLine:
             for command in self.supported_commands:
                 if command['name'] == self.input_string[0]:
                     self.current_command = command
-                    eval('self.%s()' % (command['function']))
+                    try:
+                        eval('self.%s()' % (command['function']))
+                    except Exception as e:
+                        print('Invalid command, please check your input')
                     cmd_flag = False
                     break
             else:
@@ -222,6 +225,21 @@ class CommandLine:
 
             # TODO: check device is idel
             self._driver.execute('upgrade_framework', params)
+        return True
+
+    def configure_handler(self):
+        input_args = len(self.input_string)
+        if input_args == 1:
+            print("Usage:")
+            print("confgiure config_file_name")
+        else:
+            if self.options and self.options.interface == '100base-t1':
+                params = self.input_string
+            else:
+                params = self.input_string[1]
+
+            # TODO: check device is idel
+            self._driver.execute('configure_algorithm', params)
         return True
 
     def record_handler(self):

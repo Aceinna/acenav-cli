@@ -353,6 +353,7 @@ def match_command_handler(packet_type):
         b'\x02\x0b': common_input_parser,
         b'\x09\x0a': common_input_parser,
         b'\x09\xaa': common_input_parser,
+        b'\xa4\x0a': common_input_parser,
         b'\x01\xfc': set_serial_number_parser
     }
     return parser_dict.get(packet_type)

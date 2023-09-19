@@ -13,10 +13,10 @@ PACKET_TYPE_INDEX = 2
 PACKET_PAYLOAD_LEN_INDEX = 4
 PACKET_PAYLOAD_INDEX = 8
 
-INPUT_PACKETS = [b'\x01\xcc', b'\x02\xcc', b'\x03\xcc', b'\x04\xcc', b'\x05\xcc',b'\x06\xcc', 
-                 b'\x01\x0b', b'\x02\x0b', b'\x09\x0a', b'\x09\xaa', b'\x01\xfc']
-                 
-OTHER_OUTPUT_PACKETS = [b'\x01\n', b'\x02\n', b'\x03\n', b'\x04\n', b'\x05\n', b'\x06\n', b'\x08\n',b'\x09\x0a', b'\x0a\x0a', b'\x0b\x0a', b'\x0c\x0a', b'\x0f\x0a', 
+INPUT_PACKETS = [b'\x01\xcc', b'\x02\xcc', b'\x03\xcc', b'\x04\xcc', b'\x05\xcc',b'\x06\xcc',
+                 b'\x01\x0b', b'\x02\x0b', b'\x09\x0a', b'\x09\xaa', b'\x01\xfc', b'\xa4\x0a']
+
+OTHER_OUTPUT_PACKETS = [b'\x01\n', b'\x02\n', b'\x03\n', b'\x04\n', b'\x05\n', b'\x06\n', b'\x08\n',b'\x09\x0a', b'\x0a\x0a', b'\x0b\x0a', b'\x0c\x0a', b'\x0f\x0a',
                         b'\x07\n', b'\x09\xaa', b'\x44\x4D', b'\x49\x67', b'\x64\x66', b'\x65\x66']
 
 
@@ -31,7 +31,7 @@ class EthernetMessageParser(MessageParserBase):
         if operator.eq(list(data_block[0:2]), MSG_HEADER) and len(data_block) >= PACKET_PAYLOAD_INDEX:
             payload_len_byte = bytes(data_block[PACKET_PAYLOAD_LEN_INDEX:PACKET_PAYLOAD_INDEX])
             payload_len = struct.unpack('<I', payload_len_byte)[0]
-   
+
             packet_type_byte = bytes(data_block[PACKET_TYPE_INDEX:PACKET_PAYLOAD_LEN_INDEX])
             packet_type = struct.unpack('>H', packet_type_byte)[0]
 
@@ -46,7 +46,7 @@ class EthernetMessageParser(MessageParserBase):
                 return
 
             result = helper.calc_crc(data_block[PACKET_TYPE_INDEX:PACKET_PAYLOAD_INDEX+payload_len])
-                
+
             if result[0] == data_block[PACKET_PAYLOAD_INDEX + payload_len] and result[1] == data_block[PACKET_PAYLOAD_INDEX + payload_len + 1]:
                 self._parse_message(
                     struct.pack('>H', packet_type), payload_len, data_block)

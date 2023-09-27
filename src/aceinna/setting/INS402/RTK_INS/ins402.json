@@ -805,7 +805,7 @@
         },
         {
             "name": "set",
-            "description": "Write parameters to OpenIMU",
+            "description": "Write parameters to INS402",
             "function": "set_handler"
         }
     ],

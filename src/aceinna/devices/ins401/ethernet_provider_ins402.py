@@ -334,12 +334,14 @@ class Provider(Provider_base):
             print_red('Failed to send configuration packet')
             return False
 
+        print('Configure succeed, restarting...')
         # do reset
         step_result = self.configure_do_reset()
         if not step_result:
             print_red('Failed to do reset')
             return False
 
+        print_green('Reset succeed')
         return True
 
     def configure_do_send_prepare(self, content_size, block_number):

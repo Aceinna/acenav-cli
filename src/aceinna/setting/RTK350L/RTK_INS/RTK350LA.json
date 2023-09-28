@@ -30,7 +30,7 @@
             {
                 "paramId": 3,
                 "name": "gN rate",
-                "value": 1
+                "value": 255
             },
             {
                 "paramId": 4,
@@ -65,7 +65,7 @@
             {
                 "paramId": 10,
                 "name": "pvt rate",
-                "value": 100
+                "value": 255
             },
             {
                 "paramId": 11,
@@ -80,12 +80,12 @@
             {
                 "paramId": 13,
                 "name": "movbs rate",
-                "value": 1
+                "value": 255
             },
             {
                 "paramId": 14,
                 "name": "heading rate",
-                "value": 1
+                "value": 255
             },               
             {
                 "paramId": 15,
@@ -125,7 +125,7 @@
             {
                 "paramId": 22,
                 "name": "rR port",
-                "value": 1
+                "value": 3
             },
             {
                 "paramId": 23,
@@ -452,19 +452,11 @@
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
-			"name": "INSSTD Packet Port",
-			"argument": "d1"
-		},
-        {
-			"paramId": 20,
-			"category": "General",
-			"paramType": "input",
-			"type": "uint8",
 			"name": "RUNSTATUS Packet Port",
 			"argument": "sT"
 		},
         {
-			"paramId": 21,
+			"paramId": 20,
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
@@ -472,12 +464,20 @@
 			"argument": "iS"
 		},
         {
-			"paramId": 22,
+			"paramId": 21,
 			"category": "General",
 			"paramType": "input",
 			"type": "uint8",
 			"name": "MONITOR Packet Port",
 			"argument": "RM"
+		},
+        {
+			"paramId": 22,
+			"category": "General",
+			"paramType": "input",
+			"type": "uint8",
+			"name": "ROVER RTCM Packet Port",
+			"argument": "rR"
 		},
         {
 			"paramId": 23,

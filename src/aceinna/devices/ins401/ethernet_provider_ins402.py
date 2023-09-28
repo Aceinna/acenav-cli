@@ -338,10 +338,10 @@ class Provider(Provider_base):
         # do reset
         step_result = self.configure_do_reset()
         if not step_result:
-            print_red('Failed to do reset')
+            print_red('Restart failed')
             return False
 
-        print_green('Reset succeed')
+        print_green('Restart succeed')
         return True
 
     def configure_do_send_prepare(self, content_size, block_number):
@@ -361,7 +361,7 @@ class Provider(Provider_base):
         index = 1
         start = 0
         while start < len(content):
-            actual_size = math.min(block_size, len(content)-start)
+            actual_size = min(block_size, len(content)-start)
             message_bytes = bytes([0x0b, index]) + \
                 content[start:start+actual_size]
             result = self.send_configure_command(message_bytes)

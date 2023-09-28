@@ -1,6 +1,9 @@
 # CHANGELOG
 
 ---
+## 2.6.8， 09/28/2023
+- [INS402] Support algorithm parameters configuration in cli mode.
+
 ## 2.6.7， 02/15/2023
 - [INS402] Add ins402 parse command
 - [INS401] Add parameter configuration type to be filtered to resolve timeout issue

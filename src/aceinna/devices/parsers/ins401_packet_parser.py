@@ -36,7 +36,7 @@ def string_parser(payload, user_configuration):
 
     data_str = _format_string(payload)
 
-    if data_str and (data_str.find('INS401') > -1) \
+    if data_str and (data_str.find('INS40') > -1) \
        and (data_str.find('RTK_INS App') > -1) \
        and (data_str.find('Bootloader') > -1):
         data = data_str
@@ -353,6 +353,7 @@ def match_command_handler(packet_type):
         b'\x02\x0b': common_input_parser,
         b'\x09\x0a': common_input_parser,
         b'\x09\xaa': common_input_parser,
+        b'\xa4\x0a': common_input_parser,
         b'\x01\xfc': set_serial_number_parser
     }
     return parser_dict.get(packet_type)

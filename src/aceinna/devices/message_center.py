@@ -173,9 +173,10 @@ class DeviceMessageCenter(EventBase):
             if span.total_seconds() > timeout and not \
                     self._running_message.get_finished():
                 timeout_command = self._running_message.get_command()
-                print('command timeout',
-                      timeout_command,
-                      timeout, start_time, current_time)
+                # print('command timeout',
+                #       timeout_command,
+                #       timeout, start_time, current_time)
+                APP_CONTEXT.get_logger().error('command timeout')
                 packet_info = self._parser.get_packet_info(
                     timeout_command)
                 self._last_timeout_command = packet_info

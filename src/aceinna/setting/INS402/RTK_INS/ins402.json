@@ -113,6 +113,26 @@
                 "paramId": 24,
                 "name": "dual ant heading cali",
                 "value": 0
+            },
+			{
+                "paramId": 25,
+                "name": "heading boresight",
+                "value": 20
+            },
+            {
+                "paramId": 35,
+                "name": "USER_SLIPANG_F_PARAM_BX",
+                "value": 0
+            },
+            {
+                "paramId": 36,
+                "name": "USER_SLIPANG_F_PARAM_BY",
+                "value": 0
+            },
+            {
+                "paramId": 37,
+                "name": "USER_SLIPANG_F_PARAM_BZ",
+                "value": 0
             }
         ],
         "ntrip":[
@@ -319,7 +339,39 @@
                "type": "float",
                "name": "dual ant heading cali",
                "value_accuracy": 4
-           }
+           },
+		{
+			"paramId": 25,
+			"category": "GNSS",
+			"paramType": "input",
+			"type": "float",
+			"name": "heading boresight",
+			"value_accuracy": 4
+        },
+		{
+			"paramId": 35,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "USER_SLIPANG_F_PARAM_BX",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 36,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "USER_SLIPANG_F_PARAM_BY",
+			"value_accuracy": 4
+		},
+		{
+			"paramId": 37,
+			"category": "INS",
+			"paramType": "input",
+			"type": "float",
+			"name": "USER_SLIPANG_F_PARAM_BZ",
+			"value_accuracy": 4
+		}
     ],
     "userMessages": {
         "inputPackets": [
@@ -737,29 +789,14 @@
             "function": "save_handler"
         },
         {
-            "name": "connect",
-            "description": "Find OpenIMU device",
-            "function": "connect_handler"
-        },
-        {
             "name": "upgrade",
             "description": "Upgrade firmware",
             "function": "upgrade_handler"
         },
         {
-            "name": "record",
-            "description": "Record output data of OpenIMU on local machine",
-            "function": "record_handler"
-        },
-        {
-            "name": "stop",
-            "description": "stop recording outputs on local machine",
-            "function": "stop_handler"
-        },
-        {
-            "name": "server_start",
-            "description": "start server thread and must use exit command to quit",
-            "function": "server_start_handler"
+            "name": "configure",
+            "description": "Update the configuration on algorithm",
+            "function": "configure_handler"
         },
         {
             "name": "get",
@@ -768,7 +805,7 @@
         },
         {
             "name": "set",
-            "description": "Write parameters to OpenIMU",
+            "description": "Write parameters to INS402",
             "function": "set_handler"
         }
     ],

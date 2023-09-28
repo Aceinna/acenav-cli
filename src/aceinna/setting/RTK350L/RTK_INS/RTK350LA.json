@@ -405,7 +405,7 @@
 			"paramType": "input",
 			"type": "uint8",
 			"name": "movbs Packet Rate",
-			"argument": "nm"
+			"argument": "MB"
 		},
         {
 			"paramId": 14,
@@ -413,7 +413,7 @@
 			"paramType": "input",
 			"type": "uint8",
 			"name": "heading Packet Rate",
-			"argument": "nm"
+			"argument": "HS"
 		},
         {
 			"paramId": 15,

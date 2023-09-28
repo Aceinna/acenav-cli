@@ -14,11 +14,12 @@ from ...framework.context import APP_CONTEXT
 from ...framework.utils.firmware_parser import parser as firmware_content_parser
 from ..base.provider_base import OpenDeviceBase
 from ..configs.ins401_predefine import (APP_STR, get_ins402_products,
-                                         get_ins402_configuratin_file_mapping)
+                                        get_ins402_configuratin_file_mapping)
 from ..decorator import with_device_message
 from ...models import InternalCombineAppParseRule
 from ..parsers.ins401_field_parser import encode_value
-from ...framework.utils.print import (print_yellow, print_green, print_blue)
+from ...framework.utils.print import (
+    print_yellow, print_green, print_blue, print_red)
 from ..ins401.mountangle.mountangle import MountAngle
 from ..ins401.ethernet_provider_base import Provider_base
 from ..upgrade_workers import (
@@ -31,6 +32,7 @@ from ..upgrade_workers import (
 )
 
 GNZDA_DATA_LEN = 39
+
 
 class Provider(Provider_base):
     '''
@@ -92,7 +94,7 @@ class Provider(Provider_base):
             with open(local_config_file_path) as json_data:
                 self.properties = json.load(json_data)
                 return
-        
+
         # Load the openimu.json based on its app
         product_name = self.device_info['name']
         app_name = 'RTK_INS'  # self.app_info['app_name']
@@ -139,7 +141,7 @@ class Provider(Provider_base):
 
                 # check saved result
                 self.check_predefined_result()
-                
+
             self.set_unit_sn_message()
 
             if set_mount_angle:
@@ -160,9 +162,9 @@ class Provider(Provider_base):
             if not self.is_upgrading and not self.with_upgrade_error:
                 # start ntrip client
                 if self.properties["initial"].__contains__("ntrip") \
-                    and not self.ntrip_client \
-                    and not self.is_in_bootloader \
-                    and not self.cli_options.use_cli:
+                        and not self.ntrip_client \
+                        and not self.is_in_bootloader \
+                        and not self.cli_options.use_cli:
 
                     threading.Thread(target=self.ntrip_client_thread).start()
 
@@ -170,30 +172,29 @@ class Provider(Provider_base):
             print('Exception in after setup', e)
             return False
 
-        
-    def set_mountangle_config(self, result = []):
+    def set_mountangle_config(self, result=[]):
         # copy contents of app_config under executor path
         setting_folder_path = os.path.join(resource.get_executor_path(),
-                                                'setting')
+                                           'setting')
         # Load the openimu.json based on its app
         product_name = 'INS402'
         app_name = 'RTK_INS'  # self.app_info['app_name']
         app_file_path = os.path.join(setting_folder_path, product_name,
-                                        app_name, 'ins401.json')
+                                     app_name, 'ins401.json')
 
         with open(app_file_path, 'r') as json_data:
             self.properties = json.load(json_data)
-        
+
         # update mountangle config file
-        with open(app_file_path, 'w') as json_data: 
-            userParameters = self.properties["initial"]["userParameters"]   
+        with open(app_file_path, 'w') as json_data:
+            userParameters = self.properties["initial"]["userParameters"]
             for i in range(3):
                 userParameters[9 + i]['value'] = result[i]
-            
-            json.dump(self.properties, 
-                    json_data,
-                    indent=4,
-                    ensure_ascii=False)
+
+            json.dump(self.properties,
+                      json_data,
+                      indent=4,
+                      ensure_ascii=False)
 
         # setting params
         with open(app_file_path, 'r') as json_data:
@@ -223,19 +224,23 @@ class Provider(Provider_base):
 
                 if self.mountangle:
                     payload_len = struct.unpack('<I', bytes(raw_data[4:8]))[0]
-                    self.save_mountangle_file(packet_type, payload_len, raw_data[8:8+payload_len])
-              
+                    self.save_mountangle_file(
+                        packet_type, payload_len, raw_data[8:8+payload_len])
+
                 if packet_type == b'\x07\n':
                     if self.cli_options and self.cli_options.set_mount_angle and self.mountangle_thread is None:
                         content = raw_data[8:]
-                        big_mountangle_rvb = []            
+                        big_mountangle_rvb = []
                         for i in range(3):
-                            big_mountangle_rvb.append(struct.unpack('<d', bytes(content[7 + 8 * i:15 + 8 * i]))[0])
+                            big_mountangle_rvb.append(struct.unpack(
+                                '<d', bytes(content[7 + 8 * i:15 + 8 * i]))[0])
 
                         for i in range(3):
-                            self.big_mountangle_rvb[i] = big_mountangle_rvb[i] * 57.29577951308232
+                            self.big_mountangle_rvb[i] = big_mountangle_rvb[i] * \
+                                57.29577951308232
                         if self.mountangle:
-                            self.mountangle.mountangle_logger.debug("[mountangle] big_mountangle_rvb: {0}, {1}, {2}".format(self.big_mountangle_rvb[0], self.big_mountangle_rvb[1], self.big_mountangle_rvb[2]))
+                            self.mountangle.mountangle_logger.debug("[mountangle] big_mountangle_rvb: {0}, {1}, {2}".format(
+                                self.big_mountangle_rvb[0], self.big_mountangle_rvb[1], self.big_mountangle_rvb[2]))
                         self.start_mountangle_parse()
 
     def upgrade_framework(self, params, *args):  # pylint: disable=unused-argument
@@ -248,7 +253,7 @@ class Provider(Provider_base):
 
         if isinstance(params[1], dict):
             file = params[1]['file']
-        
+
         self.rtk_upgrade_flag = False
         self.ins_upgrade_flag = False
         self.sdk_upgrade_flag = False
@@ -256,9 +261,9 @@ class Provider(Provider_base):
         self.imu_upgrade_flag = False
         self.imu_boot_upgrade_flag = False
 
-        if len(params) > 2: 
+        if len(params) > 2:
             # rtk ins sdk imu  each upgrade
-            for param in params:   
+            for param in params:
                 if param == 'rtk':
                     self.rtk_upgrade_flag = True
 
@@ -272,13 +277,13 @@ class Provider(Provider_base):
                     self.sdk_2_upgrade_flag = True
 
                 if param == 'imu_boot':
-                    self.imu_boot_upgrade_flag = True 
+                    self.imu_boot_upgrade_flag = True
 
                 if param == 'imu':
                     self.imu_upgrade_flag = True
 
-        elif len(params) == 2:    
-            # rtk ins sdk imu upgrade, the imu boot upgrade depends on 
+        elif len(params) == 2:
+            # rtk ins sdk imu upgrade, the imu boot upgrade depends on
             # whether the imu boot is merged into the firmware
             self.rtk_upgrade_flag = True
             self.ins_upgrade_flag = True
@@ -297,7 +302,149 @@ class Provider(Provider_base):
                 self._logger.stop_user_log()
 
             self.thread_do_upgrade_framework(file)
-            print("Upgrade INS401 firmware started at:[{0}].".format(
+            print("Upgrade INS402 firmware started at:[{0}].".format(
                 datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
         return {'packetType': 'success'}
+
+    def configure_algorithm(self, params, *args):
+        file = ''
+        if isinstance(params[1], str):
+            file = params[1]
+
+        can_download, content = self.download_firmware(file)
+        if not can_download:
+            print_red('Cannot find configuration file')
+            return False
+
+        content_size = len(content)
+        block_size = 1024
+        block_number = math.ceil(content_size/block_size)
+        step_result = False
+        # send prepare command
+        step_result = self.configure_do_send_prepare(
+            content_size, block_number)
+        if not step_result:
+            print_red('Failed to prepare configration')
+            return False
+
+        # send packet command
+        step_result = self.configure_do_send_packet(content, block_size)
+        if not step_result:
+            print_red('Failed to send configuration packet')
+            return False
+
+        print('Configure succeed, restarting...')
+        # do reset
+        step_result = self.configure_do_reset()
+        if not step_result:
+            print_red('Restart failed')
+            return False
+
+        print_green('Restart succeed')
+        return True
+
+    def configure_do_send_prepare(self, content_size, block_number):
+        content_size_bytes = struct.pack('<H', content_size)
+        message_bytes = bytes([0x0a, block_number]) + content_size_bytes
+        result = self.send_configure_command(message_bytes)
+
+        if result['packetType'] == 'error':
+            return False
+
+        if result['data'][0] != 0x0a:
+            return False
+
+        return True
+
+    def configure_do_send_packet(self, content, block_size):
+        index = 1
+        start = 0
+        while start < len(content):
+            actual_size = min(block_size, len(content)-start)
+            message_bytes = bytes([0x0b, index]) + \
+                content[start:start+actual_size]
+            result = self.send_configure_command(message_bytes)
+            if result['packetType'] == 'error':
+                return False
+
+            if result['data'][0] != 0x0b:
+                return False
+
+            if result['data'][1] != index:
+                return False
+
+            index += 1
+            start += actual_size
+
+        return True
+
+    def configure_do_reset(self):
+        # reset device
+        self.send_system_reset_command()
+        # ping device
+        return self.ping_device(timeout=15)
+
+    def ping_device(self, timeout):
+        start_time = datetime.datetime.now()
+        while True:
+            if (datetime.datetime.now() - start_time).total_seconds() > timeout:
+                return False
+
+            result = self.send_ping_command()
+            if result['packetType'] == 'success':
+                return True
+
+            time.sleep(1)
+
+    @with_device_message
+    def send_configure_command(self, message_bytes):
+        command_config = b'\xa4\x0a'
+
+        command_line = helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(),
+            self.communicator.get_src_mac(),
+            command_config, list(message_bytes)
+        )
+
+        result = yield self._message_center.build(command=command_line.actual_command)
+
+        error = result['error']
+        data = result['data']
+        response_code = -1
+
+        if error:
+            yield {'packetType': 'error', 'data': data}
+
+        try:
+            if data[0] == 0x0a:
+                response_code = struct.unpack('<H', data[1:3])[0]
+            if data[0] == 0x0b:
+                response_code = struct.unpack('<H', data[2:4])[0]
+        except:
+            yield {'packetType': 'error', 'data': response_code}
+
+        if response_code > 0:
+            yield {'packetType': 'error', 'data': response_code}
+
+        yield {'packetType': 'success', 'data': data}
+
+    @with_device_message
+    def send_ping_command(self):
+        command_ping = b'\x01\xcc'
+
+        command_line = helper.build_ethernet_packet(
+            self.communicator.get_dst_mac(),
+            self.communicator.get_src_mac(),
+            command_ping
+        )
+        # self.communicator.write(command.actual_command)
+        result = yield self._message_center.build(command=command_line.actual_command)
+
+        error = result['error']
+        data = result['data']
+
+        if error:
+            yield {'packetType': 'error', 'data': data}
+
+        yield {'packetType': 'success', 'data': data}

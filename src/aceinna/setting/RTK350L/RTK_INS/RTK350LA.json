@@ -1107,7 +1107,8 @@
 			}
 		]
 	},
-    "CLICommands": [{
+    "CLICommands": [
+		{
 			"name": "help",
 			"description": "CLI help menu",
 			"function": "help_handler"
@@ -1116,51 +1117,6 @@
 			"name": "exit",
 			"description": "exit CLI",
 			"function": ""
-		},
-		{
-			"name": "run",
-			"description": "Operations defined by users",
-			"function": "run_handler"
-		},
-		{
-			"name": "save",
-			"description": "Save the configuration into EEPROM",
-			"function": "save_handler"
-		},
-		{
-			"name": "connect",
-			"description": "Find OpenIMU device",
-			"function": "connect_handler"
-		},
-		{
-			"name": "upgrade",
-			"description": "Upgrade firmware",
-			"function": "upgrade_handler"
-		},
-		{
-			"name": "record",
-			"description": "Record output data of OpenIMU on local machine",
-			"function": "record_handler"
-		},
-		{
-			"name": "stop",
-			"description": "stop recording outputs on local machine",
-			"function": "stop_handler"
-		},
-		{
-			"name": "server_start",
-			"description": "start server thread and must use exit command to quit",
-			"function": "server_start_handler"
-		},
-		{
-			"name": "get",
-			"description": "Read the current configuration and output data",
-			"function": "get_handler"
-		},
-		{
-			"name": "set",
-			"description": "Write parameters to OpenIMU",
-			"function": "set_handler"
 		}
 	]
 }

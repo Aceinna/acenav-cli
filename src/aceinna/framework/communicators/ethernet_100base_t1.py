@@ -10,7 +10,7 @@ from ..communicator import Communicator
 # Add parameter configuration type to be filtered to resolve timeout issue
 OTHER_FILTER_PACKETS = [b'\x02\xcc', b'\x03\xcc', b'\x04\xcc', b'\x05\xcc', b'\x06\xcc']
 
-UPGRADE_PACKETS = [b'\x01\xcc', b'\x01\xaa', b'\x02\xaa', b'\x03\xaa', b'\x04\xaa',b'\x05\xaa', 
+UPGRADE_PACKETS = [b'\x01\xcc', b'\x01\xaa', b'\x02\xaa', b'\x03\xaa', b'\x04\xaa',b'\x05\xaa',
                    b'\x06\xaa', b'\x07\xaa', b'\x08\xaa', b'\x4a\x49', b'\x4a\x41', b'\x57\x41', b'\x0a\xaa']
 
 class Ethernet(Communicator):
@@ -42,7 +42,7 @@ class Ethernet(Communicator):
         if options:
             self.filter_host_mac_assigned = options.host_mac != 'auto'
             self.filter_host_mac = options.host_mac if self.filter_host_mac_assigned else None
-        
+
         if options:
             self.config_unit_sn = options.unit_sn != 'auto'
             self.config_unit_sn = options.unit_sn if self.config_unit_sn else None
@@ -119,7 +119,7 @@ class Ethernet(Communicator):
 
         # confirm device
         for i in range(3):
-            self.confirm_device(self)
+            self.confirm_device(self, self.filter_device_type)
             if self.device:
                 # establish the packet sniff thread
                 callback(self.device)

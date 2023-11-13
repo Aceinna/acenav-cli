@@ -26,4 +26,15 @@ def get_ins402_configuratin_file_mapping():
         'INS402':'ins402.json'
     }
 
+def get_ins502_products():
+    return {
+        'INS502':['RTK_INS']
+    }
+
+
+def get_ins502_configuratin_file_mapping():
+    return {
+        'INS502':'ins502.json'
+    }
+
 APP_STR = ['RAWDATA', 'RTK', 'RTK_INS', 'RTK_INS_CANFD']

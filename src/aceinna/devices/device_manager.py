@@ -4,6 +4,7 @@ from .rtk350la.uart_provider import Provider as RTK350LAUartProvider
 from .rtkl.uart_provider import beidouProvider as beidouUartProvider
 from .ins401.ethernet_provider_ins401 import Provider as INS401EthernetProvider
 from .ins401.ethernet_provider_ins402 import Provider as INS402EthernetProvider
+from .ins401.ethernet_provider_ins502 import Provider as INS502EthernetProvider
 from ..framework.context import APP_CONTEXT
 from ..framework.utils.print import print_green
 from ..framework.constants import INTERFACES
@@ -16,12 +17,14 @@ def create_provider(device_type, communicator):
             return beidouUartProvider(communicator)
         elif device_type == 'RTK350LA':
             return RTK350LAUartProvider(communicator)
-        
+
     if communicator.type==INTERFACES.ETH_100BASE_T1:
         if device_type == 'INS401':
             return INS401EthernetProvider(communicator)
         elif device_type == 'INS402':
             return INS402EthernetProvider(communicator)
+        elif device_type == 'INS502':
+            return INS502EthernetProvider(communicator)
 
     return None
 
@@ -90,9 +93,10 @@ class DeviceManager:
                 return DeviceManager.build_provider(communicator, device_access, ping_result)
         if communicator.type == INTERFACES.ETH_100BASE_T1:
             device_access = args[0]
-            
+            filter_device_type = args[1]
+
             ping_result = ping_tool.do_ping(communicator.type, device_access,
-                                            None)
+                                            filter_device_type)
             if ping_result is not None:
                 return DeviceManager.build_provider(communicator, device_access, ping_result)
 

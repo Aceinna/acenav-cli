@@ -65,13 +65,13 @@ def do_decode_value(data_type, data, conf):
         return struct.unpack('<h', pack_item)[0]
     elif data_type == 'uint8':
         try:
-            pack_item = struct.pack('1B', *data)
+            pack_item = struct.pack('1B', data[0])
         except:  # pylint: disable=bare-except
             return False
         return struct.unpack('<B', pack_item)[0]
     elif data_type == 'int8':
         try:
-            pack_item = struct.pack('1B', *data)
+            pack_item = struct.pack('1B', data[0])
         except:  # pylint: disable=bare-except
             return False
         return struct.unpack('<b', pack_item)[0]

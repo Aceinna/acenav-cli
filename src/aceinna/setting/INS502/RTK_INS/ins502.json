@@ -2,8 +2,8 @@
     "appVersion": "INS502 34.00.01",
     "type": "INS502",
     "description": "6-axis INS502 with INS application",
-    "initial":{
-        "userParameters": [            
+    "initial": {
+        "userParameters": [
             {
                 "paramId": 1,
                 "name": "USER_PRI_LEVER_ARM_BX",
@@ -106,7 +106,7 @@
             },
             {
                 "paramId": 21,
-                "name": "SER_COMBINE_NHC_AND_ODO",
+                "name": "USER_COMBINE_NHC_AND_ODO",
                 "value": 1
             },
             {
@@ -124,7 +124,7 @@
                 "name": "USER_HEADING_COMPENSATION",
                 "value": 0
             },
-			{
+            {
                 "paramId": 25,
                 "name": "USER_HEADING_BORESIGHT",
                 "value": 0
@@ -205,7 +205,7 @@
                 "value": 0
             }
         ],
-        "ntrip":[
+        "ntrip": [
             {
                 "name": "ip",
                 "value": "58.215.20.43"
@@ -380,7 +380,7 @@
             "name": "USER_ROTATION_ALIGN_BZ",
             "value_accuracy": 4
         },
-       {
+        {
             "paramId": 19,
             "category": "INS",
             "paramType": "input",
@@ -398,39 +398,39 @@
             "paramId": 21,
             "category": "INS",
             "paramType": "input",
-            "type": "int16",
-            "name": "SER_COMBINE_NHC_AND_ODO"
+            "type": "uint8",
+            "name": "USER_COMBINE_NHC_AND_ODO"
         },
         {
-             "paramId": 22,
-             "category": "GNSS",
-             "paramType": "input",
-             "type": "int16",
-             "name": "USER_GNSS_HEADING_UPDATE_ENABLE"
-         },
-         {
-              "paramId": 23,
-              "category": "GNSS",
-              "paramType": "input",
-              "type": "float",
-              "name": "USER_DUAL_ANT_LENGTH",
-              "value_accuracy": 4
-          },
-          {
-               "paramId": 24,
-               "category": "GNSS",
-               "paramType": "input",
-               "type": "float",
-               "name": "USER_HEADING_COMPENSATION",
-               "value_accuracy": 4
-           },
-		{
-			"paramId": 25,
-			"category": "GNSS",
-			"paramType": "input",
-			"type": "float",
-			"name": "USER_HEADING_BORESIGHT",
-			"value_accuracy": 4
+            "paramId": 22,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "int16",
+            "name": "USER_GNSS_HEADING_UPDATE_ENABLE"
+        },
+        {
+            "paramId": 23,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_DUAL_ANT_LENGTH",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 24,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_HEADING_COMPENSATION",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 25,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_HEADING_BORESIGHT",
+            "value_accuracy": 4
         },
         {
             "paramId": 26,
@@ -460,7 +460,7 @@
             "paramId": 29,
             "category": "GNSS",
             "paramType": "input",
-            "type": "unit8",
+            "type": "uint8",
             "name": "USER_DO_ZUPT",
             "value_accuracy": 4
         },
@@ -528,30 +528,30 @@
             "name": "USER_SLIPANG_F_PARAM_2",
             "value_accuracy": 4
         },
-		{
-			"paramId": 38,
-			"category": "INS",
-			"paramType": "input",
-			"type": "int32",
-			"name": "USER_SLIPANG_F_NUM",
-			"value_accuracy": 4
-		},
-		{
-			"paramId": 39,
-			"category": "INS",
-			"paramType": "input",
-			"type": "float",
-			"name": "USER_SLIPANG_MINSPEED",
-			"value_accuracy": 4
-		},
-		{
-			"paramId": 40,
-			"category": "INS",
-			"paramType": "input",
-			"type": "float",
-			"name": "USER_SLIPANG_MINRATE",
-			"value_accuracy": 4
-		}
+        {
+            "paramId": 38,
+            "category": "INS",
+            "paramType": "input",
+            "type": "int32",
+            "name": "USER_SLIPANG_F_NUM",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 39,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_SLIPANG_MINSPEED",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 40,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_SLIPANG_MINRATE",
+            "value_accuracy": 4
+        }
     ],
     "userMessages": {
         "inputPackets": [
@@ -587,7 +587,7 @@
                 "description": "Save Conifguration Parameters to Flash",
                 "inputPayload": {},
                 "responsePayload": {}
-            },            
+            },
             {
                 "name": "uP",
                 "description": "Update Configuration Parameter",
@@ -651,7 +651,10 @@
                     {
                         "name": "Acceleration",
                         "units": "m/s^2",
-                        "xAxis": {"name":"GPS_TimeofWeek", "unit":"sec"},
+                        "xAxis": {
+                            "name": "GPS_TimeofWeek",
+                            "unit": "sec"
+                        },
                         "yAxes": [
                             "x_accel",
                             "y_accel",
@@ -667,7 +670,10 @@
                     {
                         "name": "Angular-Rate",
                         "units": "deg/s",
-                        "xAxis": {"name":"GPS_TimeofWeek", "unit":"sec"},
+                        "xAxis": {
+                            "name": "GPS_TimeofWeek",
+                            "unit": "sec"
+                        },
                         "yAxes": [
                             "x_rate",
                             "y_rate",
@@ -927,7 +933,6 @@
                         "name": "sec",
                         "unit": ""
                     },
-
                     {
                         "type": "uint32",
                         "name": "imu_status",
@@ -948,7 +953,8 @@
             }
         ]
     },
-    "CLICommands": [{
+    "CLICommands": [
+        {
             "name": "help",
             "description": "CLI help menu",
             "function": "help_handler"
@@ -989,29 +995,46 @@
             "function": "set_handler"
         }
     ],
-    "canfd_settings":
-    {
+    "canfd_settings": {
         "canfd_type": "canfd",
         "is_parse": true,
-        "canfd_id": [384, 640, 641, 1412],
-        "canfd_remote_id":[1408, 1409, 1410, 1411],
-        "can_id": [384, 385, 386, 387, 388, 389, 390, 391, 392, 640],
-        "can_config":{
+        "canfd_id": [
+            384,
+            640,
+            641,
+            1412
+        ],
+        "canfd_remote_id": [
+            1408,
+            1409,
+            1410,
+            1411
+        ],
+        "can_id": [
+            384,
+            385,
+            386,
+            387,
+            388,
+            389,
+            390,
+            391,
+            392,
+            640
+        ],
+        "can_config": {
             "bus_type": "bmcan",
             "channel": 0,
             "bitrate": 500000,
             "data_bitrate": 2000000
         },
-        "imu_log_config":
-        {
+        "imu_log_config": {
             "title": "GPS_Week(),GPS_TimeofWeek(s),x_accel(m/s^2),y_accel(m/s^2),z_accel(m/s^2),x_rate(deg/s),y_rate(deg/s),z_rate(deg/s)\n",
-            "index":0
-
+            "index": 0
         },
-        "ins_log_config":
-        {
+        "ins_log_config": {
             "title": "GPS_Week(),GPS_TimeofWeek(s),insCarStatus(),insPositionType(),latitude(deg),longitude(deg),height(m),velocityNorth(m/s),velocityEast(m/s),velocityUp(m/s),roll(deg),pitch(deg),heading(deg),latitude_std(m),longitude_std(m),height_std(m)\n",
-            "index":0
+            "index": 0
         },
         "can_messages": [
             {
@@ -2267,7 +2290,7 @@
                         "unit": "s"
                     }
                 ]
-            }            
+            }
         ]
     }
 }

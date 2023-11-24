@@ -390,8 +390,8 @@ def _parse_eth_100base_t1_buffer(data_buffer):
     packet_type = []
     
     if list(data_buffer[0:2]) == command_start and len(data_buffer) >= PAYLOAD_INDEX:
-        payload_len_byte = bytes(data_buffer[PAYLOAD_LEN_INDEX:PAYLOAD_INDEX])
-        payload_len = struct.unpack('<I', payload_len_byte)[0]
+        payload_len_byte = bytes(data_buffer[PAYLOAD_LEN_INDEX:PAYLOAD_INDEX-2])
+        payload_len = struct.unpack('<H', payload_len_byte)[0]
 
         packet_type = data_buffer[PACKET_TYPE_INDEX:PAYLOAD_LEN_INDEX]
  

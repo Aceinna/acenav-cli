@@ -93,11 +93,6 @@ class OpenDeviceBase(EventBase):
         '''
 
     @abstractmethod
-    @abstractmethod
-    def after_upgrade_completed(self):
-        '''
-        Do some operations after upgrade completed
-        '''
     def get_upgrade_workers(self, firmware_content):
         '''
         Do firmware upgrade

@@ -1,0 +1,105 @@
+
+name: INS502 34.00.01
+
+description: 6-axis INS502 with INS application
+
+initial:
+  userParameters:
+    - paramId: 1
+      name: USER_PRI_LEVER_ARM_BX,
+      value: 0.7
+  ntrip:
+    ip: "58.215.20.43"
+    port: 2201
+    mountPoint: WX02
+    username: daich
+    password: 888999
+  payloadEndian: lsb
+
+userConfiguration:
+  - paramId: 1
+    category: INS,
+    paramType: input
+    type: float
+    name: USER_PRI_LEVER_ARM_BX
+    value_accuracy: 4
+
+scaling:
+  position: 1e-7
+  hundred: 1/100,
+	thousand: 1/1000
+
+structure:
+  preamble: [0x55,0x55]
+  packetType: 
+    content: ASCII-CODE
+    length: 2
+  packetContent: 
+    format: latest
+  crc: 16bit-CRC
+    
+formats:
+  classic:
+    payloadLength: 
+      content: uint32-little-endian
+      target: payload
+    payload: CONTENT
+  latest:
+    payloadLength: uint16-little-endian
+    counter: uint16-little-endian
+    payload: CONTENT
+
+protocol:
+  commands:
+    - name: cc01
+      packet: [0x01, 0xcc]
+      uses: classic
+    - name: cc02
+      packet: [0x02, 0xcc]
+      uses: classic
+    - name: cc03
+      packet: [0x03, 0xcc]
+      uses: classic
+    - name: cc04
+      packet: [0x04, 0xcc]
+      uses: classic
+    - name: 0b02
+      packet: [0x02, 0x0b]
+      uses: classic
+    - gM
+    - wS
+    - sR
+    - gE
+    - hV
+    - sV
+    - aV
+    - gB
+    - uB
+    - sC
+    - rD
+    - rG
+    - lO
+    - sO
+    - cO
+    - wA
+  outputs:
+    - GN
+    - IN
+    - IS
+    - S2
+    - RR
+    - O1
+    - T1
+    - T2
+    - GI
+    - II
+    - IR
+    - MB
+    - HS
+    - DM
+    - RT
+    - SV
+  inputs:
+    - name: iR
+    - name: cA
+    - name: iO

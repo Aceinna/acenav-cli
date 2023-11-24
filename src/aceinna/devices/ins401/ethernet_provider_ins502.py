@@ -28,7 +28,7 @@ class Provider(Provider_base):
         super(Provider, self).__init__(communicator)
         self.type = 'INS502'
         self.prepare_folders()
-        self.rtcm_rover2_logf = None
+        #self.rtcm_rover2_logf = None
 
     def prepare_folders(self):
         '''
@@ -115,8 +115,8 @@ class Provider(Provider_base):
                     file_name + '/' + 'rtcm_base_' + file_time + '.bin', "wb")
                 self.rtcm_rover_logf = open(
                     file_name + '/' + 'rtcm_rover_' + file_time + '.bin', "wb")
-                self.rtcm_rover2_logf = open(
-                    file_name + '/' + 'rtcm_rover2_' + file_time + '.bin', "wb")
+                # self.rtcm_rover2_logf = open(
+                #     file_name + '/' + 'rtcm_rover2_' + file_time + '.bin', "wb")
             if set_user_para and not self.is_upgrading:
                 result = self.set_params(
                     self.properties["initial"]["userParameters"])
@@ -129,9 +129,9 @@ class Provider(Provider_base):
 
             self.set_unit_sn_message()
 
-            if set_mount_angle:
-                self.set_mount_angle()
-                self.prepare_lib_folder()
+            # if set_mount_angle:
+            #     self.set_mount_angle()
+            #     self.prepare_lib_folder()
 
             if self.cli_options.debug == 'true':
                 result = self.get_compile_message()
@@ -161,37 +161,16 @@ class Provider(Provider_base):
         '''
         Listener for getting output packet
         '''
-        if packet_type == b'\x06\x0a':
+        if packet_type == b'RR':
             if self.rtcm_rover_logf:
                 self.rtcm_rover_logf.write(bytes(data))
-        elif packet_type == b'\x0c\x0a':
-            if self.rtcm_rover2_logf:
-                self.rtcm_rover2_logf.write(bytes(data))
+        # elif packet_type == b'\x0c\x0a':
+        #     if self.rtcm_rover2_logf:
+        #         self.rtcm_rover2_logf.write(bytes(data))
         else:
             raw_data = kwargs.get('raw')
             if self.user_logf and raw_data:
                 self.user_logf.write(bytes(raw_data))
-
-                if self.mountangle:
-                    payload_len = struct.unpack('<I', bytes(raw_data[4:8]))[0]
-                    self.save_mountangle_file(
-                        packet_type, payload_len, raw_data[8:8+payload_len])
-
-                if packet_type == b'\x07\n':
-                    if self.cli_options and self.cli_options.set_mount_angle and self.mountangle_thread is None:
-                        content = raw_data[8:]
-                        big_mountangle_rvb = []
-                        for i in range(3):
-                            big_mountangle_rvb.append(struct.unpack(
-                                '<d', bytes(content[7 + 8 * i:15 + 8 * i]))[0])
-
-                        for i in range(3):
-                            self.big_mountangle_rvb[i] = big_mountangle_rvb[i] * \
-                                57.29577951308232
-                        if self.mountangle:
-                            self.mountangle.mountangle_logger.debug("[mountangle] big_mountangle_rvb: {0}, {1}, {2}".format(
-                                self.big_mountangle_rvb[0], self.big_mountangle_rvb[1], self.big_mountangle_rvb[2]))
-                        self.start_mountangle_parse()
 
     def upgrade_framework(self, params, *args):  # pylint: disable=unused-argument
         '''

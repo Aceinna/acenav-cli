@@ -272,28 +272,6 @@
                 "name": "master_slave_type",
                 "value": 0
             }
-		],
-		"ntrip":[
-			{
-                "name": "ip",
-                "value": "58.215.20.43"
-            },
-            {
-                "name": "port",
-                "value": 2201
-			},
-			{
-                "name": "mountPoint",
-                "value": "WX02"
-            },
-            {
-                "name": "username",
-                "value": "ymj_123"
-            },
-            {
-                "name": "password",
-                "value": "F8wnHnncF"
-            }
 		]
     },
 	"userConfiguration": [

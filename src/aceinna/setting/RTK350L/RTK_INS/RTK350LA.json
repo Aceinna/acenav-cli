@@ -270,7 +270,7 @@
             {
                 "paramId": 51,
                 "name": "master_slave_type",
-                "value": 0
+                "value": 1
             }
 		]
     },

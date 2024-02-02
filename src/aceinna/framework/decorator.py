@@ -19,7 +19,7 @@ TYPES_OF_LOG = ['rtkl', 'rtk350la', 'ins401', 'beidou', 'ins401c', 'ins402', 'in
 KML_RATES = [1, 2, 5, 10]
 
 def _uppercase_string(s):
-    return s.lower()
+    return s.upper()
 
 def _lowercase_string(s):
     return s.lower()

@@ -991,7 +991,7 @@
         },
         {
             "name": "set",
-            "description": "Write parameters to INS402",
+            "description": "Write parameters to INS502",
             "function": "set_handler"
         }
     ],

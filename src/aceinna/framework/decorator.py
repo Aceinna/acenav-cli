@@ -18,6 +18,11 @@ MODES = ['default', 'cli', 'receiver']
 TYPES_OF_LOG = ['rtkl', 'rtk350la', 'ins401', 'beidou', 'ins401c', 'ins402', 'ins502']
 KML_RATES = [1, 2, 5, 10]
 
+def _uppercase_string(s):
+    return s.lower()
+
+def _lowercase_string(s):
+    return s.lower()
 
 def _build_args():
     """parse input arguments
@@ -27,7 +32,7 @@ def _build_args():
 
     parser.add_argument("-i", "--interface", dest="interface",  metavar='',
                         help="Interface. Allowed one of values: {0}".format(INTERFACE_LIST), default=INTERFACES.ETH_100BASE_T1, choices=INTERFACE_LIST)
-    parser.add_argument("--device-type", dest="device_type", type=str,
+    parser.add_argument("--device-type", dest="device_type", type=_uppercase_string,
                         help="Open Device Type. Allowed one of values: {0}".format(DEVICE_TYPES), choices=DEVICE_TYPES, metavar='')
     parser.add_argument("-b", "--baudrate", dest="baudrate", type=int, metavar='',
                         help="Baudrate for uart. Allowed one of values: {0}".format(BAUDRATE_LIST), choices=BAUDRATE_LIST)
@@ -55,7 +60,7 @@ def _build_args():
         title='Sub commands', help='use `<command> -h` to get sub command help', dest="sub_command")
     parse_log_action = subparsers.add_parser(
         'parse', help='A parse log command')
-    parse_log_action.add_argument("-t", metavar='', type=str,
+    parse_log_action.add_argument("-t", metavar='', type=_lowercase_string,
                                   help="Type of logs, Allowed one of values: {0}".format(
                                       TYPES_OF_LOG),
                                   default='ins401',  dest="log_type", choices=TYPES_OF_LOG)

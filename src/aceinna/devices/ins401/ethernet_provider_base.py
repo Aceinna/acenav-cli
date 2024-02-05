@@ -855,7 +855,6 @@ class Provider_base(OpenDeviceBase):
                 ins_len = len(content) & 0xFFFF
                 self.ins_crc = helper.calc_crc(content[0:ins_len])
             
-
             if rule == 'sdk':
                 if self.sdk_upgrade_flag:
                     worker = self.build_worker(rule, content)

@@ -3,6 +3,8 @@ import time
 import struct
 from ...framework.utils import (helper, resource)
 from ...framework.context import APP_CONTEXT
+from ...framework.utils.print import (print_red)
+
 pG = [0x01, 0xcc]
 
 
@@ -55,10 +57,10 @@ def run_command_as_string(communicator, command):
     return result
 
 
-def try_parse_app_mode(info_text):
+def try_parse_app_mode(device_type, info_text):
     is_app_mode = False
     app_ping_info = None
-    
+
     split_text = info_text.split(' SN:')
 
     if len(split_text) == 1:
@@ -69,7 +71,7 @@ def try_parse_app_mode(info_text):
         app_info_text = 'RTK_INS' + split_text[1]
 
         app_ping_info = {
-            'device_type': 'INS401',
+            'device_type': device_type,
             'device_info': device_info_text,
             'app_info': app_info_text
         }
@@ -77,10 +79,10 @@ def try_parse_app_mode(info_text):
     return is_app_mode, app_ping_info
 
 
-def try_parse_bootloader_mode(info_text):
+def try_parse_bootloader_mode(device_type, info_text):
     is_bootloader_mode = False
     bootloader_ping_info = None
-    
+
     split_text = info_text.split('SN:')
     if len(split_text) == 2:
         is_bootloader_mode = True
@@ -89,7 +91,7 @@ def try_parse_bootloader_mode(info_text):
         app_info_text = info_text
 
         bootloader_ping_info = {
-            'device_type': 'INS401',
+            'device_type': device_type,
             'device_info': device_info_text,
             'app_info': app_info_text
         }
@@ -100,6 +102,8 @@ def try_parse_bootloader_mode(info_text):
 def ping(communicator, *args):
     '''OpenDevice Ping
     '''
+    filter_device_type = args[0]
+
     cmd_info_text = run_command_as_string(communicator, pG)
     if cmd_info_text.find(',') > -1:
         info_text = cmd_info_text.replace(',', ' ')
@@ -109,16 +113,22 @@ def ping(communicator, *args):
     # Prevent action. Get app info again,
     # if cannot retrieve any info at the first time of ping. Should find the root cause.
 
-    if info_text.find('INS401') > -1:
-        is_app_mode, app_ping_info = try_parse_app_mode(info_text)
+    if info_text.find(filter_device_type) > -1:
+        is_app_mode, app_ping_info = try_parse_app_mode(filter_device_type, info_text)
         if is_app_mode:
             return app_ping_info
 
         is_bootloader_mode, bootloader_ping_info = try_parse_bootloader_mode(
+            filter_device_type,
             info_text)
         if is_bootloader_mode:
             return bootloader_ping_info
 
         return None
+    else:
+        cmd_info = info_text.split(' ')
+        if len(cmd_info) > 0:
+            print_red('{0} != {1}'.format(filter_device_type, cmd_info[0]))
+            print(info_text)
 
     return None

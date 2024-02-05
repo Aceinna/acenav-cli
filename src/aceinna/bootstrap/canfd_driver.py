@@ -642,14 +642,14 @@ class canfd_app_driver:
                 data_len = len_base_data - index
                 data_len_l = data_len & 0xff
                 data_len_h = (data_len >> 8) & 0xff
-                data_to_send[0:2] = [data_len_h, data_len_l]
-                data_to_send[2:] = base_data[index:]
+                data_to_send[0] = data_len_l
+                data_to_send[1:] = base_data[index:]
             else:
                 data_len = self.valid_base_len
                 data_len_l = data_len & 0xff
                 data_len_h = (data_len >> 8) & 0xff
-                data_to_send[0:2] = [data_len_h, data_len_l]
-                data_to_send[2:] = base_data[index:index+self.valid_base_len]
+                data_to_send[0] = data_len_l
+                data_to_send[1:] = base_data[index:index+self.valid_base_len]
             try:
                 if self.can_type == 'canfd':
                     self.canfd_handle.write(self.base_id, data_to_send, False, False, True)
@@ -661,6 +661,7 @@ class canfd_app_driver:
             all_data_len-= self.valid_base_len
             index+= self.valid_base_len
             self.all_base_len+= len_base_data
+            time.sleep(0.01)
             sys.stdout.write("\rsend base data len {0}".format(self.all_base_len))
 
     def receive_parse_all(self):

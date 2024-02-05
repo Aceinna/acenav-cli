@@ -4,7 +4,7 @@ import time
 from ..base.message_parser_base import MessageParserBase
 from ...framework.utils import helper
 from ...framework.context import APP_CONTEXT
-from .rtk330l_packet_parser import (
+from .rtk350l_packet_parser import (
     match_command_handler, common_continuous_parser, other_output_parser)
 
 MSG_HEADER = [0x55, 0x55]
@@ -17,7 +17,7 @@ INPUT_PACKETS = ['pG', 'uC', 'uP', 'uA', 'uB',
                  'JI', 'JA', 'WA', 'CS', 'JS', 'JG'
                  'RE', 'WE', 'UE', 'LE', 'SR',
                  'SF', 'RF', 'WF', 'GF', 'RC', 'WC', 'PK', 'CH']
-OTHER_OUTPUT_PACKETS = ['s1', 'S2', 'iN', 'd1', 'gN', 'd2', 'sT', 'o1', 'DM'] 
+OTHER_OUTPUT_PACKETS = ['S2','SI', 'gN', 'iN', 'iS', 'o1', 'pv', 'rR', 'iB', 'sT', 'MB', 'HS' ]
 
 
 class ANALYSIS_STATUS:
@@ -26,54 +26,6 @@ class ANALYSIS_STATUS:
     FOUND_PAYLOAD_LENGTH = 2
     FOUND_PACKET_TYPE = 3
     CRC_PASSED = 4
-
-
-class OpenDevicePacket:
-    _payload_length = 0
-    _raw_data_bytes = []
-    _payload_bytes = []
-    _packet_type = None
-
-    def __init__(self):
-        self._payload_length = 0
-        self._raw_data_bytes = []
-        self._payload_bytes = []
-        self._packet_type = None
-
-    @property
-    def payload_length(self):
-        return self._payload_length
-
-    @property
-    def packet_type(self):
-        return self._packet_type
-
-    @property
-    def payload(self):
-        return self._raw_data_bytes[5: self._payload_length]
-
-    @property
-    def raw(self):
-        return self._raw_data_bytes
-
-    def accept_to_header(self, bytes_data):
-        self._raw_data_bytes.extend(bytes_data)
-
-    def accept_to_length(self, byte_data):
-        self._payload_length = byte_data+5
-        self._raw_data_bytes.append(byte_data)
-
-    def accept_to_packet_type(self, bytes_data):
-        self._packet_type = bytes(bytes_data).decode()
-        self._raw_data_bytes.extend(bytes_data)
-
-    def accept_to_payload(self, byte_data):
-        self._raw_data_bytes.append(byte_data)
-
-    def check_crc(self):
-        crc_calculate_value = helper.calc_crc(self._raw_data_bytes[2:-2])
-        crc_value = self._raw_data_bytes[-2:]
-        return crc_calculate_value == crc_value
 
 class UartMessageParser(MessageParserBase):
     def __init__(self, configuration):
@@ -138,14 +90,13 @@ class UartMessageParser(MessageParserBase):
             self._parse_input_packet(packet_type, payload, frame)
         else:
             # consider as output packet, parse output Messages
-            self._parse_output_packet(packet_type, payload)
+            self._parse_output_packet(packet_type, payload, frame)
 
     def _parse_input_packet(self, packet_type, payload, frame):
         payload_parser = match_command_handler(packet_type)
         if payload_parser:
             data, error = payload_parser(
                 payload, self.properties['userConfiguration'])
-
             self.emit('command',
                       packet_type=packet_type,
                       data=data,
@@ -155,13 +106,19 @@ class UartMessageParser(MessageParserBase):
             print('[Warning] Unsupported command {0}'.format(
                 packet_type.encode()))
 
-    def _parse_output_packet(self, packet_type, payload):
+    def _parse_output_packet(self, packet_type, payload, frame):
         # check if it is the valid out packet
         payload_parser = None
         is_other_output_packet = OTHER_OUTPUT_PACKETS.__contains__(packet_type)
         if is_other_output_packet:
             payload_parser = other_output_parser
             data = payload_parser(payload)
+
+            self.emit('continuous_message',
+                  packet_type=packet_type,
+                  data=data,
+                  event_time=time.time(),
+                  raw=frame)
             return
 
         payload_parser = common_continuous_parser

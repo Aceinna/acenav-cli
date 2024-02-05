@@ -53,7 +53,11 @@ def do_parse(log_type, folder_path, kml_rate, dr_parse):
                 elif log_type == 'ins401' or log_type == 'ins402':
                     lib.decode_ins401(bytes(file_path, encoding='utf8'), bytes(dr_parse, encoding='utf8'), kml_rate)
                 elif log_type == 'ins401c':
-                    lib.decode_ins401c(bytes(file_path, encoding='utf8'))                   
+                    lib.decode_ins401c(bytes(file_path, encoding='utf8'))
+                elif log_type == 'rtk350la':
+                    lib.decode_rtk350la(bytes(file_path, encoding='utf8'))
+                elif log_type == 'ins502':
+                    lib.decode_ins502(bytes(file_path, encoding='utf8'))
 
 
 class LogParser:
@@ -70,9 +74,9 @@ class LogParser:
         '''
         self._validate_params()
 
-        do_parse(self._options.log_type, 
-                 self._options.path, 
-                 self._options.kml_rate, 
+        do_parse(self._options.log_type,
+                 self._options.path,
+                 self._options.kml_rate,
                  self._options.powerdr)
 
         os._exit(1)

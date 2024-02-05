@@ -25,56 +25,56 @@ Run the CLI software and connect with the INS401 system for the first time, ther
 
 ## Commands
 
-#### Log data
+### Log data
 
 Run the following command to log all data output from Ethernet port to binary files, and streaming GNSS RTK correction data through Ethernet port to the unit (e.g. on Ubuntu)
 
-## INS401
+#### INS401
 ```shell
 ./acenav -i 100base-t1
 ```
 
-## INS402
+#### INS402
 ```shell
 ./acenav -i 100base-t1 --device-type INS402 
 ```
 
 A “data” subfolder will be created for the first time, and every session of data logging will be stored in a subfolder inside the “data” folder.
 
-#### Parse Data
+### Parse Data
 
 Run the following command to parse the logged data into text or csv files, 
 
-## ins401
+#### INS401
 
 ```shell
 ./acenav parse -t ins401 -p <path to data folder/session data subfolder>
 ```
 
-## ins402
+#### INS402
 
 ```shell
 ./acenav parse -t ins402 -p <path to data folder/session data subfolder>
 ```
 
-#### Save Settings
+### Save Settings
 
 If user changed the GNSS/INS user settings in the "ins401.json" or "ins402.json" file, and wants to make it effective, run the data logging command with "-s" option like below, and the changed user settings will be saved into flash
 
-## ins401
+#### INS401
 
 ```shell
 ./acenav -i 100base-t1 -s
 ```
 
-## ins402
+#### INS402
 
 ```shell
 ./acenav -i 100base-t1 --device-type INS402 -s
 ```
-## Firmware Upgrade
+### Firmware Upgrade
 
-# INS401 Firmware Upgrade
+#### INS401
 
 INS401 supports In-Application Programming (IAP) firmware upgrade through the Ethernet interface, run the executable with the CLI option, and prompt for user input 
 
@@ -96,7 +96,7 @@ eg:
 
 After successful FW upgrade, the INS401 system restarts and starts logging data automatically. 
 
-# INS402 Firmware Upgrade
+#### INS402
 
 INS402 supports In-Application Programming (IAP) firmware upgrade through the Ethernet interface, run the executable with the CLI option, and prompt for user input 
 
@@ -117,20 +117,28 @@ eg:
 
 After successful FW upgrade, the INS402 system restarts and starts logging data automatically. 
 
-## Set the Unit Serial Number
-# ins401
+### Set the Unit Serial Number
+#### INS401
 ```shell
 ./acenav -i 100base-t1 -sn <Ins401 serial number>
 ```
 
-# ins402
+#### INS402
 ```shell
 ./acenav -i 100base-t1 --device-type INS402 -sn <Ins402 serial number>
 ```
 
-# canfd app  
+### Configure Algorithm Parameters(Only support INS402 now)
+```shell
+./acenav -i 100base-t1 --device-type INS402 --cli
+# console display with connection information
+# prompt for user input, type in command and file path after the arrow symbol
+>>configure <INS402 algorithm parameters file path>
+```
 
-### run  
+## CAN-FD app  
+
+### Run  
 please run $Env:PYTHONPATH="./src/aceinna/devices/widgets;"+$Env:PYTHONPATH in powershell  
 to set env:PYTHONPATH then  
 ```shell cmd
@@ -142,5 +150,5 @@ set "canfd_type": "canfd",
 + run with can  
 set "canfd_type": "can"  
 
-#### Parse  
+### Parse Data
 ./acenav parse -t ins401c -p <path to data folder>

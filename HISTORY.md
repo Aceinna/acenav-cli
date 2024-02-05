@@ -1,6 +1,21 @@
 # CHANGELOG
 
 ---
+## 2.6.12， 02/02/2024
+- [INS502] Resolve ping packet(0xcc01) parse issue.
+
+## 2.6.11， 12/06/2023
+- [RTK350LA] Optimized the RTK350LA rtcm log naming.
+
+## 2.6.10， 11/13/2023
+- [INS502] Support INS502 data logging.
+
+## 2.6.9， 10/04/2023
+- [RTK350LA] Support to decode RTK350LA output data.
+
+## 2.6.8， 09/28/2023
+- [INS402] Support algorithm parameters configuration in cli mode.
+
 ## 2.6.7， 02/15/2023
 - [INS402] Add ins402 parse command
 - [INS401] Add parameter configuration type to be filtered to resolve timeout issue

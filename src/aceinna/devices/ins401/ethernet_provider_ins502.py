@@ -5,43 +5,28 @@ import json
 import datetime
 import threading
 import math
-import re
 import struct
-from ..widgets import (NTRIPClient, EthernetDataLogger,
-                       EthernetDebugDataLogger, EthernetRTCMDataLogger)
 from ...framework.utils import (helper, resource)
 from ...framework.context import APP_CONTEXT
-from ...framework.utils.firmware_parser import parser as firmware_content_parser
-from ..base.provider_base import OpenDeviceBase
-from ..configs.ins401_predefine import (APP_STR, get_ins402_products,
-                                        get_ins402_configuratin_file_mapping)
+from ..configs.ins401_predefine import (APP_STR, get_ins502_products,
+                                        get_ins502_configuratin_file_mapping)
 from ..decorator import with_device_message
-from ...models import InternalCombineAppParseRule
 from ..parsers.ins401_field_parser import encode_value
 from ...framework.utils.print import (
     print_yellow, print_green, print_blue, print_red)
-from ..ins401.mountangle.mountangle import MountAngle
 from ..ins401.ethernet_provider_base import Provider_base
-from ..upgrade_workers import (
-    EthernetSDK9100UpgradeWorker,
-    FirmwareUpgradeWorker,
-    JumpBootloaderWorker,
-    JumpApplicationWorker,
-    UPGRADE_EVENT,
-    UPGRADE_GROUP
-)
 
 GNZDA_DATA_LEN = 39
 
 
 class Provider(Provider_base):
     '''
-    INS401 Ethernet 100base-t1 provider
+    INS502 Ethernet 100base-t1 provider
     '''
 
     def __init__(self, communicator, *args):
         super(Provider, self).__init__(communicator)
-        self.type = 'INS402'
+        self.type = 'INS502'
         self.prepare_folders()
         self.rtcm_rover2_logf = None
 
@@ -61,8 +46,8 @@ class Provider(Provider_base):
         self.setting_folder_path = os.path.join(executor_path,
                                                 setting_folder_name)
 
-        all_products = get_ins402_products()
-        config_file_mapping = get_ins402_configuratin_file_mapping()
+        all_products = get_ins502_products()
+        config_file_mapping = get_ins502_configuratin_file_mapping()
 
         for product in all_products:
             product_folder = os.path.join(self.setting_folder_path, product)
@@ -89,7 +74,7 @@ class Provider(Provider_base):
 
     def load_properties(self):
         # Load config from user working path
-        local_config_file_path = os.path.join(os.getcwd(), 'ins402.json')
+        local_config_file_path = os.path.join(os.getcwd(), 'ins502.json')
         if os.path.isfile(local_config_file_path):
             with open(local_config_file_path) as json_data:
                 self.properties = json.load(json_data)
@@ -99,7 +84,7 @@ class Provider(Provider_base):
         product_name = self.device_info['name']
         app_name = 'RTK_INS'  # self.app_info['app_name']
         app_file_path = os.path.join(self.setting_folder_path, product_name,
-                                     app_name, 'ins402.json')
+                                     app_name, 'ins502.json')
 
         with open(app_file_path) as json_data:
             self.properties = json.load(json_data)
@@ -120,7 +105,7 @@ class Provider(Provider_base):
                 dir_time = time.strftime("%Y%m%d_%H%M%S", time.localtime())
                 file_time = time.strftime("%Y_%m_%d_%H_%M_%S",
                                           time.localtime())
-                file_name = self.data_folder + '/' + 'ins402_log_' + dir_time
+                file_name = self.data_folder + '/' + 'ins502_log_' + dir_time
                 os.mkdir(file_name)
                 self.rtk_log_file_name = file_name
 
@@ -172,46 +157,11 @@ class Provider(Provider_base):
             print('Exception in after setup', e)
             return False
 
-    def set_mountangle_config(self, result=[]):
-        # copy contents of app_config under executor path
-        setting_folder_path = os.path.join(resource.get_executor_path(),
-                                           'setting')
-        # Load the openimu.json based on its app
-        product_name = 'INS402'
-        app_name = 'RTK_INS'  # self.app_info['app_name']
-        app_file_path = os.path.join(setting_folder_path, product_name,
-                                     app_name, 'ins401.json')
-
-        with open(app_file_path, 'r') as json_data:
-            self.properties = json.load(json_data)
-
-        # update mountangle config file
-        with open(app_file_path, 'w') as json_data:
-            userParameters = self.properties["initial"]["userParameters"]
-            for i in range(3):
-                userParameters[9 + i]['value'] = result[i]
-
-            json.dump(self.properties,
-                      json_data,
-                      indent=4,
-                      ensure_ascii=False)
-
-        # setting params
-        with open(app_file_path, 'r') as json_data:
-            self.properties = json.load(json_data)
-
-        result = self.set_params(self.properties["initial"]["userParameters"])
-        if result['packetType'] == 'success':
-            self.save_config()
-
-        # check saved result
-        self.check_predefined_result()
-
     def on_receive_output_packet(self, packet_type, data, *args, **kwargs):
         '''
         Listener for getting output packet
         '''
-        if packet_type == b'\x06\n':
+        if packet_type == b'\x06\x0a':
             if self.rtcm_rover_logf:
                 self.rtcm_rover_logf.write(bytes(data))
         elif packet_type == b'\x0c\x0a':
@@ -302,7 +252,7 @@ class Provider(Provider_base):
                 self._logger.stop_user_log()
 
             self.thread_do_upgrade_framework(file)
-            print("Upgrade INS402 firmware started at:[{0}].".format(
+            print("Upgrade INS502 firmware started at:[{0}].".format(
                 datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
         return {'packetType': 'success'}

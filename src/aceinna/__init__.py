@@ -1,3 +1,3 @@
 # Package Version
-VERSION = '2.6.7'
+VERSION = '2.6.12'
 PACKAGE_NAME = 'acenav'

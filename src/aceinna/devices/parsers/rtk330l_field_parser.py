@@ -1,7 +1,7 @@
 import math
 import struct
 import decimal
-from . import filter_nan
+from . import filter_nan 
 
 
 def do_decode_value(data_type, data, conf):
@@ -121,6 +121,15 @@ def decode_value(data_type, data, conf=None):
 
     return filter_nan(ret_value)
 
+def get_value_len(data_type):
+    if data_type == 'uint64' or data_type == 'uint64' or data_type == 'double':
+        return 8
+    elif data_type == 'uint32' or data_type == 'int32' or data_type == 'float':
+        return 4
+    elif data_type == 'uint16' or data_type == 'int16':
+        return 2
+    elif data_type == 'uint8' or data_type == 'int8':
+        return 1
 
 def encode_value(data_type, data):
     payload = []

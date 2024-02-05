@@ -1,141 +1,211 @@
 {
-    "appVersion": "INS401 31.00.01",
-    "type": "INS402",
-    "description": "6-axis INS402 with INS application",
-    "initial":{
-        "userParameters": [            
+    "appVersion": "INS502 34.00.01",
+    "type": "INS502",
+    "description": "6-axis INS502 with INS application",
+    "initial": {
+        "userParameters": [
             {
                 "paramId": 1,
-                "name": "gnss lever arm x",
+                "name": "USER_PRI_LEVER_ARM_BX",
                 "value": 0.7
             },
             {
                 "paramId": 2,
-                "name": "gnss lever arm y",
+                "name": "USER_PRI_LEVER_ARM_BY",
                 "value": 0.02
             },
             {
                 "paramId": 3,
-                "name": "gnss lever arm z",
+                "name": "USER_PRI_LEVER_ARM_BZ",
                 "value": -1.06
             },
             {
                 "paramId": 4,
-                "name": "vrp lever arm x",
+                "name": "USER_VRP_LEVER_ARM_BX",
                 "value": 0.38
             },
             {
                 "paramId": 5,
-                "name": "vrp lever arm y",
+                "name": "USER_VRP_LEVER_ARM_BY",
                 "value": 0.01
             },
             {
                 "paramId": 6,
-                "name": "vrp lever arm z",
+                "name": "USER_VRP_LEVER_ARM_BZ",
                 "value": 0.21
             },
             {
                 "paramId": 7,
-                "name": "user lever arm x",
+                "name": "USER_USER_LEVER_ARM_BX",
                 "value": 0.7
             },
             {
                 "paramId": 8,
-                "name": "user lever arm y",
+                "name": "USER_USER_LEVER_ARM_BY",
                 "value": 0.02
             },
             {
                 "paramId": 9,
-                "name": "user lever arm z",
+                "name": "USER_USER_LEVER_ARM_BZ",
                 "value": -1.06
             },
             {
                 "paramId": 10,
-                "name": "rotation rbvx",
+                "name": "USER_ROTATION_RBVX",
                 "value": 0.0
             },
             {
                 "paramId": 11,
-                "name": "rotation rbvy",
+                "name": "USER_ROTATION_RBVY",
                 "value": 0.0
             },
             {
                 "paramId": 12,
-                "name": "rotation rbvz",
+                "name": "USER_ROTATION_RBVZ",
                 "value": 180.0
             },
             {
                 "paramId": 13,
-                "name": "sec lever arm x",
+                "name": "USER_GNSS2_LEVER_ARM_BX",
                 "value": 1.75
             },
             {
                 "paramId": 14,
-                "name": "sec lever arm y",
+                "name": "USER_GNSS2_LEVER_ARM_BY",
                 "value": 0.02
             },
             {
                 "paramId": 15,
-                "name": "sec lever arm z",
+                "name": "USER_GNSS2_LEVER_ARM_BZ",
                 "value": -1.06
             },
             {
                 "paramId": 16,
-                "name": "rotation alignx",
+                "name": "USER_ROTATION_ALIGN_BX",
                 "value": 0
             },
             {
                 "paramId": 17,
-                "name": "rotation aligny",
+                "name": "USER_ROTATION_ALIGN_BY",
                 "value": 0.0
             },
             {
                 "paramId": 18,
-                "name": "rotation alignz",
+                "name": "USER_ROTATION_ALIGN_BZ",
                 "value": 0.0
             },
             {
                 "paramId": 19,
-                "name": "NHC switch",
+                "name": "USER_NHC_ENABLE",
+                "value": 1
+            },
+            {
+                "paramId": 20,
+                "name": "USER_ODOMETER_ENABLE",
+                "value": 1
+            },
+            {
+                "paramId": 21,
+                "name": "USER_COMBINE_NHC_AND_ODO",
                 "value": 1
             },
             {
                 "paramId": 22,
-                "name": "dual ant switch",
-                "value": 1
+                "name": "USER_GNSS_HEADING_UPDATE_ENABLE",
+                "value": 3
             },
             {
                 "paramId": 23,
-                "name": "dual ant baseline length",
-                "value": 6.7
+                "name": "USER_DUAL_ANT_LENGTH",
+                "value": 0
             },
             {
                 "paramId": 24,
-                "name": "dual ant heading cali",
+                "name": "USER_HEADING_COMPENSATION",
                 "value": 0
             },
-			{
+            {
                 "paramId": 25,
-                "name": "heading boresight",
-                "value": 20
+                "name": "USER_HEADING_BORESIGHT",
+                "value": 0
+            },
+            {
+                "paramId": 26,
+                "name": "USER_RELATIVE_LENGTH_TOL",
+                "value": 0
+            },
+            {
+                "paramId": 27,
+                "name": "USER_COG_UPDATE_ENABLE",
+                "value": 0
+            },
+            {
+                "paramId": 28,
+                "name": "USER_HEADINGCOG_SPEED_TOL",
+                "value": 0
+            },
+            {
+                "paramId": 29,
+                "name": "USER_DO_ZUPT",
+                "value": 0
+            },
+            {
+                "paramId": 30,
+                "name": "USER_ZUPT_INTERVAL",
+                "value": 0
+            },
+            {
+                "paramId": 31,
+                "name": "USER_USE_ODOMETER_FOR_ZUPT",
+                "value": 0
+            },
+            {
+                "paramId": 32,
+                "name": "USER_ODO_SPEED_TOL",
+                "value": 0
+            },
+            {
+                "paramId": 33,
+                "name": "USER_CHECK_ZUPT_WITH_ODOMETRY",
+                "value": 0
+            },
+            {
+                "paramId": 34,
+                "name": "USER_MAX_ODO_ZUPT_SPEED",
+                "value": 0
             },
             {
                 "paramId": 35,
-                "name": "USER_SLIPANG_F_PARAM_BX",
+                "name": "USER_SLIPANG_F_PARAM_0",
                 "value": 0
             },
             {
                 "paramId": 36,
-                "name": "USER_SLIPANG_F_PARAM_BY",
+                "name": "USER_SLIPANG_F_PARAM_1",
                 "value": 0
             },
             {
                 "paramId": 37,
-                "name": "USER_SLIPANG_F_PARAM_BZ",
+                "name": "USER_SLIPANG_F_PARAM_2",
+                "value": 0
+            },
+            {
+                "paramId": 38,
+                "name": "USER_SLIPANG_F_NUM",
+                "value": 0
+            },
+            {
+                "paramId": 39,
+                "name": "USER_SLIPANG_MINSPEED",
+                "value": 0
+            },
+            {
+                "paramId": 40,
+                "name": "USER_SLIPANG_MINRATE",
                 "value": 0
             }
         ],
-        "ntrip":[
+        "ntrip": [
             {
                 "name": "ip",
                 "value": "58.215.20.43"
@@ -171,7 +241,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "gnss lever arm x",
+            "name": "USER_PRI_LEVER_ARM_BX",
             "value_accuracy": 4
         },
         {
@@ -179,7 +249,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "gnss lever arm y",
+            "name": "USER_PRI_LEVER_ARM_BY",
             "value_accuracy": 4
         },
         {
@@ -187,7 +257,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "gnss lever arm z",
+            "name": "USER_PRI_LEVER_ARM_BZ",
             "value_accuracy": 4
         },
         {
@@ -195,7 +265,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "vrp lever arm x",
+            "name": "USER_VRP_LEVER_ARM_BX",
             "value_accuracy": 4
         },
         {
@@ -203,7 +273,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "vrp lever arm y",
+            "name": "USER_VRP_LEVER_ARM_BY",
             "value_accuracy": 4
         },
         {
@@ -211,7 +281,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "vrp lever arm z",
+            "name": "USER_VRP_LEVER_ARM_BZ",
             "value_accuracy": 4
         },
         {
@@ -219,7 +289,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "user lever arm x",
+            "name": "USER_USER_LEVER_ARM_BX",
             "value_accuracy": 4
         },
         {
@@ -227,7 +297,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "user lever arm y",
+            "name": "USER_USER_LEVER_ARM_BY",
             "value_accuracy": 4
         },
         {
@@ -235,7 +305,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "user lever arm z",
+            "name": "USER_USER_LEVER_ARM_BZ",
             "value_accuracy": 4
         },
         {
@@ -243,7 +313,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "rotation rbvx",
+            "name": "USER_ROTATION_RBVX",
             "value_accuracy": 4
         },
         {
@@ -251,7 +321,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "rotation rbvy",
+            "name": "USER_ROTATION_RBVY",
             "value_accuracy": 4
         },
         {
@@ -259,7 +329,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "rotation rbvz",
+            "name": "USER_ROTATION_RBVZ",
             "value_accuracy": 4
         },
         {
@@ -267,7 +337,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "sec lever arm x",
+            "name": "USER_GNSS2_LEVER_ARM_BX",
             "value_accuracy": 4
         },
         {
@@ -275,7 +345,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "sec lever arm y",
+            "name": "USER_GNSS2_LEVER_ARM_BY",
             "value_accuracy": 4
         },
         {
@@ -283,7 +353,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "sec lever arm z",
+            "name": "USER_GNSS2_LEVER_ARM_BZ",
             "value_accuracy": 4
         },
         {
@@ -291,7 +361,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "rotation alignx",
+            "name": "USER_ROTATION_ALIGN_BX",
             "value_accuracy": 4
         },
         {
@@ -299,7 +369,7 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "rotation aligny",
+            "name": "USER_ROTATION_ALIGN_BY",
             "value_accuracy": 4
         },
         {
@@ -307,71 +377,181 @@
             "category": "INS",
             "paramType": "input",
             "type": "float",
-            "name": "rotation alignz",
+            "name": "USER_ROTATION_ALIGN_BZ",
             "value_accuracy": 4
         },
-       {
+        {
             "paramId": 19,
             "category": "INS",
             "paramType": "input",
-            "type": "uint32",
-            "name": "NHC switch"
+            "type": "uint8",
+            "name": "USER_NHC_ENABLE"
         },
         {
-             "paramId": 22,
-             "category": "GNSS",
-             "paramType": "input",
-             "type": "uint32",
-             "name": "dual ant switch"
-         },
-         {
-              "paramId": 23,
-              "category": "GNSS",
-              "paramType": "input",
-              "type": "float",
-              "name": "dual ant baseline length",
-              "value_accuracy": 4
-          },
-          {
-               "paramId": 24,
-               "category": "GNSS",
-               "paramType": "input",
-               "type": "float",
-               "name": "dual ant heading cali",
-               "value_accuracy": 4
-           },
-		{
-			"paramId": 25,
-			"category": "GNSS",
-			"paramType": "input",
-			"type": "float",
-			"name": "heading boresight",
-			"value_accuracy": 4
+            "paramId": 20,
+            "category": "INS",
+            "paramType": "input",
+            "type": "uint8",
+            "name": "USER_ODOMETER_ENABLE"
         },
-		{
-			"paramId": 35,
-			"category": "INS",
-			"paramType": "input",
-			"type": "float",
-			"name": "USER_SLIPANG_F_PARAM_BX",
-			"value_accuracy": 4
-		},
-		{
-			"paramId": 36,
-			"category": "INS",
-			"paramType": "input",
-			"type": "float",
-			"name": "USER_SLIPANG_F_PARAM_BY",
-			"value_accuracy": 4
-		},
-		{
-			"paramId": 37,
-			"category": "INS",
-			"paramType": "input",
-			"type": "float",
-			"name": "USER_SLIPANG_F_PARAM_BZ",
-			"value_accuracy": 4
-		}
+        {
+            "paramId": 21,
+            "category": "INS",
+            "paramType": "input",
+            "type": "uint8",
+            "name": "USER_COMBINE_NHC_AND_ODO"
+        },
+        {
+            "paramId": 22,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "int16",
+            "name": "USER_GNSS_HEADING_UPDATE_ENABLE"
+        },
+        {
+            "paramId": 23,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_DUAL_ANT_LENGTH",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 24,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_HEADING_COMPENSATION",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 25,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_HEADING_BORESIGHT",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 26,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_RELATIVE_LENGTH_TOL",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 27,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "int16",
+            "name": "USER_COG_UPDATE_ENABLE",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 28,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_HEADINGCOG_SPEED_TOL",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 29,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "uint8",
+            "name": "USER_DO_ZUPT",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 30,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "double",
+            "name": "USER_ZUPT_INTERVAL",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 31,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "uint8",
+            "name": "USER_USE_ODOMETER_FOR_ZUPT",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 32,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_ODO_SPEED_TOL",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 33,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "uint8",
+            "name": "USER_CHECK_ZUPT_WITH_ODOMETRY",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 34,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_MAX_ODO_ZUPT_SPEED",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 35,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_SLIPANG_F_PARAM_0",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 36,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_SLIPANG_F_PARAM_1",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 37,
+            "category": "GNSS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_SLIPANG_F_PARAM_2",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 38,
+            "category": "INS",
+            "paramType": "input",
+            "type": "int32",
+            "name": "USER_SLIPANG_F_NUM",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 39,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_SLIPANG_MINSPEED",
+            "value_accuracy": 4
+        },
+        {
+            "paramId": 40,
+            "category": "INS",
+            "paramType": "input",
+            "type": "float",
+            "name": "USER_SLIPANG_MINRATE",
+            "value_accuracy": 4
+        }
     ],
     "userMessages": {
         "inputPackets": [
@@ -407,7 +587,7 @@
                 "description": "Save Conifguration Parameters to Flash",
                 "inputPayload": {},
                 "responsePayload": {}
-            },            
+            },
             {
                 "name": "uP",
                 "description": "Update Configuration Parameter",
@@ -471,7 +651,10 @@
                     {
                         "name": "Acceleration",
                         "units": "m/s^2",
-                        "xAxis": {"name":"GPS_TimeofWeek", "unit":"sec"},
+                        "xAxis": {
+                            "name": "GPS_TimeofWeek",
+                            "unit": "sec"
+                        },
                         "yAxes": [
                             "x_accel",
                             "y_accel",
@@ -487,7 +670,10 @@
                     {
                         "name": "Angular-Rate",
                         "units": "deg/s",
-                        "xAxis": {"name":"GPS_TimeofWeek", "unit":"sec"},
+                        "xAxis": {
+                            "name": "GPS_TimeofWeek",
+                            "unit": "sec"
+                        },
                         "yAxes": [
                             "x_rate",
                             "y_rate",
@@ -747,7 +933,6 @@
                         "name": "sec",
                         "unit": ""
                     },
-
                     {
                         "type": "uint32",
                         "name": "imu_status",
@@ -768,7 +953,8 @@
             }
         ]
     },
-    "CLICommands": [{
+    "CLICommands": [
+        {
             "name": "help",
             "description": "CLI help menu",
             "function": "help_handler"
@@ -805,33 +991,50 @@
         },
         {
             "name": "set",
-            "description": "Write parameters to INS402",
+            "description": "Write parameters to INS502",
             "function": "set_handler"
         }
     ],
-    "canfd_settings":
-    {
+    "canfd_settings": {
         "canfd_type": "canfd",
         "is_parse": true,
-        "canfd_id": [384, 640, 641, 1412],
-        "canfd_remote_id":[1408, 1409, 1410, 1411],
-        "can_id": [384, 385, 386, 387, 388, 389, 390, 391, 392, 640],
-        "can_config":{
+        "canfd_id": [
+            384,
+            640,
+            641,
+            1412
+        ],
+        "canfd_remote_id": [
+            1408,
+            1409,
+            1410,
+            1411
+        ],
+        "can_id": [
+            384,
+            385,
+            386,
+            387,
+            388,
+            389,
+            390,
+            391,
+            392,
+            640
+        ],
+        "can_config": {
             "bus_type": "bmcan",
             "channel": 0,
             "bitrate": 500000,
             "data_bitrate": 2000000
         },
-        "imu_log_config":
-        {
+        "imu_log_config": {
             "title": "GPS_Week(),GPS_TimeofWeek(s),x_accel(m/s^2),y_accel(m/s^2),z_accel(m/s^2),x_rate(deg/s),y_rate(deg/s),z_rate(deg/s)\n",
-            "index":0
-
+            "index": 0
         },
-        "ins_log_config":
-        {
+        "ins_log_config": {
             "title": "GPS_Week(),GPS_TimeofWeek(s),insCarStatus(),insPositionType(),latitude(deg),longitude(deg),height(m),velocityNorth(m/s),velocityEast(m/s),velocityUp(m/s),roll(deg),pitch(deg),heading(deg),latitude_std(m),longitude_std(m),height_std(m)\n",
-            "index":0
+            "index": 0
         },
         "can_messages": [
             {
@@ -2087,7 +2290,7 @@
                         "unit": "s"
                     }
                 ]
-            }            
+            }
         ]
     }
 }

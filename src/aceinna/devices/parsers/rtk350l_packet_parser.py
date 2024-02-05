@@ -2,7 +2,7 @@ import sys
 import struct
 import collections
 from . import filter_nan
-from .ins401_field_parser import decode_value
+from .rtk330l_field_parser import decode_value 
 from ...framework.utils.print import print_yellow
 from ...framework.context import APP_CONTEXT
 
@@ -10,38 +10,18 @@ from ...framework.context import APP_CONTEXT
 error_decode_packet = 0
 
 
-def _format_string(data_buffer):
-    parsed = bytearray(data_buffer) if data_buffer and len(
-        data_buffer) > 0 else None
-
-    formatted = ''
-    if parsed is not None:
-        try:
-            if sys.version_info < (3, 0):
-                formatted = str(struct.pack(
-                    '{0}B'.format(len(parsed)), *parsed))
-            else:
-                formatted = str(struct.pack(
-                    '{0}B'.format(len(parsed)), *parsed), 'utf-8')
-        except UnicodeDecodeError:
-            APP_CONTEXT.get_logger().logger.error('Parse data as string failed')
-            formatted = ''
-
-    return formatted
-
-
 def string_parser(payload, user_configuration):
     error = False
     data = ''
-
-    data_str = _format_string(payload)
-
-    if data_str and (data_str.find('INS') > -1) \
-       and (data_str.find('RTK_INS App') > -1) \
-       and (data_str.find('Bootloader') > -1):
-        data = data_str
-    else:
-        error = True
+    try:
+        if sys.version_info < (3, 0):
+            data = str(struct.pack(
+                '{0}B'.format(len(payload)), *payload))
+        else:
+            data = str(struct.pack(
+                '{0}B'.format(len(payload)), *payload), 'utf-8')
+    except UnicodeDecodeError:
+        data = ''
 
     return data, error
 
@@ -104,57 +84,78 @@ def get_parameters_by_block_parser(payload, user_configuration):
     '''
     data = []
     error = False
-
-    start_param_id = payload[0]
-    end_param_id = payload[1]
-    data_len = 2
-
-    for i in range(start_param_id, end_param_id+1, 1):
+    para_id = 0
+    para_len = 0
+    data_len = len(payload)
+    index = 0
+    while index < data_len:
+        para_id = payload[index]
+        para_len = payload[index+1]
         exist_param_conf = next((param_conf for param_conf in user_configuration
-                                 if param_conf['paramId'] == i), None)
-        if exist_param_conf:
-            param_type = exist_param_conf['type']
+                                 if param_conf['paramId'] == para_id), None)
+        if para_len == 1:
+            param_type = 'uint8'
+            value = decode_value(
+                param_type, payload[index+2: index+2+para_len])
+        elif para_len == 4:
+            param_type = 'float'
+            value = decode_value(
+                param_type, payload[index+2: index+2+para_len], exist_param_conf)
+        # data_len = data_len - 2 - para_len
+        index+= para_len+1+1
+        data.append({
+            "paramId": para_id,
+            "name": exist_param_conf['name'],
+            "value": value
+        })
 
-            if param_type == 'uint8' or param_type == 'int8':
-                value = decode_value(
-                    param_type, payload[data_len:data_len + 1])
-                data_len = data_len + 1
-            elif param_type == 'uint16' or param_type == 'int16':
-                value = decode_value(
-                    param_type, payload[data_len:data_len + 2])
-                data_len = data_len + 2
-            elif param_type == 'uint32' or param_type == 'int32' or param_type == 'float':
-                value = decode_value(
-                    param_type, payload[data_len:data_len + 4], exist_param_conf)
-                data_len = data_len + 4
-            elif param_type == 'uint64' or param_type == 'int64' or param_type == 'double':
-                value = decode_value(
-                    param_type, payload[data_len:data_len + 8])
-                data_len = data_len + 8
-            elif param_type == 'ip4':
-                value = decode_value(
-                    param_type, payload[data_len:data_len + 4])
-                data_len = data_len + 4
-            elif param_type == 'ip6':
-                value = decode_value(
-                    param_type, payload[data_len:data_len + 6])
-                data_len = data_len + 6
-            elif 'char' in param_type:
-                ctype_n = param_type.replace('char', '')
-                ctype_l = int(ctype_n)
-                value = decode_value(
-                    param_type, payload[data_len:data_len + ctype_l])
-                data_len = data_len + ctype_l
-            else:
-                print(
-                    "no [{0}] when unpack_input_packet".format(param_type))
-                value = False
 
-            data.append({
-                "paramId": i,
-                "name": exist_param_conf['name'],
-                "value": value
-            })
+    # for i in range(start_param_id, end_param_id+1, 1):
+    #     exist_param_conf = next((param_conf for param_conf in user_configuration
+    #                              if param_conf['paramId'] == i), None)
+    #     if exist_param_conf:
+    #         param_type = exist_param_conf['type']
+
+    #         if param_type == 'uint8' or param_type == 'int8':
+    #             value = decode_value(
+    #                 param_type, payload[data_len:data_len + 1])
+    #             data_len = data_len + 1
+    #         elif param_type == 'uint16' or param_type == 'int16':
+    #             value = decode_value(
+    #                 param_type, payload[data_len:data_len + 2])
+    #             data_len = data_len + 2
+    #         elif param_type == 'uint32' or param_type == 'int32' or param_type == 'float':
+    #             value = decode_value(
+    #                 param_type, payload[data_len:data_len + 4], exist_param_conf)
+    #             data_len = data_len + 4
+    #         elif param_type == 'uint64' or param_type == 'int64' or param_type == 'double':
+    #             value = decode_value(
+    #                 param_type, payload[data_len:data_len + 8])
+    #             data_len = data_len + 8
+    #         elif param_type == 'ip4':
+    #             value = decode_value(
+    #                 param_type, payload[data_len:data_len + 4])
+    #             data_len = data_len + 4
+    #         elif param_type == 'ip6':
+    #             value = decode_value(
+    #                 param_type, payload[data_len:data_len + 6])
+    #             data_len = data_len + 6
+    #         elif 'char' in param_type:
+    #             ctype_n = param_type.replace('char', '')
+    #             ctype_l = int(ctype_n)
+    #             value = decode_value(
+    #                 param_type, payload[data_len:data_len + ctype_l])
+    #             data_len = data_len + ctype_l
+    #         else:
+    #             print(
+    #                 "no [{0}] when unpack_input_packet".format(param_type))
+    #             value = False
+
+    #         data.append({
+    #             "paramId": i,
+    #             "name": exist_param_conf['name'],
+    #             "value": value
+    #         })
 
     return data, error
 
@@ -174,7 +175,7 @@ def get_parameter_parser(payload, user_configuration):
         try:
             first_item = next(iter(param), None)
             param_value = decode_value(
-                first_item['type'], payload[4:12], first_item)
+                first_item['type'], payload[4:12])
             data = {"paramId": param_id,
                     "name": first_item['name'], "value": param_value}
         except StopIteration:
@@ -192,8 +193,8 @@ def update_parameter_parser(payload, user_configuration):
     uP parser
     '''
     error = False
-    data = decode_value('int32', payload[0:4])
-    if data != 0:
+    data = decode_value('uint32', payload[0:4])
+    if data:
         error = True
     return data, error
 
@@ -202,34 +203,22 @@ def update_parameters_parser(payload, user_configuration):
     '''
     uB parser
     '''
-    error = False
-    data = decode_value('uint32', payload[0:4])
-    if data:
-        error = True
+    # print('uB response: ', payload)
+    error = True
+    data = 0
+    # print('data', payload)
+    for i in range(0, len(payload), 2):
+        if payload[i+1] != 0:
+            error = False
+            data = payload[i]
+            break
     return data, error
 
-def set_mount_angle_parser(payload, user_configuration):
-    '''
-    uB parser
-    '''
-    error = False
-    data = decode_value('int32', payload[0:4])
-    if data != 0:
-        error = True
-    return data, error
-
-def set_serial_number_parser(payload, user_configuration):
-    error = False
-    data = decode_value('int32', payload[0:4])
-    if data != 0:
-        error = True
-    return data, error
 
 def common_input_parser(payload, user_configuration):
     '''
     General input packet parser
     '''
-    #print('common_input_parser:', payload)
     return payload, False
 
 
@@ -343,17 +332,30 @@ def match_command_handler(packet_type):
     Find the handler for specified packet
     '''
     parser_dict = {
-        b'\x01\xcc': string_parser,
-        b'\x02\xcc': get_parameter_parser,
-        b'\x03\xcc': update_parameter_parser,
-        b'\x04\xcc': update_parameter_parser,
-        b'\x05\xcc': set_mount_angle_parser,
-        b'\x06\xcc': common_input_parser,
-        b'\x01\x0b': common_input_parser,
-        b'\x02\x0b': common_input_parser,
-        b'\x09\x0a': common_input_parser,
-        b'\x09\xaa': common_input_parser,
-        b'\xa4\x0a': common_input_parser,
-        b'\x01\xfc': set_serial_number_parser
+        'pG': string_parser,
+        'uC': common_input_parser,  # update_command_parser,
+        'uP': update_parameter_parser,
+        'uA': common_input_parser,  # update_all_command_parser,
+        'sC': common_input_parser,
+        'rD': common_input_parser,
+        'gC': common_input_parser,  # get_command_parser,
+        'gA': get_all_parameters_parser,
+        'gP': get_parameter_parser,
+        'gB': get_parameters_by_block_parser,
+        'gV': string_parser,
+        'uB': update_parameters_parser,
+        'ma': common_input_parser,
+        'RE': read_eeprom_parser,
+        'WE': common_input_parser,
+        'UE': common_input_parser,
+        'LE': common_input_parser,
+        'SR': common_input_parser,
+        'JI': common_input_parser,
+        'JA': common_input_parser,
+        'WA': common_input_parser,
+        'RF': common_input_parser,
+        'GF': common_input_parser,
+        'SF': common_input_parser,
+        'WF': common_input_parser,
     }
     return parser_dict.get(packet_type)

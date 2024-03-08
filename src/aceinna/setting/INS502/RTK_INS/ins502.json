@@ -7,82 +7,82 @@
             {
                 "paramId": 1,
                 "name": "USER_PRI_LEVER_ARM_BX",
-                "value": 0.7
+                "value": 0.52
             },
             {
                 "paramId": 2,
                 "name": "USER_PRI_LEVER_ARM_BY",
-                "value": 0.02
+                "value": -0.14
             },
             {
                 "paramId": 3,
                 "name": "USER_PRI_LEVER_ARM_BZ",
-                "value": -1.06
+                "value": -0.72
             },
             {
                 "paramId": 4,
                 "name": "USER_VRP_LEVER_ARM_BX",
-                "value": 0.38
+                "value": 0.42
             },
             {
                 "paramId": 5,
                 "name": "USER_VRP_LEVER_ARM_BY",
-                "value": 0.01
+                "value": -0.14
             },
             {
                 "paramId": 6,
                 "name": "USER_VRP_LEVER_ARM_BZ",
-                "value": 0.21
+                "value": 0.5
             },
             {
                 "paramId": 7,
                 "name": "USER_USER_LEVER_ARM_BX",
-                "value": 0.7
+                "value": 0.52
             },
             {
                 "paramId": 8,
                 "name": "USER_USER_LEVER_ARM_BY",
-                "value": 0.02
+                "value": -0.14
             },
             {
                 "paramId": 9,
                 "name": "USER_USER_LEVER_ARM_BZ",
-                "value": -1.06
+                "value": -0.72
             },
             {
                 "paramId": 10,
                 "name": "USER_ROTATION_RBVX",
-                "value": 0.0
+                "value": -1.13
             },
             {
                 "paramId": 11,
                 "name": "USER_ROTATION_RBVY",
-                "value": 0.0
+                "value": 0.563
             },
             {
                 "paramId": 12,
                 "name": "USER_ROTATION_RBVZ",
-                "value": 180.0
+                "value": -179.49
             },
             {
                 "paramId": 13,
                 "name": "USER_GNSS2_LEVER_ARM_BX",
-                "value": 1.75
+                "value": 2.02
             },
             {
                 "paramId": 14,
                 "name": "USER_GNSS2_LEVER_ARM_BY",
-                "value": 0.02
+                "value": -0.14
             },
             {
                 "paramId": 15,
                 "name": "USER_GNSS2_LEVER_ARM_BZ",
-                "value": -1.06
+                "value": -0.72
             },
             {
                 "paramId": 16,
                 "name": "USER_ROTATION_ALIGN_BX",
-                "value": 0
+                "value": 0.0
             },
             {
                 "paramId": 17,
@@ -117,7 +117,7 @@
             {
                 "paramId": 23,
                 "name": "USER_DUAL_ANT_LENGTH",
-                "value": 0
+                "value": 1.5
             },
             {
                 "paramId": 24,
@@ -132,7 +132,7 @@
             {
                 "paramId": 26,
                 "name": "USER_RELATIVE_LENGTH_TOL",
-                "value": 0
+                "value": 0.05
             },
             {
                 "paramId": 27,
@@ -142,37 +142,37 @@
             {
                 "paramId": 28,
                 "name": "USER_HEADINGCOG_SPEED_TOL",
-                "value": 0
+                "value": 2.0
             },
             {
                 "paramId": 29,
                 "name": "USER_DO_ZUPT",
-                "value": 0
+                "value": 1
             },
             {
                 "paramId": 30,
                 "name": "USER_ZUPT_INTERVAL",
-                "value": 0
+                "value": 1.0
             },
             {
                 "paramId": 31,
                 "name": "USER_USE_ODOMETER_FOR_ZUPT",
-                "value": 0
+                "value": 1
             },
             {
                 "paramId": 32,
                 "name": "USER_ODO_SPEED_TOL",
-                "value": 0
+                "value": 0.05
             },
             {
                 "paramId": 33,
                 "name": "USER_CHECK_ZUPT_WITH_ODOMETRY",
-                "value": 0
+                "value": 1
             },
             {
                 "paramId": 34,
                 "name": "USER_MAX_ODO_ZUPT_SPEED",
-                "value": 0
+                "value": 0.25
             },
             {
                 "paramId": 35,
@@ -192,17 +192,17 @@
             {
                 "paramId": 38,
                 "name": "USER_SLIPANG_F_NUM",
-                "value": 0
+                "value": 1
             },
             {
                 "paramId": 39,
                 "name": "USER_SLIPANG_MINSPEED",
-                "value": 0
+                "value": 0.25
             },
             {
                 "paramId": 40,
                 "name": "USER_SLIPANG_MINRATE",
-                "value": 0
+                "value": 0.0262
             }
         ],
         "ntrip": [
